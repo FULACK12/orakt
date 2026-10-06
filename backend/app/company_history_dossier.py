@@ -191,8 +191,8 @@ def run(ticker, accession, output_dir, review_overrides=None):
             elif checkpoint.exists():
                 section=Section.model_validate(json.loads(checkpoint.read_text(encoding="utf-8")))
             else:
-                error=""; section=None
-                for retry in range(2):
+                error=""; section=None; previous_draft=None
+                for retry in range(3):
                     retained=attempt if retry==0 else folder/f"{index+1:02d}-{key}-repair-{retry}.json"
                     if retained.exists():
                         raw=json.loads(retained.read_text(encoding="utf-8"))
@@ -201,11 +201,17 @@ def run(ticker, accession, output_dir, review_overrides=None):
                         messages[0]['content'] += "\nfinancial_ledger是程序计算的同期间对比，优先于你自己读表的结果。comparison_checks只返回required_comparison_ids要求的项目，不抄写其他项目，原样返回comparison_id、direction、period_type。必须区分quarter与nine_month_cumulative，同一地区可能单季上升但累计下降，不能统称本财季下降。IX:引用是申报原文中的结构化财务数值，允许引用并保留ID。经营现金流与投资现金流绝不混淆，资本支出不直接减少经营现金流。方向increase/decrease仅是数值方向，不自动等于好/坏。证据缺口要核对excerpts，不能把已给出的地区或产品信息称作完全缺失。"
                         messages[1]['content']=json.dumps({"chapter":zh,"company":ticker,"evidence":prose_evidence,"primary_reference":packet['filing_ref'],"allowed_evidence_ids":sorted(allowed),"verified_ratio_checks":gross_margin_checks(packet['financial_ledger']),"disclosed_product_identifiers":technical_terms,"citation_instruction":"evidence_refs只允许allowed_evidence_ids列出的ID，至少包含primary_reference。毛利额增长不代表毛利率增长，必须服从verified_ratio_checks。不得从其他综合收益推断套保成功，不得把资本支出增加解释为投资活动净流入增加。未提供定量归因时不写效率提升。引用文件不等于推断已验证，证据不足明确写条件推断。", "required_comparison_ids":required,"previous_validation_error":error,"quality_requirements":"完整双语章节。analysis中文三百至五百字，其余字段各一段，不重复表格。除证据ID及comparison_checks外，不在叙述中写阿拉伯数字；正确描述累计期间。英文忠实对应中文。"},ensure_ascii=False)
                         messages[0]['content'] += '\n先输出grounded_claims：至少两条，每条包含passage_id、quote和statement.zh/en。quote必须逐字摘抄original_passages原文且超过三十个字符，不允许改写引文。statement只转述该引文明确披露的事实或风险，不能把风险写成已发生。正文逐段引用对应PASSAGE完整ID。除引文之外仍禁止在正文重写数值。收入下降不证明总需求下降；费用下降不证明效率改善；严禁把这些当事实。机制放在条件假设段，注明缺什么验证；没有支持的结论必须暂缓。'
+                        if previous_draft:
+                            messages.append({'role':'assistant','content':previous_draft})
+                            messages.append({'role':'user','content':'修订上一份未通过稿，不重复犯错。analysis.zh至少三百字，analysis.en至少六百字符；可以解释证据范围、不同解释、条件成立所需数据，但不能空话重复。删除analysis/mechanism/counterEvidence/evidenceGaps/validationPlan中的所有金额、年份、百分比，数值只在外部程序表格展示。禁止把收入下降推出市场需求下降，禁止无据声称成本控制有效或销售策略调整。保留逐字quote，其余段落写有依据的定性分析。错误：'+error})
                         try:
                             def progress(p):
                                 if (output_dir.parent/'pause').exists():raise InterruptedError('Safe pause requested')
                                 write_json(output_dir.parent/'chapter-progress.json',{'ticker':ticker,'accession':accession,'chapter':index+1,'totalChapters':len(CHAPTERS),'attempt':retry+1,'checkedAt':datetime.now(UTC).isoformat(),**p})
-                            raw=generate_stream(str(settings.llm_base_url).rstrip('/')+'/api/chat',{'model':settings.llm_model,'think':False,'format':_compatible_json_schema(Section),'options':{'temperature':0.3,'repeat_penalty':1.15,'repeat_last_n':512,'num_ctx':32768,'num_predict':10000},'messages':messages},progress,lambda partial:write_json(retained.with_suffix('.partial.json'),partial))
+                            schema=_compatible_json_schema(Section)
+                            schema['required']=list(schema['properties'])
+                            schema['properties']['grounded_claims']['minItems']=2
+                            raw=generate_stream(str(settings.llm_base_url).rstrip('/')+'/api/chat',{'model':settings.llm_model,'think':False,'format':schema,'options':{'temperature':0.1,'repeat_penalty':1.15,'repeat_last_n':512,'num_ctx':32768,'num_predict':10000},'messages':messages},progress,lambda partial:write_json(retained.with_suffix('.partial.json'),partial))
                         except (ValueError,httpx.HTTPError) as exc:
                             error=str(exc);print(json.dumps({'ticker':ticker,'chapter':key,'generation_failed':error,'attempt':retry+1}),flush=True);continue
                         write_json(retained,raw)
@@ -218,6 +224,7 @@ def run(ticker, accession, output_dir, review_overrides=None):
                         write_json(checkpoint,section.model_dump())
                         break
                     except ValueError as exc:
+                        previous_draft=raw.get('message',{}).get('content')
                         error=str(exc)
                         print(json.dumps({"ticker":ticker,"chapter":key,"validation_failed":error,"attempt":retry+1}),flush=True)
                 if section is None: raise ValueError(f"Chapter {key} failed bounded quality repair: {error}")

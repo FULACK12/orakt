@@ -542,8 +542,8 @@
     },
     {
       "path": "backend/app/company_history_dossier.py",
-      "bytes": 21875,
-      "sha256": "5d6178eb593da430b227a99400840dee47f5419c8c1b5f76dbe9368555f33bcd"
+      "bytes": 22914,
+      "sha256": "11c5783f94ecd4ac6bd1285668835b3945b7eaa9bc5d010c8409863bc8b7caed"
     },
     {
       "path": "backend/app/competitive_evidence.py",
@@ -797,8 +797,8 @@
     },
     {
       "path": "backend/app/dossier_passages.py",
-      "bytes": 3747,
-      "sha256": "703863e7b56110b6c6c503e05791ece9b64be1fd3efef412c4a48f798ce0c9f8"
+      "bytes": 3860,
+      "sha256": "9bd18edf0d82959e1eafca56d6f5c5f8c81b2bd15dbe475df8785a9e87808192"
     },
     {
       "path": "backend/app/earnings_evidence_packet.py",

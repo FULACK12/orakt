@@ -60,7 +60,8 @@ def check_claims(claims,passages,required=False):
     for claim in claims:
         c=claim.model_dump() if hasattr(claim,'model_dump') else claim
         p=known.get(c['passage_id'])
-        if not p or len(c['quote'].strip())<30 or c['quote'] not in p['text']:
+        # EDGAR hard line wraps are formatting, not changes to quoted words.
+        if not p or len(c['quote'].strip())<30 or ' '.join(c['quote'].split()) not in ' '.join(p['text'].split()):
             raise ValueError('Claim quotation does not match its frozen original passage')
         if not re.search(r'[\u4e00-\u9fff]',c['statement']['zh']) or re.search(r'[\u4e00-\u9fff]',c['statement']['en']):
             raise ValueError('Grounded claims require Chinese and English statements')
