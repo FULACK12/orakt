@@ -10,7 +10,8 @@ from datetime import datetime, UTC
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
 from app.company_history_dossier import CHAPTERS, Section, VERSION, validate_section, write_json
-from app.dossier_accounting_checks import disclosed_product_terms, gross_margin_checks
+from app.dossier_accounting_checks import disclosed_reference_terms, gross_margin_checks
+from app.dossier_passages import check_claims
 from app.financial_period_ledger import build_ledger
 from app.dossier_event_timeline import validate_timeline
 
@@ -50,11 +51,14 @@ def assemble(source_path, review_path, cold_root):
             raise ValueError(f'No retained local-model draft for {key}; do not misattribute assistant-only work')
         attempts.extend({'file': p.name, 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths)
         section = Section.model_validate(review['chapters'][key])
-        validate_section(section, allowed, packet['financial_ledger'], required if key in {'financial', 'conclusion'} else (), disclosed_product_terms(packet['excerpts']))
+        passages=packet.get('chapter_passages',{}).get(key,[])
+        chapter_allowed=allowed|{p['id'] for p in passages}
+        validate_section(section, chapter_allowed, packet['financial_ledger'], required if key in {'financial', 'conclusion'} else (), disclosed_reference_terms(packet))
+        if passages:check_claims(section.grounded_claims,passages,required=True)
         chapters.append({'key': key, 'title': {'zh': zh, 'en': en}, 'authorship': 'assistant_revised', **section.model_dump()})
     return {'version': VERSION, 'fingerprint': expected, 'ticker': packet['ticker'], 'asOf': packet['as_of_date'], 'periodEnd': packet['period_end'], 'createdAt': datetime.now(UTC).isoformat(),
         'model': review['localModel'], 'chapters': chapters, 'facts': packet['facts'], 'financialLedger': packet['financial_ledger'], 'ratioChecks': gross_margin_checks(packet['financial_ledger']),
-        'sources': [{'id': packet['filing_ref'], 'url': packet['source_url']}], 'marketEvidence': packet.get('market_evidence', []), 'eventTimeline':validate_timeline(review.get('eventTimeline',[]),packet),
+        'sources': [{'id': packet['filing_ref'], 'url': packet['source_url']}], 'marketEvidence': packet.get('market_evidence', []), 'originalPassages':packet.get('chapter_passages',{}), 'eventTimeline':validate_timeline(review.get('eventTimeline',[]),packet),
         'provenance': {'parentVersion': original['version'], 'continuation': original.get('continuation'), 'sourcePacketHash': hashlib.sha256(raw).hexdigest(), 'sourceDocumentHash': packet['raw_sha256'], 'retainedDrafts': attempts, 'method': 'explicit_assistant_revision_of_frozen_local_drafts'},
         'review': {'state': 'content_review_pending', 'citationCheck': 'passed', 'humanAccepted': False, 'assistantRevisionHash': hashlib.sha256(review_bytes).hexdigest()}, 'eligibleForPredictiveBacktest': False}
 

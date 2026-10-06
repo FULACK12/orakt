@@ -23,7 +23,7 @@ from app.inline_filing_facts import monetary_facts
 from urllib.parse import urlsplit, unquote
 from app.dossier_model_stream import generate as generate_stream
 from app.dossier_passages import add_passages, check_claims, bind_selected_passages, selection_schema
-from app.dossier_accounting_checks import gross_margin_checks, guard_prose, guard_expense_claims, mask_financial_numbers, disclosed_product_terms
+from app.dossier_accounting_checks import gross_margin_checks, guard_prose, guard_expense_claims, mask_financial_numbers, disclosed_product_terms, disclosed_reference_terms, balance_narrative_errors, methodological_errors
 
 VERSION = "company-dossier/v12-narrative-retrieval"
 GENERATION_VERSION = 'passage-selection-v12'
@@ -129,6 +129,8 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
         raise ValueError("Missing required financial comparison checks")
     guard_prose(section,gross_margin_checks(ledger or {}))
     guard_expense_claims(section,ledger or {})
+    contradictions=balance_narrative_errors(section,ledger or {})+methodological_errors(section)
+    if contradictions:raise ValueError('; '.join(contradictions))
     pairs=[(key,getattr(section,key)) for key in ["analysis","mechanism","counterEvidence","evidenceGaps","validationPlan"]]
     pairs.extend((f'grounded_claims[{i}].statement',claim.statement) for i,claim in enumerate(section.grounded_claims))
     for field,pair in pairs:
@@ -137,7 +139,7 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
                 raise ValueError('Internal evidence masking placeholder leaked into report prose')
             narrative=re.sub(r"PASSAGE:[a-f0-9]{16}|BULK:[a-f0-9]{64}|FACT:\d+|IX:[A-Za-z0-9_.-]+|SEC:\d{10}-\d{2}-\d{6}|MARKET:[A-Za-z0-9:._-]+","",value)
             narrative=re.sub(r"\b10-[QK](?:/A)?\b","",narrative)  # SEC form names are not numerical claims
-            for term in technical_terms:narrative=re.sub(r'(?<![A-Za-z0-9_])'+re.escape(term)+r'(?![A-Za-z0-9_])','',narrative)
+            for term in sorted(technical_terms,key=len,reverse=True):narrative=re.sub(r'(?<![A-Za-z0-9_])'+re.escape(term)+r'(?![A-Za-z0-9_%])','',narrative)
             narrative=re.sub(r"(?<![\d.])\b[1-9][）)]", "", narrative)  # list ordinals are not financial quantities
             if re.search(r"\d",narrative):
                 raise ValueError(f"Numerical claims belong in deterministic source tables, not bilingual model prose: {field}.{language}")
@@ -182,7 +184,7 @@ def run(ticker, accession, output_dir, review_overrides=None, chapter_keys=None)
             allowed.update(p['id'] for p in passages)
             required=[c['id'] for c in evidence['financial_ledger']['comparisons'] if c['concept'] in {'NetCashProvidedByUsedInOperatingActivities','OperatingIncomeLoss','RevenueFromContractWithCustomerExcludingAssessedTax','PaymentsToAcquirePropertyPlantAndEquipment','SimplifiedFreeCashFlow'} or (key=='business' and 'RevenueFromContract' in c['concept'])] if key in {'business','financial','capital','conclusion'} else []
             required=required[:6]
-            technical_terms=disclosed_product_terms(packet['excerpts'])
+            technical_terms=disclosed_reference_terms(packet)
             # Preserve source values and dates so the model can reason about
             # periods. The validator still rejects generated numerical claims.
             import re
@@ -207,6 +209,7 @@ def run(ticker, accession, output_dir, review_overrides=None, chapter_keys=None)
                         messages[1]['content']=json.dumps({"chapter":zh,"company":ticker,"evidence":prose_evidence,"primary_reference":packet['filing_ref'],"allowed_evidence_ids":sorted(allowed),"verified_ratio_checks":gross_margin_checks(packet['financial_ledger']),"disclosed_product_identifiers":technical_terms,"citation_instruction":"evidence_refs只允许allowed_evidence_ids列出的ID，至少包含primary_reference。毛利额增长不代表毛利率增长，必须服从verified_ratio_checks。不得从其他综合收益推断套保成功，不得把资本支出增加解释为投资活动净流入增加。未提供定量归因时不写效率提升。引用文件不等于推断已验证，证据不足明确写条件推断。", "required_comparison_ids":required,"previous_validation_error":error,"quality_requirements":"完整双语章节。analysis中文三百至五百字，其余字段各一段，不重复表格。除证据ID及comparison_checks外，不在叙述中写阿拉伯数字；正确描述累计期间。英文忠实对应中文。"},ensure_ascii=False)
                         messages[0]['content'] += '\n先输出grounded_claims：选择至少两个不同原文段落，每条只包含passage_id和statement.zh/en。不要生成quote字段，系统会按ID从冻结原文提取原段落。statement只转述该段明确披露的事实或风险，不能把风险写成已发生。正文逐段引用对应PASSAGE完整ID。收入下降不证明总需求下降；费用下降不证明效率改善；严禁把这些当事实。机制放在条件假设段，注明缺什么验证；没有支持的结论必须暂缓。'
                         messages[0]['content'] += '\n同样禁止在grounded_claims的statement.zh/en重写日期、金额或百分比，原文数字只由程序引文展示。不要将表格销售成本总额称作单位成本，不要将销量减少写成销量增加。管理层披露的原因应写“公司披露/管理层解释”，不能提升为独立验证的因果事实。不要用国债收益率衡量行业销量，不要把成本下降称作供应链优化，不要把原文明示的成本分摊变化称作尚未说明。'
+                        messages[0]['content'] += '\n唯一额外数字例外是disclosed_product_identifiers中的完整原文标识符（如会计准则编号），不得截断成裸数字或加百分号。资产负债表prior_reported_balance必须称较上年末或较前一披露时点，除非两日期确为相隔一年，禁止称同比。现金存量与经营现金流不同方向不矛盾，必须看投融资与汇率桥接；没有桥接不推断资金来源。NFCI是金融状况指标，不能用于季节性调整。已有套保、临时定价和矿区数据必须承认，缺的是足够归因数据，不是笼统声称完全未披露。'
                         if previous_draft:
                             messages.append({'role':'assistant','content':previous_draft})
                             messages.append({'role':'user','content':'修订上一份未通过稿，不重复犯错。analysis.zh至少三百字，analysis.en至少六百字符；可以解释证据范围、不同解释、条件成立所需数据，但不能空话重复。删除analysis/mechanism/counterEvidence/evidenceGaps/validationPlan中的所有金额、年份、百分比，数值只在外部程序表格展示。禁止把收入下降推出市场需求下降，禁止无据声称成本控制有效或销售策略调整。保留逐字quote，其余段落写有依据的定性分析。错误：'+error})
@@ -242,8 +245,9 @@ def run(ticker, accession, output_dir, review_overrides=None, chapter_keys=None)
             validate_section(section,allowed,packet['financial_ledger'],required,technical_terms)
             check_claims(section.grounded_claims,passages,required=True)
             chapters.append({"key":key,"title":{"zh":zh,"en":en},"authorship":"assistant_revised" if key in revisions else "local_model",**section.model_dump()})
-            print(json.dumps({"ticker":ticker,"chapter":key,"completed":index+1,"total":len(CHAPTERS)}),flush=True)
+            print(json.dumps({"ticker":ticker,"chapter":key,"completed":len(chapters),"attempted":index+1,"failed":len(chapter_failures),"total":len(CHAPTERS),"state":"structure_checked_content_pending"}),flush=True)
         if chapter_failures:
+            write_json(folder/'partial-dossier.json',{'version':VERSION,'fingerprint':fingerprint,'ticker':ticker,'asOf':packet['as_of_date'],'chapters':chapters,'failedChapters':chapter_failures,'review':{'state':'partial_content_review_pending','humanAccepted':False},'complete':False,'eligibleForPredictiveBacktest':False})
             raise ValueError('Retained all chapter attempts; explicit content repair required: '+','.join(f['chapter'] for f in chapter_failures))
         if len(chapters)!=len(CHAPTERS):
             write_json(folder/'partial-dossier.json',{'version':VERSION,'fingerprint':fingerprint,'ticker':ticker,'asOf':packet['as_of_date'],'chapters':chapters,'review':{'state':'partial_content_review_pending','humanAccepted':False},'complete':False,'eligibleForPredictiveBacktest':False})

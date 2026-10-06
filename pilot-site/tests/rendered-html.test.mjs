@@ -211,7 +211,7 @@ test("account center is protected and its totals come from the published snapsho
  const page=await app.fetch(authorizedRequest("/account"),env,ctx);assert.equal(page.status,200);assert.match(await page.text(),/账号中心/);
  const data=await app.fetch(authorizedRequest("/api/account/overview"),env,ctx),body=await data.json();
  assert.equal(body.account.provider,"google");assert.equal(body.scope,"published_read_only");
- assert.equal(body.platform.reports,406);assert.ok(body.platform.companies>200);assert.equal(body.platform.snapshotAt,"2026-09-19T09:55:12.606832+00:00");
+ assert.equal(body.platform.reports,JSON.parse(readFileSync(new URL('../snapshot/research-report-index.json',import.meta.url),'utf8')).reports.length);assert.ok(body.platform.companies>200);assert.equal(body.platform.snapshotAt,"2026-09-19T09:55:12.606832+00:00");
  assert.doesNotMatch(JSON.stringify(body),/test-google-subject|password|recovery_hash/);
 });
 test("missing auth configuration never opens protected data",async()=>{
@@ -720,3 +720,4 @@ test("navigation links to new pages while product and account data remain protec
  for(const path of ["/account","/platform/research","/admin/users"])assert.equal((await app.fetch(new Request("http://localhost"+path,{headers:{accept:"text/html"}}),env,ctx)).status,302);
  assert.equal((await app.fetch(new Request("http://localhost/api/research-report?id=local-566"),env,ctx)).status,401);
 });
+import {readFileSync} from 'node:fs';
