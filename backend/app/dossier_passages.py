@@ -65,3 +65,43 @@ def check_claims(claims,passages,required=False):
             raise ValueError('Claim quotation does not match its frozen original passage')
         if not re.search(r'[\u4e00-\u9fff]',c['statement']['zh']) or re.search(r'[\u4e00-\u9fff]',c['statement']['en']):
             raise ValueError('Grounded claims require Chinese and English statements')
+
+
+def bind_selected_passages(draft, passages):
+    """Attach original paragraphs to model-selected IDs, never repair quotations.
+
+    This protocol deliberately does not ask a language model to copy source text.
+    The statement remains unverified interpretation requiring content review.
+    Legacy generated quotations must use check_claims, not this function.
+    """
+    import copy
+    result=copy.deepcopy(draft)
+    known={p['id']:p for p in passages}
+    claims=result.get('grounded_claims',[])
+    if len({c.get('passage_id') for c in claims})<2:
+        raise ValueError('Select at least two distinct original passages')
+    for c in claims:
+        if 'quote' in c:
+            raise ValueError('Selection protocol must not contain model-written quotes')
+        p=known.get(c.get('passage_id'))
+        if not p:raise ValueError('Selected passage is outside frozen chapter evidence')
+        c['quote']=p['text']
+    check_claims(claims,passages,required=True)
+    return result
+
+
+def selection_schema(schema, passages, allowed):
+    """Constrain IDs, with quotation text supplied only by the archive reader."""
+    import copy
+    schema=copy.deepcopy(schema)
+    schema['required']=list(schema['properties'])
+    schema['properties']['evidence_refs']['items']={'type':'string','enum':sorted(allowed)}
+    claims=schema['properties']['grounded_claims']
+    claims['minItems']=2
+    item=claims['items']
+    if '$ref' in item:
+        item=schema['$defs'][item['$ref'].rsplit('/',1)[-1]]
+    item['properties'].pop('quote',None)
+    item['required']=[key for key in item.get('required',[]) if key!='quote']
+    item['properties']['passage_id']={'type':'string','enum':[p['id'] for p in passages]}
+    return schema

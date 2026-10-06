@@ -22,7 +22,7 @@ def generate(url,payload,progress,retain_partial):
                     elapsed=time.monotonic()-started
                     if elapsed>3600:raise ValueError('Chapter exceeded one-hour hard deadline')
                     if elapsed-last>=10:
-                        progress({'generatedCharacters':len(content),'elapsedSeconds':round(elapsed),'stage':'generating_chapter','progressPercent':None});last=elapsed
+                        progress({'generatedCharacters':len(content),'reasoningCharacters':len(thinking),'elapsedSeconds':round(elapsed),'stage':'generating_chapter' if content else 'model_reasoning','progressPercent':None});last=elapsed
                         if repeated_tail(content) or repeated_tail(thinking):raise ValueError('Repetitive output detected; write distinct concise paragraphs, no repeated filler')
                     if part.get('done'):terminal=part;break
         if terminal is None:raise ValueError('Model stream ended without completion')
