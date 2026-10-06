@@ -35,6 +35,12 @@ def test_generation_schema_limits_ids_and_removes_model_quote():
     assert 'quote' not in item['required']
     assert item['properties']['passage_id']['enum']==['PASSAGE:1111111111111111']
     assert schema['properties']['evidence_refs']['items']['enum']==['SEC:0000000000-00-000001']
+    assert schema['properties']['comparison_checks']['maxItems']==0
+    schema=selection_schema(_compatible_json_schema(Section),[],set(),['CMP:one'],{'comparisons':[{'id':'CMP:one'}]})
+    item=schema['properties']['comparison_checks']['items']
+    if '$ref' in item:item=schema['$defs'][item['$ref'].rsplit('/',1)[-1]]
+    assert item['properties']['comparison_id']['enum']==['CMP:one']
+    assert schema['properties']['comparison_checks']['minItems']==1
 
 
 def test_dense_financial_table_is_not_retrieved_as_narrative():

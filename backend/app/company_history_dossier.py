@@ -26,7 +26,7 @@ from app.dossier_passages import add_passages, check_claims, bind_selected_passa
 from app.dossier_accounting_checks import gross_margin_checks, guard_prose, guard_expense_claims, mask_financial_numbers, disclosed_product_terms
 
 VERSION = "company-dossier/v12-narrative-retrieval"
-GENERATION_VERSION = 'passage-selection-v11'
+GENERATION_VERSION = 'passage-selection-v12'
 CHAPTERS = [
     ("business", "公司业务、产品与收入驱动", "Business, products and revenue drivers"),
     ("financial", "财务质量、利润与现金流", "Financial quality, earnings and cash flow"),
@@ -129,10 +129,10 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
         raise ValueError("Missing required financial comparison checks")
     guard_prose(section,gross_margin_checks(ledger or {}))
     guard_expense_claims(section,ledger or {})
-    pairs=[getattr(section,key) for key in ["analysis","mechanism","counterEvidence","evidenceGaps","validationPlan"]]
-    pairs.extend(claim.statement for claim in section.grounded_claims)
-    for pair in pairs:
-        for value in [pair.zh,pair.en]:
+    pairs=[(key,getattr(section,key)) for key in ["analysis","mechanism","counterEvidence","evidenceGaps","validationPlan"]]
+    pairs.extend((f'grounded_claims[{i}].statement',claim.statement) for i,claim in enumerate(section.grounded_claims))
+    for field,pair in pairs:
+        for language,value in [('zh',pair.zh),('en',pair.en)]:
             if '[value in source table]' in value:
                 raise ValueError('Internal evidence masking placeholder leaked into report prose')
             narrative=re.sub(r"PASSAGE:[a-f0-9]{16}|BULK:[a-f0-9]{64}|FACT:\d+|IX:[A-Za-z0-9_.-]+|SEC:\d{10}-\d{2}-\d{6}|MARKET:[A-Za-z0-9:._-]+","",value)
@@ -140,7 +140,7 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
             for term in technical_terms:narrative=re.sub(r'(?<![A-Za-z0-9_])'+re.escape(term)+r'(?![A-Za-z0-9_])','',narrative)
             narrative=re.sub(r"(?<![\d.])\b[1-9][）)]", "", narrative)  # list ordinals are not financial quantities
             if re.search(r"\d",narrative):
-                raise ValueError("Numerical claims belong in deterministic source tables, not bilingual model prose")
+                raise ValueError(f"Numerical claims belong in deterministic source tables, not bilingual model prose: {field}.{language}")
         if not re.search(r"[\u4e00-\u9fff]",pair.zh) or re.search(r"[\u4e00-\u9fff]",pair.en):
             raise ValueError("Both Chinese and English text are required")
     if len(section.analysis.zh)<200 or len(section.analysis.en)<500:
@@ -206,6 +206,7 @@ def run(ticker, accession, output_dir, review_overrides=None, chapter_keys=None)
                         messages[0]['content'] += "\nfinancial_ledger是程序计算的同期间对比，优先于你自己读表的结果。comparison_checks只返回required_comparison_ids要求的项目，不抄写其他项目，原样返回comparison_id、direction、period_type。必须区分quarter与nine_month_cumulative，同一地区可能单季上升但累计下降，不能统称本财季下降。IX:引用是申报原文中的结构化财务数值，允许引用并保留ID。经营现金流与投资现金流绝不混淆，资本支出不直接减少经营现金流。方向increase/decrease仅是数值方向，不自动等于好/坏。证据缺口要核对excerpts，不能把已给出的地区或产品信息称作完全缺失。"
                         messages[1]['content']=json.dumps({"chapter":zh,"company":ticker,"evidence":prose_evidence,"primary_reference":packet['filing_ref'],"allowed_evidence_ids":sorted(allowed),"verified_ratio_checks":gross_margin_checks(packet['financial_ledger']),"disclosed_product_identifiers":technical_terms,"citation_instruction":"evidence_refs只允许allowed_evidence_ids列出的ID，至少包含primary_reference。毛利额增长不代表毛利率增长，必须服从verified_ratio_checks。不得从其他综合收益推断套保成功，不得把资本支出增加解释为投资活动净流入增加。未提供定量归因时不写效率提升。引用文件不等于推断已验证，证据不足明确写条件推断。", "required_comparison_ids":required,"previous_validation_error":error,"quality_requirements":"完整双语章节。analysis中文三百至五百字，其余字段各一段，不重复表格。除证据ID及comparison_checks外，不在叙述中写阿拉伯数字；正确描述累计期间。英文忠实对应中文。"},ensure_ascii=False)
                         messages[0]['content'] += '\n先输出grounded_claims：选择至少两个不同原文段落，每条只包含passage_id和statement.zh/en。不要生成quote字段，系统会按ID从冻结原文提取原段落。statement只转述该段明确披露的事实或风险，不能把风险写成已发生。正文逐段引用对应PASSAGE完整ID。收入下降不证明总需求下降；费用下降不证明效率改善；严禁把这些当事实。机制放在条件假设段，注明缺什么验证；没有支持的结论必须暂缓。'
+                        messages[0]['content'] += '\n同样禁止在grounded_claims的statement.zh/en重写日期、金额或百分比，原文数字只由程序引文展示。不要将表格销售成本总额称作单位成本，不要将销量减少写成销量增加。管理层披露的原因应写“公司披露/管理层解释”，不能提升为独立验证的因果事实。不要用国债收益率衡量行业销量，不要把成本下降称作供应链优化，不要把原文明示的成本分摊变化称作尚未说明。'
                         if previous_draft:
                             messages.append({'role':'assistant','content':previous_draft})
                             messages.append({'role':'user','content':'修订上一份未通过稿，不重复犯错。analysis.zh至少三百字，analysis.en至少六百字符；可以解释证据范围、不同解释、条件成立所需数据，但不能空话重复。删除analysis/mechanism/counterEvidence/evidenceGaps/validationPlan中的所有金额、年份、百分比，数值只在外部程序表格展示。禁止把收入下降推出市场需求下降，禁止无据声称成本控制有效或销售策略调整。保留逐字quote，其余段落写有依据的定性分析。错误：'+error})
@@ -213,7 +214,7 @@ def run(ticker, accession, output_dir, review_overrides=None, chapter_keys=None)
                             def progress(p):
                                 if (output_dir.parent/'pause').exists():raise InterruptedError('Safe pause requested')
                                 write_json(output_dir.parent/'chapter-progress.json',{'ticker':ticker,'accession':accession,'chapter':index+1,'totalChapters':len(CHAPTERS),'attempt':retry+1,'checkedAt':datetime.now(UTC).isoformat(),**p})
-                            schema=selection_schema(_compatible_json_schema(Section),passages,allowed)
+                            schema=selection_schema(_compatible_json_schema(Section),passages,allowed,required,packet['financial_ledger'])
                             raw=generate_stream(str(settings.llm_base_url).rstrip('/')+'/api/chat',{'model':settings.llm_model,'think':True,'format':schema,'options':{'temperature':0.1,'repeat_penalty':1.15,'repeat_last_n':512,'num_ctx':32768,'num_predict':18000},'messages':messages},progress,lambda partial:write_json(retained.with_suffix('.partial.json'),partial))
                             raw['oraktGeneration']={'reasoningEnabled':True,'requiredGroundedClaims':True,'version':VERSION,'protocol':GENERATION_VERSION,'quoteOrigin':'frozen_archive_not_model'}
                         except (ValueError,httpx.HTTPError) as exc:

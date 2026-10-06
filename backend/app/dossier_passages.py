@@ -100,7 +100,7 @@ def bind_selected_passages(draft, passages):
     return result
 
 
-def selection_schema(schema, passages, allowed):
+def selection_schema(schema, passages, allowed, required_comparisons=(), ledger=None):
     """Constrain IDs, with quotation text supplied only by the archive reader."""
     import copy
     schema=copy.deepcopy(schema)
@@ -114,4 +114,13 @@ def selection_schema(schema, passages, allowed):
     item['properties'].pop('quote',None)
     item['required']=[key for key in item.get('required',[]) if key!='quote']
     item['properties']['passage_id']={'type':'string','enum':[p['id'] for p in passages]}
+    comparisons=schema['properties']['comparison_checks']
+    comparisons['minItems']=len(required_comparisons)
+    comparisons['maxItems']=len(required_comparisons)
+    if required_comparisons:
+        known={c['id']:c for c in (ledger or {}).get('comparisons',[])}
+        if set(required_comparisons)-known.keys():raise ValueError('Required comparison missing from ledger')
+        comparison=comparisons['items']
+        if '$ref' in comparison:comparison=schema['$defs'][comparison['$ref'].rsplit('/',1)[-1]]
+        comparison['properties']['comparison_id']={'type':'string','enum':list(required_comparisons)}
     return schema
