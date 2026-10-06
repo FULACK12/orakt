@@ -25,7 +25,7 @@ from app.dossier_model_stream import generate as generate_stream
 from app.dossier_passages import add_passages, check_claims, bind_selected_passages, selection_schema
 from app.dossier_accounting_checks import gross_margin_checks, guard_prose, guard_expense_claims, mask_financial_numbers, disclosed_product_terms
 
-VERSION = "company-dossier/v10-original-passage-grounding"
+VERSION = "company-dossier/v12-narrative-retrieval"
 GENERATION_VERSION = 'passage-selection-v11'
 CHAPTERS = [
     ("business", "公司业务、产品与收入驱动", "Business, products and revenue drivers"),
@@ -129,8 +129,9 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
         raise ValueError("Missing required financial comparison checks")
     guard_prose(section,gross_margin_checks(ledger or {}))
     guard_expense_claims(section,ledger or {})
-    for key in ["analysis","mechanism","counterEvidence","evidenceGaps","validationPlan"]:
-        pair=getattr(section,key)
+    pairs=[getattr(section,key) for key in ["analysis","mechanism","counterEvidence","evidenceGaps","validationPlan"]]
+    pairs.extend(claim.statement for claim in section.grounded_claims)
+    for pair in pairs:
         for value in [pair.zh,pair.en]:
             if '[value in source table]' in value:
                 raise ValueError('Internal evidence masking placeholder leaked into report prose')
@@ -145,7 +146,9 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
     if len(section.analysis.zh)<200 or len(section.analysis.en)<500:
         raise ValueError("Chapter analysis is too brief")
 
-def run(ticker, accession, output_dir, review_overrides=None):
+def run(ticker, accession, output_dir, review_overrides=None, chapter_keys=None):
+    selected=set(chapter_keys or [c[0] for c in CHAPTERS])
+    if selected-{c[0] for c in CHAPTERS}:raise ValueError('Unknown requested chapter')
     settings=get_settings()
     with get_session_factory()() as session, local_model_workload_lock(session) as acquired:
         if not acquired: raise RuntimeError("Local model busy; no concurrent generation")
@@ -167,6 +170,7 @@ def run(ticker, accession, output_dir, review_overrides=None):
             write_json(folder/f'assistant-review-{review_hash}.json',reviewed)
         chapters=[];chapter_failures=[]
         for index,(key,zh,en) in enumerate(CHAPTERS):
+            if key not in selected:continue
             checkpoint=folder/f"{index+1:02d}-{key}.json"
             write_json(output_dir.parent/"chapter-progress.json",{"ticker":ticker,"accession":accession,"chapter":index+1,"totalChapters":len(CHAPTERS),"stage":key,"checkedAt":datetime.now(UTC).isoformat()})
             evidence=chapter_packet(packet,key)
@@ -240,15 +244,22 @@ def run(ticker, accession, output_dir, review_overrides=None):
             print(json.dumps({"ticker":ticker,"chapter":key,"completed":index+1,"total":len(CHAPTERS)}),flush=True)
         if chapter_failures:
             raise ValueError('Retained all chapter attempts; explicit content repair required: '+','.join(f['chapter'] for f in chapter_failures))
+        if len(chapters)!=len(CHAPTERS):
+            write_json(folder/'partial-dossier.json',{'version':VERSION,'fingerprint':fingerprint,'ticker':ticker,'asOf':packet['as_of_date'],'chapters':chapters,'review':{'state':'partial_content_review_pending','humanAccepted':False},'complete':False,'eligibleForPredictiveBacktest':False})
+            write_json(output_dir.parent/'chapter-progress.json',{'ticker':ticker,'accession':accession,'stage':'partial_content_review_pending','completedChapters':len(chapters),'totalChapters':len(CHAPTERS),'checkedAt':datetime.now(UTC).isoformat(),'published':False})
+            return
         write_json(folder/"dossier.json",{"version":VERSION,"fingerprint":fingerprint,"ticker":ticker,"asOf":packet["as_of_date"],"periodEnd":packet["period_end"],"createdAt":datetime.now(UTC).isoformat(),"model":settings.llm_model,"chapters":chapters,"facts":packet["facts"],"financialLedger":packet['financial_ledger'],"originalPassages":packet['chapter_passages'],"sources":[{"id":packet["filing_ref"],"url":packet["source_url"]}],"marketEvidence":packet["market_evidence"],"review":{"state":"content_review_pending","citationCheck":"passed","humanAccepted":False,"assistantRevisionHash":review_hash},"eligibleForPredictiveBacktest":False})
         write_json(output_dir.parent/"chapter-progress.json",{"ticker":ticker,"accession":accession,"stage":"content_review_pending","completedChapters":len(chapters),"totalChapters":len(CHAPTERS),"checkedAt":datetime.now(UTC).isoformat(),"published":False})
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser();parser.add_argument("--ticker",required=True);parser.add_argument("--accession",required=True);parser.add_argument("--output-dir",type=Path,required=True)
     parser.add_argument('--review-overrides',type=Path)
+    parser.add_argument('--chapters',nargs='+',choices=[c[0] for c in CHAPTERS],help='Bounded quality pilot; never produces a complete dossier')
     args=parser.parse_args()
     try:
-        run(args.ticker,args.accession,args.output_dir,args.review_overrides)
+        run(args.ticker,args.accession,args.output_dir,args.review_overrides,args.chapters)
+    except InterruptedError as exc:
+        write_json(args.output_dir.parent/"chapter-progress.json",{"ticker":args.ticker,"accession":args.accession,"stage":"safely_paused","reason":str(exc),"checkedAt":datetime.now(UTC).isoformat(),"published":False})
     except Exception as exc:
         write_json(args.output_dir.parent/"chapter-progress.json",{"ticker":args.ticker,"accession":args.accession,"stage":"failed_quality_or_generation","error":str(exc)[:1200],"checkedAt":datetime.now(UTC).isoformat(),"published":False})
         raise

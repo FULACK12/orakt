@@ -35,3 +35,14 @@ def test_generation_schema_limits_ids_and_removes_model_quote():
     assert 'quote' not in item['required']
     assert item['properties']['passage_id']['enum']==['PASSAGE:1111111111111111']
     assert schema['properties']['evidence_refs']['items']['enum']==['SEC:0000000000-00-000001']
+
+
+def test_dense_financial_table_is_not_retrieved_as_narrative():
+    from app.dossier_passages import prose_fraction
+    table='Consolidated operating costs and production expense statements\n'+('Operating costs\nInterest expense\n100\n200\nRevenue from operations\n300\n'*30)
+    assert prose_fraction(table)<.6
+    assert retrieve_passages(table,'supply','a'*64)==[]
+    prose=('Production costs were affected by changes in ore grade and the amount of material processed.\n'
+           'The disclosed change is specific to this operation and does not prove an industry-wide shortage.\n')*4
+    results=retrieve_passages(prose,'supply','a'*64)
+    assert results and all(prose[p['start']:p['end']]==p['text'] for p in results)

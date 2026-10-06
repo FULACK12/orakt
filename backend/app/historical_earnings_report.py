@@ -177,7 +177,10 @@ def validate_citations(value, allowed):
             validate_citations(child, allowed)
     elif isinstance(value, str):
         # Check inline citations as well as structured evidence_refs.
-        for match in re.findall(r"(?:PASSAGE:[a-f0-9]{16}|BULK:[a-f0-9]{64}|FACT:\d+|IX:[A-Za-z0-9_.-]+|SEC:\d{10}-\d{2}-\d{6}|MARKET:[A-Za-z0-9:._-]+)", value):
+        # Match the whole token, including malformed IDs. Matching only a
+        # legitimate prefix previously let FACT:<letters> escape validation.
+        for token in re.findall(r"(?:PASSAGE|BULK|FACT|IX|SEC|MARKET):[A-Za-z0-9:._-]+", value):
+            match=token.rstrip('.')
             if match not in allowed:
                 raise ValueError("Inline citation outside frozen packet")
 

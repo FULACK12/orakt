@@ -542,8 +542,8 @@
     },
     {
       "path": "backend/app/company_history_dossier.py",
-      "bytes": 23797,
-      "sha256": "ff1df8f0262774b86e52932761d44cf472c5b47b36a18c5dab56430430e0fdd4"
+      "bytes": 25125,
+      "sha256": "a90420c38d932468b586424a51c97587fd6abfcb3f406f498feacbb6f09f8e8f"
     },
     {
       "path": "backend/app/competitive_evidence.py",
@@ -797,8 +797,8 @@
     },
     {
       "path": "backend/app/dossier_passages.py",
-      "bytes": 5588,
-      "sha256": "84895e791aae0a43c7a4ff225d3d139d9616c7493b306363cff7afbae982bbbe"
+      "bytes": 6096,
+      "sha256": "2efef7c87ef419af09314364542c67a6c5e50c81321ab0efd828e214f0d3eee3"
     },
     {
       "path": "backend/app/earnings_evidence_packet.py",
@@ -1027,8 +1027,8 @@
     },
     {
       "path": "backend/app/historical_earnings_report.py",
-      "bytes": 19283,
-      "sha256": "0545a629cfba9404240d78bdae3edbb190ebd7cc0d95d6a1f9a2073a39d5ed38"
+      "bytes": 19405,
+      "sha256": "58ccd8b8277bcd295d89f611f560bcbfcd5955c2edc680fbc639859d2e436887"
     },
     {
       "path": "backend/app/horizon_backtest.py",
@@ -1597,8 +1597,8 @@
     },
     {
       "path": "backend/tests/test_company_history_dossier.py",
-      "bytes": 1135,
-      "sha256": "e667bcf92fa424d2dfeda173bc6366f6a7820310509e039c843b2aeab9dfaf3b"
+      "bytes": 2005,
+      "sha256": "87123d982e3b9dfda15487d3401f3e13789dff1445ca6a796b5769c1e87036d6"
     },
     {
       "path": "backend/tests/test_competitive_evidence.py",
@@ -1667,8 +1667,8 @@
     },
     {
       "path": "backend/tests/test_dossier_passages.py",
-      "bytes": 2639,
-      "sha256": "ea0f9403237b92e407873b5453251eaf1ee781c4d413ff907b38c3ea3db81d91"
+      "bytes": 3368,
+      "sha256": "e0adb672c776553607bfeaea4b43d938ef99040757a4752708a8cd134e923698"
     },
     {
       "path": "backend/tests/test_dossier_snapshot_preservation.py",

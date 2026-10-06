@@ -21,6 +21,15 @@ TOPICS={
  'conclusion':r'outlook|risk|uncertain|cash flow|revenue|demand|sales',
 }
 
+
+def prose_fraction(text):
+    """EDGAR table cells must not masquerade as narrative retrieval hits."""
+    lines=[line.strip() for line in text.splitlines() if line.strip()]
+    if not lines:return 0.0
+    # Older filings hard-wrap sentences. Genuine prose still has long lines;
+    # a numeric table may contain many letters in labels but mostly short cells.
+    return sum(len(line)>=45 and len(re.findall(r'[A-Za-z]+',line))>=6 for line in lines)/len(lines)
+
 def retrieve_passages(text,chapter,source_hash,limit=8):
     matches=[]
     for m in re.finditer(r'[^\n]+',text):
@@ -33,6 +42,7 @@ def retrieve_passages(text,chapter,source_hash,limit=8):
         raw=text[m.start():end];left=len(raw)-len(raw.lstrip());value=raw.strip()
         if not 100<=len(value)<=2200:continue
         if sum(c.isalpha() for c in value)<len(value)*.58:continue
+        if prose_fraction(value)<.6:continue
         score=len(re.findall(TOPICS[chapter],value,re.I))
         if not score:continue
         digest=hashlib.sha256((source_hash+':'+str(m.start()+left)+':'+value).encode()).hexdigest()

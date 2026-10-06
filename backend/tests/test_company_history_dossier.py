@@ -20,3 +20,17 @@ def test_currency_conversion_and_missing_translation_fail_closed():
 def test_unknown_citation_rejected():
     s=section();s.evidence_refs=["FACT:999"]
     with pytest.raises(ValueError):validate_section(s,{"FACT:1"})
+
+
+def test_malformed_inline_id_cannot_escape_validation():
+    from app.historical_earnings_report import validate_citations
+    for text in ['FACT:ca6697b3c229','PASSAGE:1111111111111111extra','SEC:madeup','BULK:wrong']:
+        with pytest.raises(ValueError,match='Inline citation'):validate_citations(text,{'FACT:1'})
+    validate_citations('Supported by FACT:1.',{'FACT:1'})
+
+
+def test_claim_statements_cannot_bypass_numerical_prose_guard():
+    from app.company_history_dossier import GroundedClaim
+    s=section()
+    s.grounded_claims=[GroundedClaim(passage_id='PASSAGE:1111111111111111',quote='An original statement long enough for citation.',statement={'zh':'公司净利润为189百万美元。','en':'Net income was 189 million dollars.'})]
+    with pytest.raises(ValueError,match='Numerical claims'):validate_section(s,{'FACT:1','PASSAGE:1111111111111111'})
