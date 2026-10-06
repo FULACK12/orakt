@@ -27,3 +27,8 @@ if(readdirSync(folder).filter(v=>v.endsWith('.json')).length!==index.reports.len
 mkdirSync(new URL('generated/',root),{recursive:true});
 writeFileSync(new URL('generated/private-reports.mjs',root),`// Generated server-only report archive. Never import from app/ client code.\nexport default ${JSON.stringify(reports)};\n`);
 console.log(`Packed ${index.reports.length} private report bodies for the server.`);
+const charts=JSON.parse(readFileSync(new URL('private-data/company-charts.json',root),'utf8'));
+const chartArchive={generatedAt:charts.generatedAt,companies:charts.companies.map(c=>({ticker:c.ticker,name:c.name})),bodies:Object.fromEntries(charts.companies.map(c=>[c.ticker,gzipSync(Buffer.from(JSON.stringify(c)),{level:9}).toString('base64')]))};
+writeFileSync(new URL('generated/private-charts.mjs',root),`// Server-only, decompress only the requested company.\nexport default ${JSON.stringify(chartArchive)};\n`);
+const lab=gzipSync(readFileSync(new URL('private-data/lab-expansion.json',root)),{level:9}).toString('base64');
+writeFileSync(new URL('generated/private-labs.mjs',root),`// Server-only research archive.\nexport default ${JSON.stringify(lab)};\n`);

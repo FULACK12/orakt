@@ -541,6 +541,11 @@
       "sha256": "2f3675cad30edd0d336ccd690ece646b9efe0af6b6d8e4fc76200fb49b58b375"
     },
     {
+      "path": "backend/app/company_chart_export.py",
+      "bytes": 5385,
+      "sha256": "ca85e624ca55a0260f786bf8dfb16058327b4117202e584c2ad15330a38dbc6c"
+    },
+    {
       "path": "backend/app/company_history_dossier.py",
       "bytes": 25805,
       "sha256": "d56d571201e121b78be194b68647a8a7aea847428555cdf76637618bf9454e64"
@@ -1059,6 +1064,11 @@
       "path": "backend/app/institutional_history_cli.py",
       "bytes": 2715,
       "sha256": "63dbab04c07cafe1c112f9f78661b22c42826dfd9a432dde0e29a610667d1167"
+    },
+    {
+      "path": "backend/app/lab_expansion_export.py",
+      "bytes": 6465,
+      "sha256": "266381bd84d4a43ba9dab473d6b5aaf45d035895af645d79e75a214789b816de"
     },
     {
       "path": "backend/app/logic_chains.py",
@@ -1776,6 +1786,11 @@
       "sha256": "a7bf60c2c28f72631f23de29503952d6a2ffa4574e6428f6b3fa66fdfe7f3da0"
     },
     {
+      "path": "backend/tests/test_financial_labs_export.py",
+      "bytes": 2203,
+      "sha256": "6d734a01c7c05e5219a097532dca5591b6954807bb4a557ea00a6c5cd5c6ab37"
+    },
+    {
       "path": "backend/tests/test_financial_period_ledger.py",
       "bytes": 3608,
       "sha256": "ce612b430dac6b7655e62c3199931e773ff9f81ae963e95ca89fbe7c3afcaf79"
@@ -2137,8 +2152,8 @@
     },
     {
       "path": "pilot-site/app/AlphaLab.tsx",
-      "bytes": 6733,
-      "sha256": "a913565fffc268584bfc6270a9d84b270b6dc35b9016808d9f95b132336d1575"
+      "bytes": 7540,
+      "sha256": "6de7a92de18baf3593bc5a0e6715ddefc63a5fd30ac63dd8497d58cdf6cd20b6"
     },
     {
       "path": "pilot-site/app/chatgpt-auth.ts",
@@ -2159,6 +2174,11 @@
       "path": "pilot-site/app/CompanyDossier.tsx",
       "bytes": 2390,
       "sha256": "df848a241f0bef507e406c65830f9c0d065e878ac06b558ceeff3a4314d73986"
+    },
+    {
+      "path": "pilot-site/app/CompanyFinancialCharts.tsx",
+      "bytes": 7620,
+      "sha256": "cb85ca2f9a4dadae2406c57bc081202590daba4f21261cb6e7a99831add97fec"
     },
     {
       "path": "pilot-site/app/DataLibrary.tsx",
@@ -2186,6 +2206,16 @@
       "sha256": "c3ab90053666a60ff1ff2d9046ad4870d6e414c4315f30d252d0436a833ad96a"
     },
     {
+      "path": "pilot-site/app/financial-chart-math.mjs",
+      "bytes": 784,
+      "sha256": "8b12925f13c3cdccd8139fa8ebf2b1ec1e54b126499543d51f3a24ca84d28a44"
+    },
+    {
+      "path": "pilot-site/app/financial-labs.css",
+      "bytes": 4238,
+      "sha256": "9872c41f1a90651b6f807587b558bd8cd2811be8b4cb051438bc88bfd2091bcf"
+    },
+    {
       "path": "pilot-site/app/FinancialPeriodLedger.tsx",
       "bytes": 6349,
       "sha256": "bd6ed11a3a042b350e55f7d443135219bae49e0056907475a68e555649a1b513"
@@ -2202,8 +2232,8 @@
     },
     {
       "path": "pilot-site/app/layout.tsx",
-      "bytes": 629,
-      "sha256": "a859778e4ee6909ce6180a64360a0b0ef8c4a7061af79a73c8b1f449414d1140"
+      "bytes": 660,
+      "sha256": "376fc969e65dcb48c8afcbea460fbad58a37ecd2b33a493dbc1d1a4506abb0d4"
     },
     {
       "path": "pilot-site/app/MacroEventReports.tsx",
@@ -2264,6 +2294,11 @@
       "path": "pilot-site/app/metric-format.mjs",
       "bytes": 938,
       "sha256": "d0218720d8251bbabdbe44af46f9cf106d0d55a4e5cc6197890c9db9925390ab"
+    },
+    {
+      "path": "pilot-site/app/MultiFactorLab.tsx",
+      "bytes": 5602,
+      "sha256": "0776429e7bef528fc8c22d0a673cc19d0f2d32d6a536a82df4de8f0680812f36"
     },
     {
       "path": "pilot-site/app/OraktArrow.tsx",
@@ -2352,8 +2387,8 @@
     },
     {
       "path": "pilot-site/app/PilotDashboard.tsx",
-      "bytes": 217987,
-      "sha256": "81707bbb6a814b9d90eaa07e9b45b2cd496f6c3161358bf727bbd7d7cd0bbf26"
+      "bytes": 217892,
+      "sha256": "1205aee6235dcb8651237b69d5eda300244e050780465bb5fdb98531fa6adf4a"
     },
     {
       "path": "pilot-site/app/plans/page.tsx",
@@ -2377,8 +2412,8 @@
     },
     {
       "path": "pilot-site/app/platform/intelligence/IntelligenceMarket.tsx",
-      "bytes": 14178,
-      "sha256": "d0bf91db41a2624899fdd2c04f6658de5919c57c8a95efb79bf2042bfdf3d5ec"
+      "bytes": 14708,
+      "sha256": "54729762f6482ddbb8bd87a5dccdfda43dd944b36daf75477006fdfbf8ab6422"
     },
     {
       "path": "pilot-site/app/platform/intelligence/page.tsx",
@@ -2422,8 +2457,8 @@
     },
     {
       "path": "pilot-site/app/platform/publish/PublicationCenter.tsx",
-      "bytes": 5161,
-      "sha256": "27adaf875be2deba0fbf9e0811a1b5d4760a4eca31e8e0fe2d5837a0c32e7c4e"
+      "bytes": 5310,
+      "sha256": "2e65692f89d12106ff9aa1ab933ede8c3a4e48f97d59bbe7c999759c72822f3b"
     },
     {
       "path": "pilot-site/app/platform/research/page.tsx",
@@ -2436,9 +2471,14 @@
       "sha256": "7a6f626b2633cec0b749e0f5f37e590cb3428233d81e62891965f614a4fe9859"
     },
     {
+      "path": "pilot-site/app/PortfolioGallery.tsx",
+      "bytes": 6418,
+      "sha256": "a82ba5ca187fa605d5d63862dfaef47c4a27bef722078c11c731c2dd44bb3586"
+    },
+    {
       "path": "pilot-site/app/PortfolioLab.tsx",
-      "bytes": 5557,
-      "sha256": "1bc6e93685a598761b747ee67c666881c57f0ba778211c3cebf6acf467e51b64"
+      "bytes": 5740,
+      "sha256": "bad0b5bc156f0e44ab7af795b2c6cd15ce704a92106aaf0b2cc842fb2192d6bc"
     },
     {
       "path": "pilot-site/app/product-plans.ts",
@@ -2504,6 +2544,11 @@
       "path": "pilot-site/app/SiteFooter.tsx",
       "bytes": 3964,
       "sha256": "1ec983d36dd266d34dae36f3370ab40023172072fbd5c01559e39523705b54ea"
+    },
+    {
+      "path": "pilot-site/app/StudyCurve.tsx",
+      "bytes": 1216,
+      "sha256": "ae48f7942a7376da514b41d02802c6c960a50ede6f476c316e091c66f50696e3"
     },
     {
       "path": "pilot-site/app/useDisplayLanguage.ts",
@@ -2677,8 +2722,8 @@
     },
     {
       "path": "pilot-site/scripts/pack-private-reports.mjs",
-      "bytes": 2787,
-      "sha256": "e5fefaf783826893ea0427a06736d71b106962c4911ffe2a481b95cde8885c14"
+      "bytes": 3553,
+      "sha256": "ebe2b5a958864973f063ed208ab41ea20b55182ab4b8e91e27e96e554891c1fd"
     },
     {
       "path": "pilot-site/scripts/peer-study.mjs",
@@ -2729,6 +2774,11 @@
       "path": "pilot-site/tests/brand-motion.test.mjs",
       "bytes": 6361,
       "sha256": "397f301d79449763dddc347680eff270c4b012df8305674ddb07292c01efe6de"
+    },
+    {
+      "path": "pilot-site/tests/financial-chart-math.test.mjs",
+      "bytes": 1025,
+      "sha256": "d4aa895ba8ee39cabaade0bc1d07bd06edaae976ab7e358888d3ceae1b7a9590"
     },
     {
       "path": "pilot-site/tests/financial-supplement.test.mjs",
@@ -2792,8 +2842,8 @@
     },
     {
       "path": "pilot-site/tests/rendered-html.test.mjs",
-      "bytes": 39150,
-      "sha256": "48146693945fe22df7778b1b47cff548aebb0885810ac5d0b07067aa4dbfec32"
+      "bytes": 39954,
+      "sha256": "56e4e12398e28b2a2fcdb9205e49b8a2a166cab3bd30f552c3b0b0f62f0e63d0"
     },
     {
       "path": "pilot-site/tests/research-completion.test.mjs",
@@ -2832,8 +2882,8 @@
     },
     {
       "path": "pilot-site/worker/index.ts",
-      "bytes": 21899,
-      "sha256": "4b763a0107f8bda449d4328d6830a9ecf9400b0b23b8e0c338960a96409fb364"
+      "bytes": 22882,
+      "sha256": "7e280761dbf34c917bdd0dfc321e24beb1b48477c54b4464cb94bb7323b460a1"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",

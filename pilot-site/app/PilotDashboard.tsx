@@ -1,7 +1,7 @@
 "use client";
 import useDisplayLanguage from "./useDisplayLanguage";
 import {economicValue, metricCount, finiteNumber, reportFilterDate} from "./metric-format.mjs";
-import ResearchOperations from "./ResearchOperations";
+import CompanyFinancialCharts from "./CompanyFinancialCharts";
 import CompanyDossier from "./CompanyDossier";
 import PeerFactorStudy from "./PeerFactorStudy";
 import ResearchCompletion from "./ResearchCompletion";
@@ -4716,8 +4716,8 @@ export default function PilotDashboard({
             <button type="button" role="tab" aria-selected={tab==="sec"} className={tab==="sec"?"active":""} onClick={()=>{setEvidenceView("single");changeTab("sec");}}><ShieldCheck size={17}/><span><b>{language==="zh"?"SEC 证据审核":"SEC source review"}</b><small>{language==="zh"?"财报原文与证据核对":"Filings and evidence checks"}</small></span></button>
           </div>
           {tab === "evidence" && evidenceView === "crypto" && <MarketExpansion kind="crypto" language={language}/>}
-          <div className="orakt-research-links"><button onClick={()=>{setEvidenceView("operations");changeTab("evidence")}}>{language==="zh"?"历史补全与 Alpha 验证":"Historical coverage & Alpha validation"}</button><a href="/platform/publish">{language==="zh"?"发布与存证中心":"Publication & provenance"}</a></div>
-          {evidenceView === "operations" && <ResearchOperations language={language}/>}
+          {evidenceView === "operations" && <button onClick={()=>changeTab('alpha')}>{language==='zh'?'历史补全已迁至 Alpha 因子专区':'Historical coverage has moved to Alpha Lab'}</button>}
+          {evidenceView === "single" && accessRights?.reports && <CompanyFinancialCharts language={language}/>}
           {evidenceView === "single" && accessRights?.research && <DisclosureReviews language={language}/>}
           {evidenceView === "cross" && accessRights?.research && <MacroEventReports language={language}/>}
           {tab === "evidence" && evidenceView === "single" && (

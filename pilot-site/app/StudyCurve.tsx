@@ -1,0 +1,6 @@
+"use client";
+export default function StudyCurve({points,series,title}:{points:any[],series:{key:string,label:string,color:string}[],title:string}){
+ if(points.length<2)return <p>—</p>;
+ const values=points.flatMap(p=>series.map(s=>p[s.key])).filter(Number.isFinite),min=Math.min(...values),max=Math.max(...values),range=max-min||1;
+ return <figure className="study-curve"><div className="chart-scroll"><svg viewBox="0 0 700 240" role="img" aria-label={title}><title>{title}</title>{[0,.5,1].map(t=><g key={t}><line x1="55" x2="676" y1={20+170*t} y2={20+170*t} stroke="currentColor" opacity=".12"/><text x="48" y={24+170*t} textAnchor="end" fill="currentColor" fontSize="13">{(max-range*t).toFixed(1)}</text></g>)}{series.map(s=><polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2.5" points={points.map((p,i)=>`${55+621*i/(points.length-1)},${20+170*(max-p[s.key])/range}`).join(' ')}/>)}<text x="55" y="225" fill="currentColor" fontSize="13">{points[0].date}</text><text x="676" y="225" textAnchor="end" fill="currentColor" fontSize="13">{points.at(-1).date}</text></svg></div><figcaption>{series.map(s=><span key={s.key}><i style={{background:s.color}}/>{s.label}</span>)}</figcaption></figure>;
+}

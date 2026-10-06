@@ -2,7 +2,12 @@
 import {useState} from 'react';
 import useResearchData from './useResearchData';
 import ResearchOperations from './ResearchOperations';
+import MultiFactorLab from './MultiFactorLab';
 export default function AlphaLab({language}:{language:'zh'|'en'}){
+ const [area,setArea]=useState('curves'),zh=language==='zh';
+ return <section><nav className="workspace-actions lab-subnav" aria-label={zh?'Alpha 分区':'Alpha sections'}>{[['curves','收益曲线','Equity curves'],['multi','多因子实验','Multi-factor'],['history','历史补全','History coverage'],['validation','验证档案','Validation records']].map(([key,cn,en])=><button key={key} aria-pressed={area===key} onClick={()=>setArea(key)}>{zh?cn:en}</button>)}</nav>{area==='curves'?<AlphaReference language={language}/>:area==='multi'?<MultiFactorLab language={language}/>:<ResearchOperations key={area} language={language} initialSection={area==='history'?'coverage':'alpha'}/>}</section>;
+}
+function AlphaReference({language}:{language:'zh'|'en'}){
  const zh=language==='zh',{data,error}=useResearchData('/api/alpha-lab'),[selected,setSelected]=useState('AAPL'),[mode,setMode]=useState('nav'),[library,setLibrary]=useState(false),[records,setRecords]=useState(false);
  const experiment=data?.experiments.find((x:any)=>x.ticker===selected),points=experiment?.points||[];
  const keys=mode==='nav'?['strategy','market','industry']:mode==='drawdown'?['drawdown']:['excessMarket','excessIndustry'];

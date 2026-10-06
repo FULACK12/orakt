@@ -18,6 +18,8 @@ import secBulkImport from "../private-data/sec-bulk-import.json";
 import alphaLab from "../private-data/alpha-lab.json";
 import macroEvents from "../private-data/macro-events.json";
 import disclosureReviews from "../private-data/disclosure-reviews.json";
+import companyCharts from "../generated/private-charts.mjs";
+import labExpansion from "../generated/private-labs.mjs";
 import {accessPagePaths} from "../app/access/access-navigation.mjs";
 import conflictSnapshot from "../snapshot/conflicts.json";
 import entryBacktestStatus from "../snapshot/entry-backtest-status.json";
@@ -130,6 +132,13 @@ const worker = {
     if(url.pathname==="/api/publication/requests")return protectedResponse(await publicationResponse(request,env,member,researchOperations.provenance));
     if(url.pathname==="/api/publication/status"&&request.method==="GET")return protectedResponse(member.access.permissions.reports?jsonResponse({generatedAt:researchOperations.generatedAt,records:researchOperations.provenance,canSubmit:member.access.permissions.manageUsers,broadcastEnabled:false}):jsonResponse({error:"plan_required"},403));
     if(url.pathname==="/api/alpha-lab"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(alphaLab):jsonResponse({error:"plan_required"},403));
+    if(url.pathname==="/api/lab-expansion"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(JSON.parse(gunzipSync(Buffer.from(labExpansion,'base64')).toString('utf8'))):jsonResponse({error:"plan_required"},403));
+    if(url.pathname==='/api/company-charts'&&request.method==='GET'){
+      if(!member.access.permissions.reports)return protectedResponse(jsonResponse({error:'plan_required'},403));
+      const ticker=url.searchParams.get('ticker');
+      const packed=ticker&&Object.hasOwn(companyCharts.bodies,ticker)?companyCharts.bodies[ticker]:null;
+      return protectedResponse(jsonResponse(ticker?{generatedAt:companyCharts.generatedAt,company:packed?JSON.parse(gunzipSync(Buffer.from(packed,'base64')).toString('utf8')):null}:{generatedAt:companyCharts.generatedAt,companies:companyCharts.companies}));
+    }
     if(url.pathname==="/api/macro-event-reports"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(macroEvents):jsonResponse({error:"plan_required"},403));
     if(url.pathname==="/api/disclosure-reviews"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(disclosureReviews):jsonResponse({error:"plan_required"},403));
     if(url.pathname==="/api/research-operations"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse({...researchOperations,usHistoryCoverage,secBulkImport}):jsonResponse({error:"plan_required"},403));

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import "./research-workspace.css";
+import "./financial-labs.css";
 import WalletSessionGuard from "./WalletSessionGuard";
 
 export const metadata: Metadata = {

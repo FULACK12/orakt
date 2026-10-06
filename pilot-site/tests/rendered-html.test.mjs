@@ -49,11 +49,18 @@ const ctx = { waitUntil() {}, passThroughOnException() {} };
 
 test('new research datasets require access and remain explicitly exploratory',async()=>{
  const app=await worker();
- for(const path of ['/api/alpha-lab','/api/macro-event-reports','/api/disclosure-reviews']){
+ for(const path of ['/api/alpha-lab','/api/macro-event-reports','/api/disclosure-reviews','/api/lab-expansion','/api/company-charts']){
   assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
   assert.equal((await app.fetch(authorizedRequest(path),env,ctx)).status,200);
  }
  const alpha=await (await app.fetch(authorizedRequest('/api/alpha-lab'),env,ctx)).json();
+ const catalog=await (await app.fetch(authorizedRequest('/api/company-charts'),env,ctx)).json();
+ assert.ok(catalog.companies.length>=100);assert.ok(catalog.companies.every(c=>!c.metrics));
+ const charts=await (await app.fetch(authorizedRequest('/api/company-charts?ticker=LULU'),env,ctx)).json();
+ assert.ok(charts.company.metrics.revenue.length);assert.equal(charts.company.consensus,null);
+ const unknown=await (await app.fetch(authorizedRequest('/api/company-charts?ticker=__proto__'),env,ctx)).json();assert.equal(unknown.company,null);
+ const labs=await (await app.fetch(authorizedRequest('/api/lab-expansion'),env,ctx)).json();
+ assert.equal(labs.factors.length,6);assert.ok(labs.factors.every(f=>!f.validatedAlpha));assert.equal(labs.baskets.length,3);
  assert.equal(alpha.experiments.length,3);
  for(const e of alpha.experiments){assert.equal(e.validatedAlpha,false);assert.ok(e.points.length>100);assert.ok(e.points.every(p=>Number.isFinite(p.strategy)&&Number.isFinite(p.market)&&Number.isFinite(p.industry)));}
  const reviews=await (await app.fetch(authorizedRequest('/api/disclosure-reviews'),env,ctx)).json();
