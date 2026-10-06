@@ -1,0 +1,1 @@
+ALTER TABLE `member_accounts` ADD `last_change_id` text DEFAULT '' NOT NULL;

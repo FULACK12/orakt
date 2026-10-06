@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {validateSupplement} from '../scripts/report-supplement.mjs';
+const fact=(value,start,end)=>({value,unit:'USD',period_start:start,period_end:end});
+function sample(){return {ticker:'AAPL',asOf:'2025-08-01',periodEnd:'2025-06-28',sourceDocumentHash:'a'.repeat(64),review:{status:'arithmetic_checked_narrative_not_replaced'},financialLedger:{comparisons:[{current:fact(81,'2024-09-29','2025-06-28'),previous:fact(91,'2023-10-01','2024-06-29'),unit:'USD',direction:'decrease',changePercent:(81/91-1)*100,periodType:'nine_month_cumulative',evidence_refs:['FACT:1','FACT:2']}]}};}
+test('supplements cannot be attached to a different company or cutoff',()=>{assert.throws(()=>validateSupplement(sample(),{ticker:'AMD',dataCutoff:'2025-08-01'}));assert.throws(()=>validateSupplement(sample(),{ticker:'AAPL',dataCutoff:'2025-01-01'}));});
+test('direction and quarterly/cumulative mismatches block packaging',()=>{const r={ticker:'AAPL',dataCutoff:'2025-08-01'};validateSupplement(sample(),r);const s=sample();s.financialLedger.comparisons[0].direction='increase';assert.throws(()=>validateSupplement(s,r));s.financialLedger.comparisons[0].direction='decrease';s.financialLedger.comparisons[0].periodType='quarter';assert.throws(()=>validateSupplement(s,r));});

@@ -1,0 +1,2 @@
+CREATE INDEX `idx_evidence_reports_created_at` ON `evidence_reports` (`created_at`);--> statement-breakpoint
+CREATE INDEX `idx_review_feedback_report_created` ON `review_feedback` (`report_id`,`created_at`);

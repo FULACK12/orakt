@@ -1,0 +1,2 @@
+"""NEWS App backend tests."""
+

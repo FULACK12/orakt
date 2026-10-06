@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "newsapp-backend"
+version = "0.22.0"
+description = "Backend API for the NEWS global intelligence map"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.16,<2.0",
+  "baostock>=0.9.3,<1.0",
+  "fastapi>=0.116,<1.0",
+  "feedparser>=6.0.11,<7.0",
+  "fonttools>=4.59,<5.0",
+  "httpx>=0.28,<1.0",
+  "pypdf>=6,<7",
+  "psycopg[binary]>=3.2,<4.0",
+  "pydantic-settings>=2.10,<3.0",
+  "sqlalchemy>=2.0.41,<3.0",
+  "solders==0.29.0",
+  "uvicorn[standard]>=0.35,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.16,<2.0",
+  "pytest>=8.4,<10.0",
+  "pytest-cov>=6.2,<8.0",
+  "ruff>=0.12,<1.0",
+]
+
+[project.scripts]
+newsapp-cluster-worker = "app.cluster_jobs:main"
+newsapp-rss = "app.collectors.cli:main"
+newsapp-economics = "app.economics.cli:main"
+newsapp-geography = "app.geography.cli:main"
+newsapp-recent = "app.collectors.gdelt_cli:main"
+newsapp-ucdp = "app.collectors.ucdp_cli:main"
+newsapp-energy-bulk = "app.energy.cli:main"
+newsapp-firms = "app.collectors.firms_cli:main"
+newsapp-acled-aggregate = "app.conflicts.cli:main"
+newsapp-market-history = "app.market_history_cli:main"
+newsapp-survivorship-import = "app.survivorship_import_cli:main"
+newsapp-alpha-listings = "app.alpha_vantage_listings_cli:main"
+newsapp-research = "app.research_cli:main"
+newsapp-research-batch-worker = "app.research_batches:main"
+newsapp-research-audit-worker = "app.research_audit_jobs:main"
+newsapp-companies = "app.companies_cli:main"
+newsapp-gdelt-history = "app.gdelt_history_cli:main"
+newsapp-institutional-history = "app.institutional_history_cli:main"
+newsapp-insider-history = "app.insider_history_cli:main"
+newsapp-supply-chain = "app.supply_chain_cli:main"
+newsapp-supply-chain-review-import = "app.supply_chain_review_import:main"
+newsapp-supplier-market-history = "app.supplier_market_history_cli:main"
+newsapp-supply-chain-sites = "app.supply_chain_sites_cli:main"
+newsapp-supply-chain-site-import = "app.supply_chain_site_import:main"
+newsapp-china-equities = "app.china_equities_cli:main"
+newsapp-product-evidence = "app.product_evidence_cli:main"
+newsapp-a-share-disclosures = "app.a_share_disclosures_cli:main"
+newsapp-queue-equity-reports = "app.queue_equity_reports_cli:main"
+newsapp-entry-calibration = "app.entry_calibration_cli:main"
+newsapp-factor-experiments = "app.factor_experiments_cli:main"
+newsapp-entry-review-import = "app.entry_review_import_cli:main"
+newsapp-daily-equity-reports = "app.daily_equity_reports:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --disable-warnings"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]

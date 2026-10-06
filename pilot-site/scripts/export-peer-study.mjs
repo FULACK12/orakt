@@ -1,0 +1,12 @@
+import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
+import {validatePeerStudy} from './peer-study.mjs';
+const [studyPath,inputPath]=process.argv.slice(2);
+if(!studyPath||!inputPath)throw Error('Usage: study-path input-path');
+const root=new URL('../',import.meta.url),read=p=>JSON.parse(readFileSync(new URL(p,root),'utf8'));
+const d=JSON.parse(readFileSync(studyPath,'utf8')),bytes=readFileSync(inputPath);
+const id='dossier-AMD-20250507',report=read(`private-data/research-reports/${id}.json`).report,dossier=read(`private-data/company-dossiers/${id}.json`);
+validatePeerStudy(d,report,dossier,bytes);
+const dir=new URL('private-data/peer-studies/',root);mkdirSync(dir,{recursive:true});
+for(const file of [`${id}.json`,`${id}.inputs.json`])if(existsSync(new URL(file,dir)))throw Error('Preserve existing study revision');
+writeFileSync(new URL(`${id}.json`,dir),JSON.stringify(d));writeFileSync(new URL(`${id}.inputs.json`,dir),bytes);
+console.log(JSON.stringify({id,peers:d.peers.length,events:d.factor.events.length,validatedAlpha:false}));
