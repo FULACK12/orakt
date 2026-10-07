@@ -11,7 +11,7 @@ export default function DossierGroundedClaims({chapter,dossier,language}:{chapte
   {claims.map((claim,i)=><article key={`${claim.passage_id}-${i}`}>
    <h4>{zh?'逐项解读':'Reviewed interpretation'} {i+1}</h4>
    <p>{claim.statement[language]}</p>
-   <small>{claim.passage_id} · {zh?'资料截止':'Information cutoff'} {dossier.asOf}</small>
+   <small>{zh?'资料截止':'Information cutoff'} {dossier.asOf}</small><details className="technical-reference"><summary>{zh?'技术编号':'Technical reference'}</summary><code>{claim.passage_id}</code></details>
    <blockquote lang="en">{claim.quote}</blockquote>
    {sourceUrl&&<a href={sourceUrl} target="_blank" rel="noopener noreferrer">{zh?'查看 SEC 原始文件':'Read original SEC filing'} ↗</a>}
   </article>)}

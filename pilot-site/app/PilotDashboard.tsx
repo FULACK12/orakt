@@ -1,23 +1,28 @@
 "use client";
 import useDisplayLanguage from "./useDisplayLanguage";
+import useWorkspaceChrome from './useWorkspaceChrome';
+import {reportForReading} from './report-reading.mjs';
+import {ReadingText} from './ReadingReferences';
+import useWatchlist from './useWatchlist';
 import {economicValue, metricCount, finiteNumber, reportFilterDate} from "./metric-format.mjs";
-import CompanyFinancialCharts from "./CompanyFinancialCharts";
 import CompanyDossier from "./CompanyDossier";
+import ReportEvidence from './ReportEvidence';
 import PeerFactorStudy from "./PeerFactorStudy";
 import ResearchCompletion from "./ResearchCompletion";
 import FinancialPeriodLedger from "./FinancialPeriodLedger";
 import ReportMarketCoverage from "./ReportMarketCoverage";
 import DataLibrary from "./DataLibrary";
-import PortfolioLab from "./PortfolioLab";
 import MarketsWorkspace from "./MarketsWorkspace";
-import AlphaLab from "./AlphaLab";
 import PersonalResearch from "./PersonalResearch";
+import {chainGeoJSON,hormuzChain} from "./chain-catalog";
 import MacroEventReports from "./MacroEventReports";
 import DisclosureReviews from "./DisclosureReviews";
 import IntelligenceMarket from "./platform/intelligence/IntelligenceMarket";
 import {localizeReport} from "./report-language.mjs";
 
 import {
+  Moon,
+  Sun,
   Activity,
   Anchor,
   ArrowRight,
@@ -57,10 +62,17 @@ import {
   useMemo,
   useRef,
   useState,
+  lazy,
+  Suspense,
 } from "react";
+const SemiconductorComparisonPanel=lazy(()=>import('./SemiconductorComparisonPanel'));
+const CompanyFinancialCharts=lazy(()=>import('./CompanyFinancialCharts'));
+const EvidenceChains=lazy(()=>import('./EvidenceChains'));
+const PortfolioLab=lazy(()=>import('./PortfolioLab'));
+const AlphaLab=lazy(()=>import('./AlphaLab'));
 
 type Language = "zh" | "en";
-type Tab = "map" | "evidence" | "sec" | "data" | "portfolio" | "intelligence" | "markets" | "alpha" | "personal";
+type Tab = "map" | "evidence" | "sec" | "data" | "portfolio" | "intelligence" | "markets" | "alpha" | "chains" | "personal";
 type WindowKey = "7d" | "30d" | "90d" | "all";
 type MobilePanel = "layers" | "events" | "detail" | null;
 type AnalysisMode = "news_first" | "hypothesis_first";
@@ -1438,146 +1450,6 @@ function formatLargeMoney(value: number | null) {
       : `$${(value / 1e6).toFixed(1)}M`;
 }
 
-function SemiconductorComparisonPanel({
-  comparison,
-  language,
-}: {
-  comparison: SemiconductorComparison;
-  language: Language;
-}) {
-  return (
-    <section className="semiconductor-comparison">
-      <header>
-        <div>
-          <span className="eyebrow">
-            <Activity size={14} />
-            {comparison.version} · OPENAI {comparison.openaiUsed ? "ON" : "OFF"}
-          </span>
-          <h1>{language === "zh" ? comparison.titleZh : comparison.titleEn}</h1>
-          <p>
-            {language === "zh" ? comparison.verdictZh : comparison.verdictEn}
-          </p>
-        </div>
-        <b>
-          {comparison.marketDataCutoff}
-          <small>
-            {language === "zh" ? "统一行情截止日" : "common market cutoff"}
-          </small>
-        </b>
-      </header>
-      <div className="comparison-findings">
-        {comparison.findings.map((item) => (
-          <article key={item.key}>
-            <span>{language === "zh" ? item.labelZh : item.labelEn}</span>
-            <strong>
-              {item.ticker ?? "—"} · {formatMove(item.value)}
-            </strong>
-            <p>{language === "zh" ? item.caveatZh : item.caveatEn}</p>
-          </article>
-        ))}
-      </div>
-      <div className="comparison-company-grid">
-        {comparison.companies.map((company) => (
-          <article key={company.ticker}>
-            <header>
-              <div>
-                <span>{company.ticker}</span>
-                <h2>{company.name}</h2>
-                <small>{company.industry}</small>
-              </div>
-              <b>
-                {company.dataCoverageScore}%
-                <small>{language === "zh" ? "数据覆盖" : "coverage"}</small>
-              </b>
-            </header>
-            <div className="comparison-price">
-              <strong>{formatPrice(company.market.latestClose)}</strong>
-              <span>
-                21D {formatMove(company.market.return21d)} · 63D{" "}
-                {formatMove(company.market.return63d)}
-              </span>
-              <small>
-                {company.market.historyStart} — {company.market.historyEnd} ·{" "}
-                {formatCount(company.market.barCount)} OHLCV
-              </small>
-            </div>
-            <dl>
-              <div>
-                <dt>{language === "zh" ? "年度收入" : "Annual revenue"}</dt>
-                <dd>{formatLargeMoney(company.fundamentals.revenue)}</dd>
-              </div>
-              <div>
-                <dt>
-                  {language === "zh" ? "年度净利润" : "Annual net income"}
-                </dt>
-                <dd>{formatLargeMoney(company.fundamentals.netIncome)}</dd>
-              </div>
-              <div>
-                <dt>{language === "zh" ? "净利率" : "Net margin"}</dt>
-                <dd>{formatMove(company.fundamentals.netMargin)}</dd>
-              </div>
-              <div>
-                <dt>{language === "zh" ? "研发强度" : "R&D intensity"}</dt>
-                <dd>{formatMove(company.fundamentals.researchIntensity)}</dd>
-              </div>
-              <div>
-                <dt>P/S {language === "zh" ? "代理" : "proxy"}</dt>
-                <dd>{formatRatio(company.fundamentals.priceToSalesProxy)}</dd>
-              </div>
-              <div>
-                <dt>P/E {language === "zh" ? "代理" : "proxy"}</dt>
-                <dd>
-                  {formatRatio(company.fundamentals.priceToEarningsProxy)}
-                </dd>
-              </div>
-              <div>
-                <dt>
-                  {language === "zh" ? "63日年化波动" : "63D ann. volatility"}
-                </dt>
-                <dd>{formatMove(company.market.annualizedVolatility63d)}</dd>
-              </div>
-              <div>
-                <dt>
-                  {language === "zh" ? "252日最大回撤" : "252D max drawdown"}
-                </dt>
-                <dd>{formatMove(company.market.maximumDrawdown252d)}</dd>
-              </div>
-            </dl>
-            <footer>
-              <span>
-                {language === "zh" ? "财年截止" : "Fiscal end"}{" "}
-                {company.fundamentals.periodEnd ?? "—"}
-              </span>
-              <span>
-                {language === "zh" ? "已核验供应链" : "Verified supply-chain"}{" "}
-                {company.evidence.verifiedSupplyChainEdges} ·{" "}
-                {language === "zh" ? "未具名" : "unnamed"}{" "}
-                {company.evidence.unnamedVerifiedSupplyChainEdges}
-              </span>
-              <a
-                href={company.fundamentals.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                SEC
-                <ExternalLink size={11} />
-              </a>
-            </footer>
-          </article>
-        ))}
-      </div>
-      <footer>
-        <ShieldCheck size={16} />
-        <p>
-          {language === "zh"
-            ? comparison.methodologyZh
-            : comparison.methodologyEn}
-        </p>
-      </footer>
-    </section>
-  );
-}
-
 function DataReadinessPanel({
   readiness,
   language,
@@ -2634,6 +2506,8 @@ export default function PilotDashboard({
   initialTab?: Tab;
 }) {
   const [language, setLanguage] = useDisplayLanguage();
+  const workspaceRef=useWorkspaceChrome();
+  const {tickers: watchedTickers}=useWatchlist();
   const [accessRights,setAccessRights]=useState<{reports:boolean;research:boolean}|null>(null);
   const [accessError,setAccessError]=useState(false);
   useEffect(()=>{const c=new AbortController();fetch("/api/account/overview",{cache:"no-store",signal:c.signal}).then(async r=>{if(!r.ok)throw Error();return r.json();}).then(d=>setAccessRights(d.account.membership.permissions)).catch(()=>{if(!c.signal.aborted)setAccessError(true);});return()=>c.abort();},[]);
@@ -2650,6 +2524,9 @@ export default function PilotDashboard({
   const [conflictEnabled, setConflictEnabled] = useState(true);
   const [severityEnabled, setSeverityEnabled] = useState(true);
   const [economyEnabled, setEconomyEnabled] = useState(false);
+  const [chainEnabled,setChainEnabled]=useState(false);
+  const [economicError,setEconomicError]=useState('');
+  const [economicRetry,setEconomicRetry]=useState(0);
   const [economicIndicator, setEconomicIndicator] = useState("FP.CPI.TOTL.ZG");
   const [economicData, setEconomicData] = useState<EconomicObservation[]>([]);
   const [economicLoading, setEconomicLoading] = useState(false);
@@ -2685,8 +2562,8 @@ export default function PilotDashboard({
   const [evidenceView, setEvidenceView] = useState<EvidenceView>("single");
   const [reportTheme, setReportTheme] = useState<"light" | "dark">("light");
   const [entryMarket, setEntryMarket] = useState<"all" | "china" | "us">("all");
-  const [dateBasis, setDateBasis] = useState("generated");
-  const [appliedDateBasis, setAppliedDateBasis] = useState("generated");
+  const [dateBasis, setDateBasis] = useState("evidence");
+  const [appliedDateBasis, setAppliedDateBasis] = useState("evidence");
   const deepLinkLoaded = useRef(false);
   useEffect(() => {
     try { const saved = localStorage.getItem("orakt-report-theme"); if (saved === "dark" || saved === "light") setReportTheme(saved); } catch { /* Device preferences are optional. */ }
@@ -2706,6 +2583,7 @@ export default function PilotDashboard({
   const [appliedReportFrom, setAppliedReportFrom] = useState("");
   const [appliedReportTo, setAppliedReportTo] = useState("");
   const [reportFilterNotice, setReportFilterNotice] = useState("");
+  const [comparisonMode, setComparisonMode] = useState<"macro"|"peers">("macro");
   const [comparisonReportId, setComparisonReportId] = useState("");
   const [comparisonDetail, setComparisonDetail] =
     useState<EvidenceReport | null>(null);
@@ -2821,9 +2699,9 @@ export default function PilotDashboard({
       rows.set(key, { key, label: `${ticker} · ${name}`, market });
     }
     return [...rows.values()].sort((left, right) =>
-      left.label.localeCompare(right.label, language === "zh" ? "zh-CN" : "en"),
+      Number(watchedTickers.includes(right.key.split(':')[1]))-Number(watchedTickers.includes(left.key.split(':')[1])) || left.label.localeCompare(right.label, language === "zh" ? "zh-CN" : "en"),
     );
-  }, [allLocalReports, equityCatalog, language, reportMarket]);
+  }, [allLocalReports, equityCatalog, language, reportMarket, watchedTickers]);
   const reportVersionOptions = useMemo(
     () =>
       allLocalReports
@@ -2867,7 +2745,7 @@ export default function PilotDashboard({
       appliedDateBasis,
     ],
   );
-  const localReports = filteredReports;
+  const localReports = useMemo(()=>[...filteredReports].sort((a,b)=>Number(watchedTickers.includes(b.ticker||''))-Number(watchedTickers.includes(a.ticker||''))),[filteredReports,watchedTickers]);
   useEffect(()=>{
     if(deepLinkLoaded.current || !accessRights?.reports || !allLocalReports.length)return;
     const params=new URLSearchParams(window.location.search);
@@ -3008,12 +2886,12 @@ export default function PilotDashboard({
       )
       .slice(0, 12);
   }, [allLocalReports, entryMarket]);
-  const report = localizeReport(
+  const report = useMemo(()=>reportForReading(localizeReport(
     selectedReport &&
     (selectedReport.origin === "remote_openai" ||
       filteredReports.some((item) => item.id === selectedReport.id))
       ? selectedReport
-      : null, language);
+      : null, language),language),[selectedReport,filteredReports,language]);
   const visibleReportVersion = reportVersionOptions.some(
     (item) => item.id === reportVersion,
   )
@@ -3125,7 +3003,7 @@ export default function PilotDashboard({
     return () => controller.abort();
   }, [secEvidence, tab, accessRights]);
   useEffect(() => {
-    if (tab !== "evidence" || !accessRights?.reports || allLocalReports.length > 0) return;
+    if (!["evidence","chains"].includes(tab) || !accessRights?.reports || allLocalReports.length > 0) return;
     const controller = new AbortController();
     const startedAt = performance.now();
     fetch("/api/research-report-index", {
@@ -3212,6 +3090,7 @@ export default function PilotDashboard({
     if (!supplyEnabled || supplySnapshot || supplyError) return;
     if(!accessRights)return;
     if(!accessRights.research){setSupplyError(language==="zh"?"供应链图层需要 Research 授权，请查看账号中心。":"Supply-chain layers require Research access. See your account.");setSupplyLoading(false);return;}
+    setSupplyLoading(true);
     const controller = new AbortController();
     const startedAt = performance.now();
     fetch("/api/supply-chain-sites", { signal: controller.signal })
@@ -3276,22 +3155,32 @@ export default function PilotDashboard({
   useEffect(() => {
     if (!economyEnabled) return;
     const controller = new AbortController();
-    fetch(`/api/economics?indicator=${encodeURIComponent(economicIndicator)}`, {
+    let active=true;setEconomicLoading(true);setEconomicError('');setEconomicData([]);setEconomicSelected(null);
+    const timeout=window.setTimeout(()=>controller.abort(),15000);
+    fetch(`/api/economics?indicator=${encodeURIComponent(economicIndicator)}&year=${cursorDate.getUTCFullYear()}`, {
       signal: controller.signal,
     })
       .then(async (response) => {
         if (!response.ok) throw new Error("economic request failed");
         return response.json();
       })
-      .then((payload: { observations: EconomicObservation[] }) =>
-        setEconomicData(payload.observations ?? []),
-      )
-      .catch((error: Error) => {
-        if (error.name !== "AbortError") setEconomicData([]);
+      .then((payload: { observations: EconomicObservation[] }) => {
+        if(active){setEconomicData(payload.observations ?? []);if(!payload.observations?.length)setEconomicError('此指标/年份暂无有效观测 · No observations for this indicator/year');}
       })
-      .finally(() => setEconomicLoading(false));
-    return () => controller.abort();
-  }, [economicIndicator, economyEnabled]);
+      .catch((error: Error) => {
+        if(active){setEconomicData([]);setEconomicError(error.name==='AbortError'?'数据源超时，请重试 · Provider timed out; retry':'数据源暂不可用，请重试 · Provider unavailable; retry');}
+      })
+      .finally(() => {clearTimeout(timeout);if(active)setEconomicLoading(false)});
+    return () => {active=false;clearTimeout(timeout);controller.abort()};
+  }, [economicIndicator, economyEnabled, economicRetry, cursorDate.getUTCFullYear()]);
+  useEffect(()=>{
+    const map=mapRef.current;if(tab!=='map'||!map||!map.isStyleLoaded())return;
+    if(!map.getSource('research-chain'))map.addSource('research-chain',{type:'geojson',data:chainGeoJSON() as any});
+    if(!map.getLayer('research-chain-lines'))map.addLayer({id:'research-chain-lines',type:'line',source:'research-chain',filter:['==',['geometry-type'],'LineString'],paint:{'line-color':'#c4a5ff','line-width':3,'line-dasharray':[2,2]}});
+    if(!map.getLayer('research-chain-points'))map.addLayer({id:'research-chain-points',type:'circle',source:'research-chain',filter:['==',['geometry-type'],'Point'],paint:{'circle-radius':10,'circle-color':'#c4a5ff','circle-stroke-color':'#fff','circle-stroke-width':2}});
+    for(const id of ['research-chain-lines','research-chain-points'])map.setLayoutProperty(id,'visibility',chainEnabled?'visible':'none');
+    if(chainEnabled)map.fitBounds([[49,24],[58,34]],{padding:60,duration:600,maxZoom:5});
+  },[chainEnabled,mapReady,tab]);
   useEffect(() => {
     if (tab !== "map" || !mapContainer.current) return;
     let disposed = false;
@@ -3712,7 +3601,7 @@ export default function PilotDashboard({
     economicMarkersRef.current = economicData.map((item) => {
       const element = document.createElement("button");
       element.className = "economic-marker";
-      element.textContent = formatEconomic(item.value, item.unit);
+      element.textContent = `${formatEconomic(item.value, item.unit)} · ${item.date}`;
       element.setAttribute(
         "aria-label",
         `${item.country} ${formatEconomic(item.value, item.unit)}`,
@@ -3730,11 +3619,15 @@ export default function PilotDashboard({
   }, [economicData, economyEnabled, mapReady, tab]);
   useEffect(() => {
     const resize = () => mapRef.current?.resize();
+    const container=workspaceRef.current?.querySelector('.map-stage');
+    const observer=container?new ResizeObserver(resize):null;
+    if(container)observer?.observe(container);
     window.addEventListener("resize", resize);
     const timer = window.setTimeout(resize, 180);
     return () => {
       window.removeEventListener("resize", resize);
       window.clearTimeout(timer);
+      observer?.disconnect();
     };
   }, [mobilePanel, tab]);
 
@@ -4062,6 +3955,8 @@ export default function PilotDashboard({
   const layerControls = (
     <div className="layer-controls">
       <p>{t.layerHelp}</p>
+      <label className="toggle-row"><span>{language==='zh'?'证据链：霍尔木兹—氦气':'Evidence chain: Hormuz–helium'}</span><input type="checkbox" checked={chainEnabled} onChange={e=>setChainEnabled(e.target.checked)}/></label>
+      {chainEnabled&&<div className="chain-map-note"><b>{language==='zh'?'虚线 = 待验证传导；位置仅为区域示意':'Dashed lines = unverified links; regional reference points'}</b><p>{language==='zh'?'这是无事件日期的研究情景，不随事件时间轴伪装为已发生新闻。末端芯片影响尚未定位到企业。':'Undated research scenario, not timeline-filtered event news. No chipmaker impact location is established.'}</p>{hormuzChain.nodes.map((n,i)=><button key={n.id} onClick={()=>n.coordinates?mapRef.current?.flyTo({center:n.coordinates as [number,number],zoom:5}):changeTab('chains')}>{i+1}. {language==='zh'?n.zh:n.en}</button>)}<button onClick={()=>changeTab('chains')}>{language==='zh'?'展开证据与缺口':'Inspect evidence and gaps'}</button></div>}
       <label className="toggle-row">
         <span>
           <i className="layer-dot" />
@@ -4141,7 +4036,8 @@ export default function PilotDashboard({
             </option>
           ))}
         </select>
-        <small>{economicLoading ? t.loadingEconomy : t.economyHelp}</small>
+        <small>{economicLoading ? t.loadingEconomy : economicError || t.economyHelp}</small>
+        {economyEnabled&&<><p>{language==='zh'?`显示截至 ${cursorDate.getUTCFullYear()} 年的最近年度观测；不是周度数据或当时发布版本。各标记含观测年份。`:`Latest annual observations through ${cursorDate.getUTCFullYear()}, not weekly data or historical publication vintages. Each marker shows its year.`}</p><small>{economicData.length} {language==='zh'?'个国家有值；无值不代表零':'countries with values; missing is not zero'}</small><button type="button" onClick={()=>setEconomicRetry(x=>x+1)} disabled={economicLoading}>{language==='zh'?'重试加载指标':'Retry indicator'}</button></>}
       </div>
       <div className="mobile-time-control">
         <span>{t.filters}</span>
@@ -4347,7 +4243,7 @@ export default function PilotDashboard({
   );
 
   return (
-    <main className="app-shell" data-report-theme={reportTheme} data-active-tab={tab}>
+    <main ref={workspaceRef} className="app-shell" data-report-theme={reportTheme} data-active-tab={tab}>
       <header className="topbar">
         <a
           className="brand"
@@ -4372,6 +4268,7 @@ export default function PilotDashboard({
             ['intelligence',Newspaper,'情报市场','Intelligence market'],
             ['markets',Activity,'市场行情','Markets'],
             ['data',Database,'研究资料库','Research library'],
+            ['chains',Activity,'证据链推演','Evidence chains'],
             ['personal',BrainCircuit,'专属研究','Personal research'],
           ] as const).map(([item,Icon,zh,en]) => (
             <button
@@ -4384,6 +4281,7 @@ export default function PilotDashboard({
           ))}
         </nav>
         <div className="top-actions">
+          <button className="theme-toggle" type="button" aria-label={language==="zh"?"切换全局明暗主题":"Toggle workspace appearance"} title={language==="zh"?"切换明暗":"Toggle appearance"} onClick={()=>chooseReportTheme(reportTheme==="dark"?"light":"dark")}>{reportTheme==="dark"?<Sun size={17}/>:<Moon size={17}/>}<span>{language==="zh"?(reportTheme==="dark"?"浅色":"深色"):(reportTheme==="dark"?"Light":"Dark")}</span></button>
           <a className="home-return" href="/" target="_top">{language === "zh" ? "返回官网" : "Home"}</a>
           <a className="privacy-pill" href="/account" aria-label="Account center">
             <LockKeyhole size={13} />
@@ -4664,10 +4562,7 @@ export default function PilotDashboard({
         <section className="content-page evidence-page">
           <header className="research-workspace-toolbar">
             <div><span className="eyebrow">ORAKT RESEARCH</span><h1>{language === "zh" ? "研究工作台" : "Research workspace"}</h1></div>
-            <div className="report-theme-picker" role="group" aria-label={language === "zh" ? "报告明暗主题" : "Report appearance"}>
-              <button type="button" aria-pressed={reportTheme === "light"} onClick={() => chooseReportTheme("light")}>{language === "zh" ? "浅色阅读" : "Light"}</button>
-              <button type="button" aria-pressed={reportTheme === "dark"} onClick={() => chooseReportTheme("dark")}>{language === "zh" ? "深色阅读" : "Dark"}</button>
-            </div>
+            <p>{language==="zh"?"选择研究类型，筛选资料，再展开阅读与核验。":"Choose a research type, filter the library, then read and verify."}</p>
           </header>
           <div
             className="evidence-view-switch"
@@ -4712,14 +4607,13 @@ export default function PilotDashboard({
                 </small>
               </span>
             </button>
-            {([['entry', '建仓观察', 'Entry watchlist', '独立价格与证据筛选', 'Price and evidence gates'], ['crypto', '加密市场', 'Crypto markets', '行情与分析 · 预留', 'Market analysis · Reserved']] as const).map(([key, zh, en, subZh, subEn]) => <button type="button" role="tab" key={key} aria-selected={evidenceView === key} className={evidenceView === key ? "active" : ""} onClick={() => {changeTab("evidence");setEvidenceView(key);}}><Layers3 size={17}/><span><b>{language === "zh" ? zh : en}</b><small>{language === "zh" ? subZh : subEn}</small></span></button>)}
+            {([['entry', '建仓观察', 'Entry watchlist', '独立价格与证据筛选', 'Price and evidence gates'], ['crypto', '加密市场', 'Crypto markets', '现货报价与日 K 线', 'Spot quotes & daily candles']] as const).map(([key, zh, en, subZh, subEn]) => <button type="button" role="tab" key={key} aria-selected={evidenceView === key} className={evidenceView === key ? "active" : ""} onClick={() => {changeTab("evidence");setEvidenceView(key);}}><Layers3 size={17}/><span><b>{language === "zh" ? zh : en}</b><small>{language === "zh" ? subZh : subEn}</small></span></button>)}
             <button type="button" role="tab" aria-selected={tab==="sec"} className={tab==="sec"?"active":""} onClick={()=>{setEvidenceView("single");changeTab("sec");}}><ShieldCheck size={17}/><span><b>{language==="zh"?"SEC 证据审核":"SEC source review"}</b><small>{language==="zh"?"财报原文与证据核对":"Filings and evidence checks"}</small></span></button>
           </div>
           {tab === "evidence" && evidenceView === "crypto" && <MarketExpansion kind="crypto" language={language}/>}
           {evidenceView === "operations" && <button onClick={()=>changeTab('alpha')}>{language==='zh'?'历史补全已迁至 Alpha 因子专区':'Historical coverage has moved to Alpha Lab'}</button>}
-          {evidenceView === "single" && accessRights?.reports && <CompanyFinancialCharts language={language}/>}
-          {evidenceView === "single" && accessRights?.research && <DisclosureReviews language={language}/>}
-          {evidenceView === "cross" && accessRights?.research && <MacroEventReports language={language}/>}
+          {tab === "evidence" && evidenceView === "single" && accessRights?.research && <DisclosureReviews language={language}/>}
+
           {tab === "evidence" && evidenceView === "single" && (
             <>
           <section className="report-filter-bar">
@@ -4747,6 +4641,7 @@ export default function PilotDashboard({
                 </small>
               </b>
             </header>
+            <p className="watchlist-priority">{language==='zh'?`自选优先 · ${watchedTickers.length} 家公司`:`Watchlist first · ${watchedTickers.length} companies`} · <a href="/account">{language==='zh'?'管理自选':'Edit watchlist'}</a></p>
             <div className="report-filter-grid">
               <label>
                 <span>{language === "zh" ? "市场" : "Market"}</span>
@@ -4842,23 +4737,14 @@ export default function PilotDashboard({
                    ) : (
                      reportVersionOptions.map((item) => (
                        <option value={item.id} key={item.id}>
-                         {new Date(item.createdAt).toLocaleString(
-                           language === "zh" ? "zh-CN" : "en-CA",
-                           {
-                             year: "numeric",
-                             month: "2-digit",
-                             day: "2-digit",
-                             hour: "2-digit",
-                             minute: "2-digit",
-                           },
-                         )} · {item.ticker || item.companyName || "GLOBAL"} · #{item.localInquiryId ?? item.id}{item.historical ? ` · ${language==="zh"?"回溯":"Historical"} ${item.historical.asOf}` : ""}
+                         {(dateBasis==='generated'?item.createdAt:reportFilterDate(item,'evidence')||item.createdAt)?.slice(0,10)} · {item.ticker || item.companyName || "GLOBAL"} · #{item.localInquiryId ?? item.id}{item.historical ? ` · ${language==="zh"?"财务期末":"Period end"} ${item.historical.periodEnd}` : ""}
                        </option>
                      ))
                    )}
                  </select>
                  <small>
                    {language === "zh"
-                     ? `当前条件内共 ${reportVersionOptions.length} 份，可选择同一公司的不同生成时间。`
+                     ? `当前条件内共 ${reportVersionOptions.length} 份，可选择同一公司的不同研究期间和版本。`
                      : `${reportVersionOptions.length} matching reports; choose a specific generation time.`}
                  </small>
                </label>
@@ -5094,7 +4980,7 @@ export default function PilotDashboard({
                           : item.model.replace("ollama:", "")}
                       </span>
                       <time>
-                        {new Date(item.createdAt).toLocaleDateString(
+                        {new Date(item.historical?.periodEnd || item.dataCutoff || item.createdAt).toLocaleDateString(
                           language === "zh" ? "zh-CN" : "en-CA",
                         )}
                       </time>
@@ -5248,10 +5134,7 @@ export default function PilotDashboard({
                         <br />
                       </>
                     )}
-                    {report.model} ·{" "}
-                    {new Date(report.createdAt).toLocaleString(
-                      language === "zh" ? "zh-CN" : "en-CA",
-                    )}
+                    {language==='zh'?'研究期间':'Research period'} · {report.historical?.periodEnd || report.dataCutoff || report.createdAt?.slice(0,10)}
                     {report.dataCutoff
                       ? ` · ${language === "zh" ? "数据截止" : "data cutoff"} ${report.dataCutoff}`
                       : ""}
@@ -5294,10 +5177,11 @@ export default function PilotDashboard({
                   </em>
                 </section>
               )}
-              {report.historical && <details className="historical-report-note"><summary>{language==="zh"?"研究口径与版本记录":"Research scope & version history"} · {report.historical.periodEnd}</summary><p>{language==="zh"?"证据截止":"Evidence cutoff"}: {report.historical.asOf} · {language==="zh"?"本数据库报告不作为当时已发布的预测参与胜率统计。":"Database research is not counted as a prediction published at the historical date."}</p><ul>{report.historical.corrections.map((v:string,i:number)=><li key={i}>{v}</li>)}</ul></details>}
+              <details className="historical-report-note"><summary>{language==='zh'?'研究口径与版本记录':'Research scope & version history'}</summary><p>{report.model} · {language==='zh'?'实际生成':'Generated'}: {report.createdAt}</p>{report.historical&&<><p>{language==='zh'?'证据截止':'Evidence cutoff'}: {report.historical.asOf} · {language==='zh'?'数据库补建研究，不作为当时已发布的预测参与胜率统计。':'Reconstructed database research; not counted as a prediction published at the historical date.'}</p><ul>{(report.historical.corrections||[]).map((v:string,i:number)=><li key={i}>{v}</li>)}</ul></>}</details>
               {language==="en"&&!report.translations?.en&&!report.dossier&&<p role="status" className="orakt-boundary">The English body for this archived report is not available yet. The Chinese original is shown; changing the interface language does not constitute a translation.</p>}
               {report.researchCompletion&&<ResearchCompletion data={report.researchCompletion} language={language}/>}
               {report.peerStudy&&<PeerFactorStudy data={report.peerStudy} language={language}/>}
+              {report.ticker && accessRights?.reports && <Suspense fallback={<p role="status">{language==='zh'?'加载财务图表…':'Loading financial charts…'}</p>}><CompanyFinancialCharts key={report.id} ticker={report.ticker} asOf={report.historical?.asOf||report.createdAt?.slice(0,10)} periodEnd={report.historical?.periodEnd} language={language}/></Suspense>}
               {report.dossier&&<CompanyDossier dossier={report.dossier} language={language}/>}
               {!report.dossier&&report.financialSupplement&&<FinancialPeriodLedger ledger={report.financialSupplement.financialLedger} language={language}/>}
               {report.financialSupplement?.marketCoverage&&<ReportMarketCoverage items={report.financialSupplement.marketCoverage} language={language}/>}
@@ -5360,7 +5244,7 @@ export default function PilotDashboard({
               <section className="executive-summary">
                 <span>{t.executive}</span>
                 <h2>{report.verdict}</h2>
-                <p>{report.thesis}</p>
+                <p><ReadingText text={report.thesis}/></p>
               </section>
               {report.tradingScenario && (
                 <TradingScenarioPanel
@@ -5371,184 +5255,7 @@ export default function PilotDashboard({
               {report.canslim && (
                 <CanslimPanel scorecard={report.canslim} language={language} />
               )}
-              <section className="report-section">
-                <div className="section-heading">
-                  <div>
-                    <span>01</span>
-                    <h2>{t.chainTitle}</h2>
-                  </div>
-                  <small>{report.chain.length} nodes · evidence-linked</small>
-                </div>
-                <div className="report-chain">
-                  {report.chain.map((step, index) => (
-                    <div
-                      className={`report-node ${step.status}`}
-                      key={`${step.title}-${index}`}
-                    >
-                      <div className="node-top">
-                        <span>0{index + 1}</span>
-                        <b>{step.confidence}%</b>
-                      </div>
-                      <h3>{step.title}</h3>
-                      <p>{step.claim}</p>
-                      <footer>
-                        <span className={`state-${step.status}`}>
-                          {step.status === "verified" ? (
-                            <Check size={12} />
-                          ) : (
-                            <CircleAlert size={12} />
-                          )}{" "}
-                          {statusLabel(step.status)}
-                        </span>
-                        <small>{step.evidenceCount} evidence</small>
-                      </footer>
-                      {index < report.chain.length - 1 && (
-                        <ArrowRight className="report-arrow" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-              <div className="report-columns">
-                <section className="report-section">
-                  <div className="section-heading">
-                    <div>
-                      <span>02</span>
-                      <h2>{t.scoreTitle}</h2>
-                    </div>
-                  </div>
-                  <div className="score-breakdown">
-                    {report.historical && <p>{language==="zh"?"该回溯报告的评分是复审后的主观证据支持度，尚未建立校准权重模型；不提供虚构的评分分项或上涨概率。请逐项核对下方证据和反证。":"This historical report uses a subjective reviewed evidence score, not a calibrated probability model. No fabricated weighted components or price-rise probabilities are supplied."}</p>}
-                    {report.confidenceDetail && (
-                      <div className="confidence-method">
-                        <span>
-                          {language === "zh"
-                            ? "方向支持度计算"
-                            : "Directional support calculation"}
-                          <small>
-                            {language === "zh"
-                              ? "不是股价上涨概率"
-                              : "not a probability of price appreciation"}
-                          </small>
-                        </span>
-                        <b>{report.confidence}%</b>
-                        <p>
-                          {language === "zh"
-                            ? `证据链均值 ${report.confidenceDetail.rawChainScore}% · 数据门控上限 ${report.confidenceDetail.dataReadinessCap}% · 数据完备度 ${report.confidenceDetail.dataReadinessScore ?? "—"}%`
-                            : `Chain mean ${report.confidenceDetail.rawChainScore}% · data-gate cap ${report.confidenceDetail.dataReadinessCap}% · readiness ${report.confidenceDetail.dataReadinessScore ?? "—"}%`}
-                        </p>
-                        <p>
-                          {language === "zh"
-                            ? `已验证 ${report.confidenceDetail.verifiedSteps} · 部分支持 ${report.confidenceDetail.partiallySupportedSteps} · 未解决 ${report.confidenceDetail.unresolvedSteps} · 样本外盈利信号 ${report.confidenceDetail.validatedAlphaSupported ? "通过" : "未通过"}`
-                            : `${report.confidenceDetail.verifiedSteps} verified · ${report.confidenceDetail.partiallySupportedSteps} partial · ${report.confidenceDetail.unresolvedSteps} unresolved · out-of-sample alpha ${report.confidenceDetail.validatedAlphaSupported ? "supported" : "not supported"}`}
-                        </p>
-                        {(language === "zh"
-                          ? report.confidenceDetail.blockersZh
-                          : report.confidenceDetail.blockersEn
-                        ).map((item) => (
-                          <small key={item}>· {item}</small>
-                        ))}
-                      </div>
-                    )}
-                    {report.scores.map((score) => (
-                      <div key={score.label}>
-                        <span>
-                          {score.label}
-                          <small>权重 {score.weight}%</small>
-                        </span>
-                        <b>{score.score}%</b>
-                        <i>
-                          <span style={{ width: `${score.score}%` }} />
-                        </i>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-                <section className="report-section">
-                  <div className="section-heading">
-                    <div>
-                      <span>03</span>
-                      <h2>{t.alternatives}</h2>
-                    </div>
-                  </div>
-                  <ul className="report-list">
-                    {report.alternatives.map((item) => (
-                      <li key={item}>
-                        <CircleAlert size={14} />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              </div>
-              <section className="report-section">
-                <div className="section-heading">
-                  <div>
-                    <span>04</span>
-                    <h2>{t.evidenceLedger}</h2>
-                  </div>
-                  <small>{report.evidence.length} cited items</small>
-                </div>
-                <div className="evidence-ledger">
-                  {report.evidence.map((item, index) => (
-                    <article key={`${item.url}-${index}`}>
-                      <header>
-                        <span className={`evidence-role ${item.supports}`}>
-                          {item.supports}
-                        </span>
-                        <b>{item.reliability==null ? (language==="zh"?"未量化":"Not quantified") : `${item.reliability}%`}</b>
-                      </header>
-                      <h3>{item.title}</h3>
-                      <p>{item.claim}</p>
-                      <footer>
-                        <span>
-                          {item.publisher} · {item.observedAt}
-                        </span>
-                        {item.url && (
-                          <a href={item.url} target="_blank" rel="noreferrer">
-                            {t.source}
-                            <ExternalLink size={12} />
-                          </a>
-                        )}
-                      </footer>
-                    </article>
-                  ))}
-                </div>
-              </section>
-              <div className="report-columns">
-                <section className="report-section">
-                  <div className="section-heading">
-                    <div>
-                      <span>05</span>
-                      <h2>{t.limitations}</h2>
-                    </div>
-                  </div>
-                  <ul className="report-list warning-list">
-                    {report.limitations.map((item) => (
-                      <li key={item}>
-                        <CircleAlert size={14} />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-                <section className="report-section">
-                  <div className="section-heading">
-                    <div>
-                      <span>06</span>
-                      <h2>{t.nextData}</h2>
-                    </div>
-                  </div>
-                  <ol className="next-data-list">
-                    {report.nextData.map((item, index) => (
-                      <li key={item}>
-                        <b>{index + 1}</b>
-                        {item}
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              </div>
+              <ReportEvidence report={report} language={language}/>
             </article>
           )}
             </main>
@@ -5568,13 +5275,13 @@ export default function PilotDashboard({
                   </span>
                   <h1>
                     {language === "zh"
-                      ? "独立横向报告区"
-                      : "Independent comparison report area"}
+                      ? "跨公司与宏观研究"
+                      : "Cross-company & macro research"}
                   </h1>
                   <p>
                     {language === "zh"
-                      ? "这里仅展示跨公司、跨竞争对手的同口径数据，不再混入单公司研究正文。"
-                      : "This area contains only cross-company and peer comparisons, separate from individual company reports."}
+                      ? "宏观研究观察关键经济事件之后的市场变化；同行比较核对不同公司的财务与经营差异。请选择你要查验的问题。"
+                      : "Macro research studies markets after key economic events; peer comparisons examine financial and operating differences. Choose the question you want to explore."}
                   </p>
                 </div>
                 <b>
@@ -5582,6 +5289,15 @@ export default function PilotDashboard({
                   <small>{language === "zh" ? "份横向报告" : "comparisons"}</small>
                 </b>
               </header>
+              <div className="comparison-mode-tabs" aria-label={language==="zh"?"研究类型":"Research type"}>
+                <button type="button" aria-pressed={comparisonMode==="macro"} onClick={()=>setComparisonMode("macro")}>{language==="zh"?"宏观事件研究":"Macro events"}</button>
+                <button type="button" aria-pressed={comparisonMode==="peers"} onClick={()=>setComparisonMode("peers")}>{language==="zh"?"同行公司比较":"Company peers"}</button>
+              </div>
+              {comparisonMode==="macro" ? <>
+                <p className="comparison-explainer">{language==="zh"?"选取一次 FOMC 议息或非农发布，查看事件后 1、5、20 个交易日的市场反应。这是已有数据的事件研究，不会因点击而重新调用 AI。":"Choose an FOMC decision or payroll release to examine market reactions over 1, 5 and 20 trading days. This opens retained event studies; it does not start a new AI run."}</p>
+                <MacroEventReports language={language}/>
+              </> : <>
+              <p className="comparison-explainer">{language==="zh"?"先选择公司与报告日期，再点“确定并查看”。每份报告保留其当时可得的资料，不是实时行情；财季、币种或会计口径不同的项目不作直接排名。":"Choose a company and report date, then Apply and view. Reports retain the information available at their cutoff, not live prices. Different fiscal periods, currencies or accounting bases are not ranked as like-for-like."}</p>
               <div className="cross-report-picker">
                 <label>
                   <span>
@@ -5637,19 +5353,11 @@ export default function PilotDashboard({
                     : "10-Q, annual filings and product disclosures retain their own periods and availability dates."}
                 </span>
               </div>
-              {semiconductorComparison ? (
-                <SemiconductorComparisonPanel
-                  comparison={semiconductorComparison}
-                  language={language}
-                />
-              ) : (
-                <div className="report-library-state">
-                  <LoaderCircle className="spin" size={17} />
-                  {language === "zh"
-                    ? "正在读取行业横向报告…"
-                    : "Loading sector comparison…"}
-                </div>
-              )}
+              {semiconductorComparison && <details className="research-fold sector-reference">
+                <summary>{language==="zh"?"附：半导体行业财务对照":"Reference: semiconductor financial comparison"}</summary>
+                <p>{language==="zh"?"这是单独的行业资料，与上方选中的公司报告不同。请按表内数据日期和会计口径查验。":"This is a separate sector reference, not the selected company report. Check the dates and accounting bases shown in its tables."}</p>
+                <Suspense fallback={<p role="status">{language==="zh"?"读取行业对照…":"Loading sector comparison…"}</p>}><SemiconductorComparisonPanel comparison={semiconductorComparison} language={language}/></Suspense>
+              </details>}
               {comparisonDetailLoading ? (
                 <div className="report-detail-state">
                   <LoaderCircle className="spin" size={17} />
@@ -5686,6 +5394,7 @@ export default function PilotDashboard({
                     : "Choose a peer report, then select Apply and view."}
                 </div>
               )}
+              </>}
             </section>
           )}
         </section>
@@ -5799,11 +5508,12 @@ export default function PilotDashboard({
       )}
 
       {tab === "data" && <DataLibrary language={language}/>}
-      {tab === "portfolio" && <PortfolioLab language={language}/>}
+      {tab === "portfolio" && <Suspense fallback={<p role="status">{language==='zh'?'加载组合工具…':'Loading portfolio tools…'}</p>}><PortfolioLab language={language}/></Suspense>}
       {tab === "intelligence" && <IntelligenceMarket embedded displayLanguage={language}/>}
       {tab === "markets" && <MarketsWorkspace language={language}/>}
-      {tab === "alpha" && <AlphaLab language={language}/>}
+      {tab === "alpha" && <Suspense fallback={<p role="status">{language==='zh'?'加载 Alpha 工具…':'Loading Alpha tools…'}</p>}><AlphaLab language={language}/></Suspense>}
       {tab === "personal" && <PersonalResearch language={language}/>}
+      {tab === "chains" && <Suspense fallback={<p role="status">{language==='zh'?'加载证据链…':'Loading chains…'}</p>}><EvidenceChains language={language} catalog={allLocalReports} onMap={()=>{setChainEnabled(true);changeTab('map')}}/></Suspense>}
 
     </main>
   );

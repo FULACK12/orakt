@@ -1,6 +1,8 @@
 import { Layers3, ShieldCheck, Coins } from "lucide-react";
+import CryptoMarkets from './CryptoMarkets';
 
 export default function MarketExpansion({ kind, language }: { kind: "portfolio" | "crypto"; language: "zh" | "en" }) {
+  if(kind==='crypto')return <CryptoMarkets language={language}/>;
   const zh = language === "zh";
   const portfolio = kind === "portfolio";
   const items = portfolio

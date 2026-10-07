@@ -1,0 +1,7 @@
+"use client";
+import {useState} from 'react';
+import useWatchlist from './useWatchlist';
+export default function WatchlistEditor({language}:{language:'zh'|'en'}){
+ const zh=language==='zh',w=useWatchlist(),[selected,setSelected]=useState('');
+ return <section className="watchlist-editor"><h2>{zh?'我的公司自选':'My company watchlist'}</h2><p>{zh?'保存在当前账号，跨设备同步；报告与行情优先展示自选。不同登录方式仍为独立账号。':'Saved to this account across devices. Reports and markets prioritize your selections. Sign-in providers remain separate accounts.'}</p>{w.error&&<p role="alert">{w.error}</p>}{!w.ready?<p>{zh?'读取自选…':'Loading watchlist…'}</p>:<><div className="workspace-actions"><select aria-label={zh?'添加自选公司':'Add company'} value={selected} onChange={e=>setSelected(e.target.value)}><option value="">{zh?'选择公司':'Select company'}</option>{w.companies.filter(c=>!w.tickers.includes(c.ticker)).map(c=><option key={c.ticker} value={c.ticker}>{c.ticker} · {c.name}</option>)}</select><button disabled={!selected||w.busy||w.tickers.length>=50} onClick={async()=>{if(await w.save([...w.tickers,selected]))setSelected('')}}>{zh?'加入自选':'Add'}</button></div><ul className="watchlist-tags">{w.tickers.map(t=><li key={t}><span>{t}</span><button disabled={w.busy} aria-label={(zh?'移除 ':'Remove ')+t} onClick={()=>w.save(w.tickers.filter(v=>v!==t))}>×</button></li>)}</ul><small>{w.tickers.length}/50 · {zh?'仅改变展示排序，不增加套餐权限。':'Ordering preference only; does not change access rights.'}</small></>}</section>;
+}

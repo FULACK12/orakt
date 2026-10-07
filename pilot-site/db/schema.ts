@@ -1,4 +1,9 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+export const memberWatchlists=sqliteTable('member_watchlists',{
+ memberId:text('member_id').primaryKey().references(()=>memberAccounts.id),
+ tickers:text('tickers').notNull().default('[]'),
+ updatedAt:integer('updated_at').notNull(),
+});
 export const intelligenceItems=sqliteTable('intelligence_items',{
  id:text('id').primaryKey(),authorId:text('author_id').notNull(),kind:text('kind').notNull(),payload:text('payload').notNull(),contentHash:text('content_hash').notNull(),assetKey:text('asset_key'),state:text('state').notNull().default('pending'),verdict:text('verdict').notNull().default('unresolved'),revision:integer('revision').notNull().default(0),headHash:text('head_hash').notNull(),createdAt:integer('created_at').notNull(),
 },t=>[uniqueIndex('idx_intelligence_content').on(t.contentHash),index('idx_intelligence_author').on(t.authorId,t.createdAt)]);

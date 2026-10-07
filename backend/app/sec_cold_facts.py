@@ -3,7 +3,8 @@ import json
 import sqlite3
 
 def cold_facts_for_filing(cold_root, ticker, accession, filed_at, period_end):
-    candidates=sorted((cold_root/'raw/sec/bulk').glob('*/import-ledger.sqlite3'),reverse=True)
+    candidates=list((cold_root/'raw/sec/live').glob('*/import-ledger.sqlite3'))+list((cold_root/'raw/sec/bulk').glob('*/import-ledger.sqlite3'))
+    candidates.sort(key=lambda p:p.stat().st_mtime,reverse=True)
     for path in candidates:
         with sqlite3.connect(path.resolve().as_uri()+'?mode=ro',uri=True) as db:
             done=db.execute("SELECT state FROM issuers WHERE ticker=?",(ticker,)).fetchone()

@@ -29,6 +29,14 @@ def load_frozen_packet(source_path, cold_root):
         raise ValueError('Archived filing hash mismatch')
     if build_ledger(packet) != packet['financial_ledger']:
         raise ValueError('Frozen ledger no longer reproduces; review the evidence revision separately')
+    if packet.get('verified_cash_source'):
+        from app.dossier_cash_attachment import validate_attachment
+        validate_attachment(packet,filing.read_bytes().decode('utf-8'))
+    if packet.get('cash_context_ids'):
+        from app.dossier_cash_context import validate_context
+        from app.historical_earnings_report import FilingText
+        parser=FilingText();parser.feed(filing.read_bytes().decode('utf-8'))
+        validate_context(packet,parser.clean())
     return original, raw
 
 

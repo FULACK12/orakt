@@ -11,6 +11,7 @@ export const footerGroups=[
   {href:"/lab",zh:"因子实验室",en:"Factor lab"},
  ]},
  {zh:"学习与方法",en:"Learn & understand",links:[
+  {href:"/knowledge",zh:"ORAKT 知识词条",en:"ORAKT knowledge index"},
   {href:"/lab#alpha",zh:"什么是 Alpha",en:"What is Alpha?"},
   {href:"/lab#validation",zh:"因子如何验证",en:"How factors are tested"},
   {href:"/research#evidence",zh:"理解证据链",en:"Understanding evidence"},

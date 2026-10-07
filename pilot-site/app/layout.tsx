@@ -3,6 +3,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import "./research-workspace.css";
 import "./financial-labs.css";
+import "./knowledge.css";
+import './report-reading.css';
+import './workspace-layout.css';
+import './workspace-v89.css';
 import WalletSessionGuard from "./WalletSessionGuard";
 
 export const metadata: Metadata = {

@@ -1249,10 +1249,23 @@ def dump_research_report_assets(
         dossier_path = REPORT_DETAIL_OUTPUT.parent/'company-dossiers'/archived.name
         review_path = REPORT_DETAIL_OUTPUT.parent/'dossier-reviews'/archived.name
         dossier = json.loads(dossier_path.read_text(encoding='utf-8'))
+        consolidated = dossier.get('version') == 'consolidated-site/v1'
+        receipt = json.loads(review_path.read_text(encoding='utf-8')) if consolidated else {}
+        valid_review = (
+            dossier.get('review', {}).get('state') == 'assistant_reviewed_research_only'
+            and receipt.get('version') == 'consolidated-publication/v1'
+            and receipt.get('siteDossierSha256') == hashlib.sha256(dossier_path.read_bytes()).hexdigest()
+            and receipt.get('reviewedDossierSha256') == dossier.get('provenance', {}).get('reviewedDossierHash')
+            and receipt.get('wholeReportAudit') == dossier.get('wholeReportAudit')
+            and dossier.get('eligibleForPredictiveBacktest') is False
+            and dossier.get('validatedAlpha') is False
+        ) if consolidated else (
+            dossier.get('review', {}).get('state') == 'assistant_reviewed'
+            and dossier['review'].get('assistantRevisionHash') == hashlib.sha256(review_path.read_bytes()).hexdigest()
+        )
         if (report.get('id') != archived.stem or dossier.get('ticker') != report.get('ticker')
                 or dossier.get('asOf') != report.get('dataCutoff')
-                or dossier.get('review', {}).get('state') != 'assistant_reviewed'
-                or dossier['review'].get('assistantRevisionHash') != hashlib.sha256(review_path.read_bytes()).hexdigest()):
+                or not valid_review):
             raise ValueError('Cannot preserve an unverified dossier archive')
         if report['id'] not in ids:
             reports.append(report)

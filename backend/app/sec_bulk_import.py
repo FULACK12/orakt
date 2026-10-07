@@ -38,6 +38,22 @@ def read_member(archive, name):
     return json.loads(archive.read(info))
 
 
+def optional_facts(archive,name):
+    # Missing archive member is a coverage gap, not an empty set of facts.
+    # Parsing/CRC errors must still fail; never hide them as unavailable data.
+    try:archive.getinfo(name)
+    except KeyError:return None
+    return read_member(archive,name)
+
+
+def already_processed(prior,identities):
+    if not prior:return False
+    if prior[0]=='complete':return True
+    if prior[0]!='source_gap':return False
+    result=json.loads(prior[1])
+    return result.get('archives')==identities
+
+
 def insert_absent(session, model, rows):
     count = 0
     for start in range(0, len(rows), 500):
@@ -68,8 +84,8 @@ def run(root, limit):
     with get_session_factory()() as session, zipfile.ZipFile(root/'submissions.zip') as submissions, zipfile.ZipFile(root/'companyfacts.zip') as facts:
         profiles = list(session.scalars(select(CompanyProfile).order_by(CompanyProfile.ticker)))
         for profile in profiles:
-            prior = ledger.execute('SELECT state FROM issuers WHERE cik=?', (profile.cik,)).fetchone()
-            if prior and prior[0] == 'complete':
+            prior = ledger.execute('SELECT state,result FROM issuers WHERE cik=?', (profile.cik,)).fetchone()
+            if already_processed(prior,identities):
                 continue
             if len(summary['companies']) >= limit or (root / 'pause-import').exists():
                 summary['state'] = 'bounded_batch_complete' if len(summary['companies']) >= limit else 'safely_paused'
@@ -81,7 +97,8 @@ def run(root, limit):
                 filings = _submission_rows(profile, payload)
                 for name in _historical_submission_files(payload):
                     filings.extend(_submission_rows_from_columns(profile, read_member(submissions, name)))
-                observations = _company_fact_rows(profile, read_member(facts, f'CIK{profile.cik}.json'), retain_period_variants=True)
+                fact_payload=optional_facts(facts, f'CIK{profile.cik}.json')
+                observations = _company_fact_rows(profile, fact_payload, retain_period_variants=True) if fact_payload is not None else []
                 for row in observations:
                     raw = json.dumps(row, sort_keys=True, default=str)
                     digest = hashlib.sha256(raw.encode()).hexdigest()
@@ -93,7 +110,9 @@ def run(root, limit):
                     newFilings=insert_absent(session, CompanyFiling, list({r['accession_number']:r for r in filings}.values())),
                     newUnambiguousFacts=insert_absent(session, CompanyFinancialFact, safe))
                 session.commit()
-                result['state']='complete'
+                result['state']='complete' if fact_payload is not None else 'source_gap'
+                if fact_payload is None:
+                    result.update(reason='companyfacts_member_missing',missingMember=f'CIK{profile.cik}.json',archives=identities,filingsRetained=True,factsComplete=False)
             except Exception as exc:
                 session.rollback(); result.update(state='failed', errorType=type(exc).__name__)
             ledger.execute('INSERT OR REPLACE INTO issuers VALUES(?,?,?,?)', (profile.cik,profile.ticker,result['state'],json.dumps(result)))
@@ -103,6 +122,9 @@ def run(root, limit):
             summary['state']='known_universe_import_complete'
     summary['retainedCoreObservations'] = ledger.execute('SELECT count(*) FROM observations').fetchone()[0]
     summary['completedIssuers'] = ledger.execute("SELECT count(*) FROM issuers WHERE state='complete'").fetchone()[0]
+    summary['sourceGapIssuers'] = ledger.execute("SELECT count(*) FROM issuers WHERE state='source_gap'").fetchone()[0]
+    if summary['state']=='known_universe_import_complete' and summary['sourceGapIssuers']:
+        summary['state']='known_universe_processed_with_source_gaps'
     progress(); ledger.close()
 
 

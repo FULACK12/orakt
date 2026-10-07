@@ -47,6 +47,24 @@ const paid=await memberFor(env,{provider:"google",subject:"test-google-subject",
 fixture.sql.prepare("UPDATE member_accounts SET plan='research',grant_kind='complimentary',expires_at=? WHERE id=?").run(Date.now()+86400000,paid.row.id);
 const ctx = { waitUntil() {}, passThroughOnException() {} };
 
+test('public knowledge is server rendered and private data is excluded from indexing',async()=>{
+ const app=await worker();
+ const index=await app.fetch(new Request('http://localhost/knowledge'),{},ctx);assert.equal(index.status,200);assert.match(await index.text(),/financial-statements/);
+ const article=await app.fetch(new Request('http://localhost/knowledge/hormuz-helium'),{},ctx);assert.equal(article.status,200);const html=await article.text();assert.match(html,/USGS/);assert.match(html,/canonical/);assert.match(html,/低温容器/);
+ const sitemap=await (await app.fetch(new Request('http://localhost/sitemap.xml'),{},ctx)).text();assert.match(sitemap,/https:\/\/orakt.com\/knowledge\/alpha/);assert.doesNotMatch(sitemap,/\/api\/|\/platform/);
+ const robots=await (await app.fetch(new Request('http://localhost/robots.txt'),{},ctx)).text();assert.match(robots,/Disallow: \/api\//);
+ const privateResult=await app.fetch(new Request('http://localhost/api/research-report?id=test'),{},ctx);assert.equal(privateResult.status,401);assert.match(privateResult.headers.get('x-robots-tag'),/noindex/);
+ assert.equal((await app.fetch(new Request('http://localhost/knowledge/unknown-entry'),{},ctx)).status,404);
+});
+
+test('economic layers select newest valid annual values independent of upstream order',async()=>{
+ const app=await worker();const saved=globalThis.fetch;
+ globalThis.fetch=async()=>Response.json([{},[{country:{value:'United States'},countryiso3code:'USA',date:'2020',value:0},{country:{value:'United States'},countryiso3code:'USA',date:'2022',value:3},{country:{value:'United States'},countryiso3code:'USA',date:'2026',value:10},{country:{value:'China'},countryiso3code:'CHN',date:'2021',value:null}]]);
+ try{const r=await app.fetch(authorizedRequest('/api/economics?indicator=FP.CPI.TOTL.ZG&year=2024'),env,ctx);assert.equal(r.status,200);const d=await r.json();assert.equal(d.observations.length,1);assert.equal(d.observations[0].date,'2022');assert.equal(d.observations[0].value,3);assert.equal(d.coverage.countriesAvailable,1);
+ assert.equal((await app.fetch(authorizedRequest('/api/economics?year=bad'),env,ctx)).status,422);
+ }finally{globalThis.fetch=saved}
+});
+
 test('new research datasets require access and remain explicitly exploratory',async()=>{
  const app=await worker();
  for(const path of ['/api/alpha-lab','/api/macro-event-reports','/api/disclosure-reviews','/api/lab-expansion','/api/company-charts']){
@@ -60,7 +78,7 @@ test('new research datasets require access and remain explicitly exploratory',as
  assert.ok(charts.company.metrics.revenue.length);assert.equal(charts.company.consensus,null);
  const unknown=await (await app.fetch(authorizedRequest('/api/company-charts?ticker=__proto__'),env,ctx)).json();assert.equal(unknown.company,null);
  const labs=await (await app.fetch(authorizedRequest('/api/lab-expansion'),env,ctx)).json();
- assert.equal(labs.factors.length,6);assert.ok(labs.factors.every(f=>!f.validatedAlpha));assert.equal(labs.baskets.length,3);
+ assert.equal(labs.factors.length,6);assert.ok(labs.factors.every(f=>!f.validatedAlpha));assert.equal(labs.baskets.length,6);
  assert.equal(alpha.experiments.length,3);
  for(const e of alpha.experiments){assert.equal(e.validatedAlpha,false);assert.ok(e.points.length>100);assert.ok(e.points.every(p=>Number.isFinite(p.strategy)&&Number.isFinite(p.market)&&Number.isFinite(p.industry)));}
  const reviews=await (await app.fetch(authorizedRequest('/api/disclosure-reviews'),env,ctx)).json();
@@ -87,7 +105,8 @@ test("research workspace exposes appearance controls and five separate modules",
   const html = await response.text();
   assert.match(html,/正在核对账号权限与报告目录/);
   const source=await readFile(new URL("../app/PilotDashboard.tsx",import.meta.url),"utf8");
-  for (const label of ["浅色阅读", "深色阅读", "单公司报告", "宏观事件横向报告", "建仓观察", "组合实验室", "加密市场", "Alpha 因子", "专属研究"]) assert.ok(source.includes(label));
+  for (const label of ["切换全局明暗主题", "单公司报告", "宏观事件横向报告", "建仓观察", "组合实验室", "加密市场", "Alpha 因子", "专属研究"]) assert.ok(source.includes(label));
+  assert.match(html,/class="theme-toggle"/);assert.doesNotMatch(html,/class="report-theme-picker"/);
   assert.match(html,/data-report-theme="light"/);
   assert.doesNotMatch(html,/class="entry-watchlist"/); // not mixed into the default report panel
 });
@@ -113,6 +132,17 @@ function authorizedRequest(path = "/", init = {}) {
     },
   });
 }
+
+test('new historical dossier is privately served with nine bilingual chapters and unestimated confidence',async()=>{
+ const app=await worker(),path='/api/research-report?id=dossier-NVDA-20090820-97979407';
+ assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
+ const response=await app.fetch(authorizedRequest(path),env,ctx);assert.equal(response.status,200);
+ const {report}=await response.json();assert.equal(report.confidence,null);assert.equal(report.dossier.chapters.length,9);
+ assert.equal(report.dossier.review.state,'assistant_reviewed_research_only');assert.equal(report.dossier.validatedAlpha,false);
+ assert.match(report.translations.en.question,/Nine-chapter/);assert.equal(report.dossier.cashBridge.residual,'0');
+ assert.ok(report.dossier.chapters.every(c=>c.analysis.zh&&c.analysis.en));
+ assert.match(response.headers.get('x-robots-tag'),/noindex/);
+});
 
 test("serves the official homepage publicly without exposing the pilot", async () => {
   const app = await worker();
@@ -721,3 +751,33 @@ test("navigation links to new pages while product and account data remain protec
  assert.equal((await app.fetch(new Request("http://localhost/api/research-report?id=local-566"),env,ctx)).status,401);
 });
 import {readFileSync} from 'node:fs';
+test('research levels are enforced by server APIs, including direct detail URLs and range limits',async()=>{
+ const app=await worker(),get=async p=>app.fetch(authorizedRequest(p),env,ctx);
+ try{
+  fixture.sql.prepare("UPDATE member_accounts SET plan='explorer',grant_kind='free',expires_at=NULL WHERE id=?").run(paid.row.id);
+  assert.equal((await (await get('/api/alpha-lab')).json()).experiments.length,0);
+  assert.equal((await (await get('/api/portfolio-catalog')).json()).recipes.filter(r=>!r.locked).length,0);
+  assert.equal((await get('/api/portfolio-study?recipe=tech-core&start=2026-01-01&end=2026-09-22')).status,403);
+  fixture.sql.prepare("UPDATE member_accounts SET plan='signal',grant_kind='complimentary',expires_at=? WHERE id=?").run(Date.now()+86400000,paid.row.id);
+  const paths=await (await get('/api/evidence-chain-index')).json();assert.equal(paths.chains.length,12);
+  assert.equal((await get('/api/evidence-chain?id='+paths.chains[0].id)).status,200);
+  assert.equal((await get('/api/evidence-chain?id=unknown')).status,403);
+  assert.equal((await (await get('/api/alpha-lab')).json()).experiments.length,1);
+  assert.equal((await get('/api/portfolio-study?recipe=china-us&start=2026-01-01&end=2026-09-22&tier=research')).status,403);
+  assert.equal((await get('/api/portfolio-study?recipe=tech-core&start=2024-01-01&end=2026-09-22')).status,403);
+  assert.equal((await get('/api/portfolio-study?recipe=tech-core&start=2026-01-01&end=2026-09-22')).status,200);
+  fixture.sql.prepare("UPDATE member_accounts SET plan='research' WHERE id=?").run(paid.row.id);
+  assert.equal((await get('/api/portfolio-study?recipe=china-us&start=2025-01-01&end=2026-09-22')).status,200);
+  assert.equal((await (await get('/api/alpha-lab')).json()).experiments.length,3);
+ }finally{fixture.sql.prepare("UPDATE member_accounts SET plan='research',grant_kind='complimentary',expires_at=? WHERE id=?").run(Date.now()+86400000,paid.row.id);}
+});
+test('new workspace APIs enforce account and plan boundaries',async()=>{
+ const app=await worker();
+ for(const path of ['/api/account/watchlist','/api/crypto-market','/api/evidence-chain-index'])assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
+ const save=await app.fetch(authorizedRequest('/api/account/watchlist',{method:'PUT',headers:{Origin:'http://localhost','Content-Type':'application/json','X-ORAKT-Preferences':'watchlist'},body:JSON.stringify({tickers:['AAPL','NVDA']})}),env,ctx);
+ assert.equal(save.status,200);assert.deepEqual((await save.json()).tickers,['AAPL','NVDA']);
+ const index=await (await app.fetch(authorizedRequest('/api/evidence-chain-index'),env,ctx)).json();assert.ok(index.chains.length>0);assert.ok(index.chains.every(c=>c.nodes.length>0));assert.ok(!index.chains.find(c=>c.id==='dossier-NVDA-20090820-97979407'));assert.doesNotMatch(JSON.stringify(index),/evidenceGaps|financialLedger/);
+ const basic=new Request('http://localhost/api/lab-expansion',{headers:{'oai-authenticated-user-id':'explorer-fixture','oai-authenticated-user-email':'explorer@example.invalid'}});
+ const labs=await app.fetch(basic,env,ctx);assert.equal(labs.status,200);const body=await labs.json();assert.equal(body.factors.length,0);assert.equal(body.baskets.length,0);
+ const preview=await app.fetch(new Request('http://localhost/api/evidence-chain-index',{headers:basic.headers}),env,ctx);assert.equal(preview.status,200);assert.deepEqual((await preview.json()).chains,[]);
+});

@@ -1,0 +1,9 @@
+"use client";
+export function ReadingText({text}:{text?:string}){
+ if(!text)return null;
+ return <>{text.split(/(〔(?:证据|Ref) \d+(?: · (?:证据|Ref) \d+)*〕)/g).map((part,i)=>/^〔(?:证据|Ref) /.test(part)?<sup className="reading-citation" key={i}>{part.slice(1,-1).split(' · ').map((label,j)=>{const n=label.match(/\d+/)?.[0];return <a key={j} href={'#reading-source-'+n} onClick={e=>{const target=document.getElementById('reading-source-'+n);if(!target)return;e.preventDefault();let p:HTMLElement|null=target;while(p){if(p instanceof HTMLDetailsElement)p.open=true;p=p.parentElement}target.scrollIntoView({behavior:'smooth',block:'start'});target.focus({preventScroll:true});}}>{label}</a>})}</sup>:part)}</>;
+}
+export default function ReadingReferences({references,language}:{references:any[];language:'zh'|'en'}){
+ const zh=language==='zh';if(!references?.length)return null;
+ return <details className="research-fold reading-reference-list"><summary>{zh?'正文引用与原文':'Text citations & original passages'} <small>{references.length}</small></summary><p>{zh?'正文中的证据编号对应以下原文。技术编号仅供追溯，不是置信度。':'Numbered citations map to the original passages below. Technical IDs are traceability records, not confidence scores.'}</p>{references.map(r=><details key={r.id} id={'reading-source-'+r.number} className="source-reference" tabIndex={-1}><summary>{zh?'证据':'Ref'} {r.number} · {zh?'查看原文':'Original passage'}</summary>{r.quote?<blockquote lang="en">{r.quote}</blockquote>:<p>{zh?'当前发布版本未附此段原文，需回到原报告来源核对。':'This published revision does not retain the passage text. Consult the original report source.'}</p>}{r.url&&<a href={r.url} target="_blank" rel="noreferrer">{zh?'打开原始文件':'Open original filing'} ↗</a>}<details className="technical-reference"><summary>{zh?'技术编号':'Technical reference'}</summary><code>{r.id}</code></details></details>)}</details>;
+}

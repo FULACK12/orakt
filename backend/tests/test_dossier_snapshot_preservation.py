@@ -30,3 +30,24 @@ def test_snapshot_keeps_file_backed_history_or_stops_before_deleting(tmp_path,ta
         assert reports==[report] and (folder/name).exists()
         item=exports['research-report-index.json']['reports'][0]
         assert item['historical']==report['historical'] and item['questionEn']=='English title'
+
+
+@pytest.mark.parametrize('tamper',[False,True])
+def test_consolidated_archive_survives_snapshot_refresh(tmp_path,tamper):
+    module=exporter();base=tmp_path/'private-data';folder=base/'research-reports';folder.mkdir(parents=True)
+    for name in ['company-dossiers','dossier-reviews']:(base/name).mkdir()
+    name='dossier-NVDA-20090820-97979407.json'
+    source=Path(__file__).resolve().parents[2]/'pilot-site/private-data'
+    for namepart in ['research-reports','company-dossiers','dossier-reviews']:
+        (base/namepart/name).write_bytes((source/namepart/name).read_bytes())
+    if tamper:
+        path=base/'company-dossiers'/name
+        d=json.loads(path.read_text(encoding='utf-8'));d['validatedAlpha']=True
+        path.write_text(json.dumps(d),encoding='utf-8')
+    module.REPORT_DETAIL_OUTPUT=folder;module.dump=lambda *a:None
+    if tamper:
+        with pytest.raises(ValueError,match='unverified'):module.dump_research_report_assets([],generated_at='now')
+        assert (folder/name).exists()
+    else:
+        reports=[];module.dump_research_report_assets(reports,generated_at='now')
+        assert len(reports)==1 and reports[0]['ticker']=='NVDA'

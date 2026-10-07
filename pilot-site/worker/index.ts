@@ -1,3 +1,6 @@
+import {workspaceAccess,visibleAlpha,visibleChains} from './research-tiers.mjs';
+import {portfolioCatalog,portfolioStudy} from './portfolio-studies.mjs';
+import packedPortfolioPrices from '../generated/private-portfolio-prices.mjs';
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
@@ -8,6 +11,7 @@ import {createHmac} from "node:crypto";
 import {gunzipSync} from "node:zlib";
 import {Buffer} from "node:buffer";
 import privateReports from "../generated/private-reports.mjs";
+import chainIndex from '../generated/private-chain-index.mjs';
 import {memberFor,publicMember,memberAdminResponse} from "./membership.mjs";
 import {publicationResponse} from "./publication.mjs";
 import {newsPublicationResponse} from "./news-publication.mjs";
@@ -29,6 +33,10 @@ import semiconductorComparisonSnapshot from "../snapshot/semiconductor-compariso
 import snapshotManifest from "../snapshot/snapshot-manifest.json";
 import secEvidenceSnapshot from "../snapshot/sec-evidence.json";
 import supplyChainSitesSnapshot from "../snapshot/supply-chain-sites.json";
+import {articles} from '../app/knowledge/articles';
+import {watchlistResponse} from './watchlist.mjs';
+import {cryptoMarketResponse} from './crypto-market.mjs';
+import {visibleLab} from './lab-access.mjs';
 
 const researchReportIds = new Set(
   researchReportIndexSnapshot.reports.map((report) => report.id),
@@ -71,7 +79,12 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/app-version" && request.method === "GET") {
-      return publicApiResponse(jsonResponse({version: "82"}));
+      return publicApiResponse(jsonResponse({version: "89"}));
+    }
+    if(['GET','HEAD'].includes(request.method)&&url.pathname==='/robots.txt')return new Response(request.method==='HEAD'?null:'User-agent: *\nAllow: /knowledge\nDisallow: /api/\nDisallow: /platform\nDisallow: /account\nDisallow: /admin/\nDisallow: /snapshot/\nDisallow: /access\nSitemap: https://orakt.com/sitemap.xml\n',{headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'public, max-age=3600'}});
+    if(['GET','HEAD'].includes(request.method)&&url.pathname==='/sitemap.xml'){
+      const paths=['/','/knowledge','/company','/research','/lab',...articles.map(a=>'/knowledge/'+a.slug)];
+      return new Response(request.method==='HEAD'?null:'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+paths.map(p=>'<url><loc>https://orakt.com'+p+'</loc></url>').join('')+'</urlset>',{headers:{'Content-Type':'application/xml; charset=utf-8','Cache-Control':'public, max-age=3600'}});
     }
     if (["/api/auth/local/config", "/api/auth/local/challenge", "/api/auth/local/register", "/api/auth/local/login", "/api/auth/local/recover"].includes(url.pathname)) return publicApiResponse(await localAuthResponse(request,env));
     if (["/api/auth/google/config", "/api/auth/google/challenge", "/api/auth/google/verify"].includes(url.pathname)) {
@@ -127,12 +140,21 @@ const worker = {
     }
 
     if(member.access.status!=="active")return protectedResponse(jsonResponse({error:"account_suspended"},403));
+    if(url.pathname==='/api/account/watchlist')return protectedResponse(await watchlistResponse(request,env,member,equityReportCatalog.companies));
+    if(url.pathname==='/api/crypto-market')return protectedResponse(await cryptoMarketResponse(request));
+    if(url.pathname==='/api/workspace-access'&&request.method==='GET')return protectedResponse(jsonResponse(workspaceAccess(member.access)));
+    if(url.pathname==='/api/evidence-chain-index'&&request.method==='GET')return protectedResponse(jsonResponse(visibleChains(chainIndex,member.access)));
+    if(['/api/portfolio-catalog','/api/portfolio-study'].includes(url.pathname)&&request.method==='GET'){
+      const prices=JSON.parse(gunzipSync(Buffer.from(packedPortfolioPrices,'base64')).toString('utf8'));
+      try{return protectedResponse(jsonResponse(url.pathname==='/api/portfolio-catalog'?portfolioCatalog(prices,member.access):portfolioStudy(prices,member.access,{recipe:url.searchParams.get('recipe'),start:url.searchParams.get('start'),end:url.searchParams.get('end')})));}
+      catch(e){return protectedResponse(jsonResponse({error:(e as Error).message},(e as any).status||400));}
+    }
     if(url.pathname==='/api/intelligence'||url.pathname==='/api/intelligence/asset')return protectedResponse(await intelligenceResponse(request,env,member));
     if(url.pathname==="/api/news-publication")return protectedResponse(await newsPublicationResponse(request,env,member));
     if(url.pathname==="/api/publication/requests")return protectedResponse(await publicationResponse(request,env,member,researchOperations.provenance));
     if(url.pathname==="/api/publication/status"&&request.method==="GET")return protectedResponse(member.access.permissions.reports?jsonResponse({generatedAt:researchOperations.generatedAt,records:researchOperations.provenance,canSubmit:member.access.permissions.manageUsers,broadcastEnabled:false}):jsonResponse({error:"plan_required"},403));
-    if(url.pathname==="/api/alpha-lab"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(alphaLab):jsonResponse({error:"plan_required"},403));
-    if(url.pathname==="/api/lab-expansion"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(JSON.parse(gunzipSync(Buffer.from(labExpansion,'base64')).toString('utf8'))):jsonResponse({error:"plan_required"},403));
+    if(url.pathname==="/api/alpha-lab"&&request.method==="GET")return protectedResponse(jsonResponse(visibleAlpha(alphaLab,member.access)));
+    if(url.pathname==="/api/lab-expansion"&&request.method==="GET")return protectedResponse(jsonResponse(visibleLab(JSON.parse(gunzipSync(Buffer.from(labExpansion,'base64')).toString('utf8')),member.access)));
     if(url.pathname==='/api/company-charts'&&request.method==='GET'){
       if(!member.access.permissions.reports)return protectedResponse(jsonResponse({error:'plan_required'},403));
       const ticker=url.searchParams.get('ticker');
@@ -141,8 +163,8 @@ const worker = {
     }
     if(url.pathname==="/api/macro-event-reports"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(macroEvents):jsonResponse({error:"plan_required"},403));
     if(url.pathname==="/api/disclosure-reviews"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse(disclosureReviews):jsonResponse({error:"plan_required"},403));
-    if(url.pathname==="/api/research-operations"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse({...researchOperations,usHistoryCoverage,secBulkImport}):jsonResponse({error:"plan_required"},403));
-    const reportRoutes=new Set(["/api/research-report","/api/sec-evidence"]);
+    if(url.pathname==="/api/research-operations"&&request.method==="GET")return protectedResponse(member.access.permissions.research?jsonResponse({...researchOperations,publishedReports:researchReportIndexSnapshot.reports.length,publishedHistoricalReports:researchReportIndexSnapshot.reports.filter((r:any)=>r.historical).length,usHistoryCoverage,secBulkImport}):jsonResponse({error:"plan_required"},403));
+    const reportRoutes=new Set(["/api/research-report","/api/evidence-chain","/api/sec-evidence"]);
     const researchRoutes=new Set(["/api/entry-backtest-status","/api/semiconductor-comparison","/api/supply-chain-sites"]);
     if((reportRoutes.has(url.pathname)&&!member.access.permissions.reports)||(researchRoutes.has(url.pathname)&&!member.access.permissions.research))return protectedResponse(jsonResponse({error:"plan_required",requiredPlan:researchRoutes.has(url.pathname)?"research":"signal"},403));
 
@@ -181,8 +203,9 @@ const worker = {
       return protectedResponse(jsonResponse(member.access.permissions.reports?researchReportIndexSnapshot:freeReportCatalog()));
     }
 
-    if (url.pathname === "/api/research-report" && request.method === "GET") {
+    if (["/api/research-report","/api/evidence-chain"].includes(url.pathname) && request.method === "GET") {
       const reportId = url.searchParams.get("id") ?? "";
+      if(url.pathname==='/api/evidence-chain'&&!visibleChains(chainIndex,member.access).chains.some((r:any)=>r.id===reportId))return protectedResponse(jsonResponse({error:'path_not_available_for_plan'},403));
       if (!researchReportIds.has(reportId))
         return protectedResponse(jsonResponse({ error: "report not found" }, 404));
       const packed=(privateReports as Record<string,string>)[reportId];
@@ -271,15 +294,18 @@ async function economicIndicatorResponse(url: URL): Promise<Response> {
   const config = ECONOMIC_INDICATORS[indicator];
   if (!config) return jsonResponse({ error: "unsupported indicator" }, 422);
   const countries = Object.keys(ECONOMIC_COUNTRIES).join(";");
-  const endpoint = `https://api.worldbank.org/v2/country/${countries}/indicator/${encodeURIComponent(indicator)}?format=json&mrv=5&per_page=200`;
+  const year=Number(url.searchParams.get('year')||new Date().getUTCFullYear());
+  if(!Number.isInteger(year)||year<1960||year>new Date().getUTCFullYear())return jsonResponse({error:'invalid year'},422);
+  const endpoint = `https://api.worldbank.org/v2/country/${countries}/indicator/${encodeURIComponent(indicator)}?format=json&date=${Math.max(1960,year-9)}:${year}&per_page=1000`;
   try {
-    const upstream = await fetch(endpoint, { headers: { "User-Agent": "NEWS-Map-Pilot/1.0" } });
+    const upstream = await fetch(endpoint, { headers: { "User-Agent": "ORAKT/1.0" },signal:AbortSignal.timeout(10000) });
     if (!upstream.ok) throw new Error(`World Bank ${upstream.status}`);
     const payload = await upstream.json() as [unknown, Array<{ country: { value: string }; countryiso3code: string; date: string; value: number | null }>];
     const rows = Array.isArray(payload?.[1]) ? payload[1] : [];
     const latest = new Map<string, (typeof rows)[number]>();
     for (const row of rows) {
-      if (row.value == null || latest.has(row.countryiso3code) || !ECONOMIC_COUNTRIES[row.countryiso3code]) continue;
+      if (typeof row.value!=='number'||!Number.isFinite(row.value)||Number(row.date)>year||!ECONOMIC_COUNTRIES[row.countryiso3code]) continue;
+      const existing=latest.get(row.countryiso3code);if(existing&&Number(existing.date)>=Number(row.date))continue;
       latest.set(row.countryiso3code, row);
     }
     const observations = [...latest.values()].map((row) => ({
@@ -291,7 +317,7 @@ async function economicIndicatorResponse(url: URL): Promise<Response> {
       indicator,
       coordinates: ECONOMIC_COUNTRIES[row.countryiso3code].coordinates,
     }));
-    return jsonResponse({ indicator, provider: "World Bank", observations });
+    return jsonResponse({ indicator, provider: "World Bank", year, observations,sourceUrl:endpoint,coverage:{countriesRequested:Object.keys(ECONOMIC_COUNTRIES).length,countriesAvailable:observations.length},basis:'annual_latest_through_year_not_publication_vintage' });
   } catch {
     return jsonResponse({ error: "economic provider unavailable", observations: [] }, 502);
   }
@@ -307,7 +333,7 @@ function jsonResponse(
   return new Response(JSON.stringify(payload), { status, headers });
 }
 
-const allowedReturnPaths = new Set(["/platform","/platform/research","/platform/filings","/platform/data","/platform/publish","/platform/news","/platform/portfolio","/account","/admin/users"]);
+const allowedReturnPaths = new Set(["/platform/markets","/platform/alpha","/platform/personal","/platform/intelligence","/platform","/platform/chains","/platform/research","/platform/filings","/platform/data","/platform/publish","/platform/news","/platform/portfolio","/account","/admin/users"]);
 async function accountIdentity(request:Request,env:Env) {
   const local=await readLocalSession(request,env);
   if(local)return {subject:local.accountId,provider:"local",displayName:local.username,accountId:local.accountId.slice(0,16),expiresAt:new Date(local.expiresAt).toISOString(),createdAt:new Date(local.createdAt).toISOString()};
@@ -341,6 +367,7 @@ function sanitizeReturnTo(value:string):string{
 function protectedResponse(response: Response): Response {
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", "private, no-store");
+  headers.set("X-Robots-Tag", "noindex, nofollow");
   headers.set("Referrer-Policy", "no-referrer");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
@@ -354,7 +381,8 @@ function protectedResponse(response: Response): Response {
 function isPublicWebsiteRequest(request: Request, url: URL): boolean {
   if (!["GET", "HEAD"].includes(request.method)) return false;
   return (
-    ["/","/lab","/company","/research","/roadmap","/membership","/plans"].includes(url.pathname) ||
+    ["/","/lab","/company","/research","/roadmap","/membership","/plans","/knowledge"].includes(url.pathname) ||
+    /^\/knowledge\/[a-z0-9-]+$/.test(url.pathname) ||
     accessPagePaths.has(url.pathname) ||
     url.pathname === "/favicon.svg" ||
     url.pathname.startsWith("/_next/static/")

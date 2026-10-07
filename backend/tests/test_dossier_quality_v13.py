@@ -38,3 +38,17 @@ def test_no_false_flags_for_negation_hypotheses_or_valid_methodology():
 def test_english_direct_balance_contradiction():
  s=section();s.analysis.en+=' Current liabilities increased.'
  assert balance_narrative_errors(s,ledger())
+
+
+@pytest.mark.parametrize('zh,en',[
+ ('递延收入可能更接近于已实现的利润。','Deferred revenue may be closer to realized profit.'),
+ ('如果回购价格高于当前累计平均价格，可能对每股收益产生正面影响。','If repurchases occur at a price higher than the historical average, it may positively impact earnings per share.')])
+def test_known_valuation_and_factor_regressions_blocked(zh,en):
+ s=section();s.mechanism.zh=zh;s.mechanism.en=en
+ assert methodological_errors(s)
+
+
+def test_accounting_corrections_not_blocked():
+ s=section();s.mechanism.zh='递延收入不等于已实现的利润。回购价格高于历史平均价格不能据此推断每股收益提高。'
+ s.mechanism.en='Deferred revenue is not equivalent to realized profit. A repurchase price higher than the historical average does not establish earnings per share accretion.'
+ assert not methodological_errors(s)

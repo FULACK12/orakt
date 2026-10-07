@@ -22,7 +22,10 @@ def client(lines):
         def __init__(self,**kwargs):pass
         def __enter__(self):return self
         def __exit__(self,*a):pass
-        def stream(self,*a,**kwargs):assert kwargs['json']['stream'] is True;return Reply(lines)
+        def stream(self,*a,**kwargs):
+            assert kwargs['json']['stream'] is True
+            assert kwargs['json']['truncate'] is False
+            return Reply(lines)
     return Client
 
 
@@ -34,3 +37,12 @@ def test_stream_requires_terminal_message_and_retains_partial(monkeypatch):
     monkeypatch.setattr(module.httpx,'Client',client([{'message':{'content':'unfinished'}}]))
     with pytest.raises(ValueError,match='without completion'):generate('http://local.test',{},lambda p:None,saved.append)
     assert saved[0]['complete'] is False and saved[0]['message']['content']=='unfinished'
+
+
+def test_context_overflow_rejected_before_network(monkeypatch):
+    def forbidden(**kwargs):raise AssertionError('Network must not be called')
+    monkeypatch.setattr(module.httpx,'Client',forbidden)
+    saved=[]
+    with pytest.raises(ValueError,match='context budget'):
+        generate('http://local.test',{'messages':[{'role':'user','content':'证据'*20000}]},lambda p:None,saved.append)
+    assert saved[0]['complete'] is False

@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import {validateConsolidatedReceipt} from './consolidated-dossier.mjs';
 export const chapterKeys=['business','financial','capital','competition','supply','macro','valuation','factors','conclusion'];
 export function validateGroundedClaims(d,c){
  const passages=d.originalPassages?.[c.key]||[];
@@ -28,9 +29,10 @@ export function validateTimeline(d){
   ids.add(e.id);
  }
 }
-export function validateDossier(d,report){
+export function validateDossier(d,report,bytes,receiptBytes){
  if(d.ticker!==report.ticker||d.asOf!==report.dataCutoff)throw Error('Dossier identity/cutoff mismatch');
- if(d.review?.state!=='assistant_reviewed'||d.review?.humanAccepted!==false||! /^[a-f0-9]{64}$/.test(d.review?.assistantRevisionHash||'')||d.eligibleForPredictiveBacktest!==false)throw Error('Dossier needs explicit review; not a validated forecast');
+ if(d.version==='consolidated-site/v1')validateConsolidatedReceipt(d,report,bytes,receiptBytes);
+ else if(d.review?.state!=='assistant_reviewed'||d.review?.humanAccepted!==false||! /^[a-f0-9]{64}$/.test(d.review?.assistantRevisionHash||'')||d.eligibleForPredictiveBacktest!==false)throw Error('Dossier needs explicit review; not a validated forecast');
  if(JSON.stringify(d.chapters?.map(c=>c.key))!==JSON.stringify(chapterKeys))throw Error('Nine ordered unique chapters required');
  const known=new Set([...(d.sources||[]).map(s=>s.id),...(d.facts||[]).map(f=>f.evidence_id),...(d.marketEvidence||[]).map(s=>s.id)]);
  for(const c of d.chapters){

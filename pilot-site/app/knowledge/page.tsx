@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import {articles} from './articles';
+export const metadata:Metadata={title:'ORAKT 知识库 · Knowledge index',description:'公开的市场研究词条：Alpha、财务报表、因果证据与供应链。Public research concepts with sources and clear limits.',alternates:{canonical:'https://orakt.com/knowledge'},robots:{index:true,follow:true}};
+export default function KnowledgeIndex(){return <main className="knowledge-page"><nav><a href="/">ORAKT</a><a href="/platform">进入研究 / Research</a></nav><span className="eyebrow">OPEN KNOWLEDGE</span><h1>ORAKT 知识库</h1><p>从词条理解世界，而不只是从结论开始。A source-linked guide to research concepts.</p><p>由 ORAKT 编辑维护，非维基百科官方条目；无需登录。不包含私人报告或用户数据。</p><div className="knowledge-grid">{articles.map(a=><article key={a.slug}><h2><a href={'/knowledge/'+a.slug}>{a.title}</a></h2><p>{a.summary}</p></article>)}</div><footer>编辑更新 / Editorial update: 2026-10-06 · <a href="/research#risk-notice">研究风险说明 / Research limitations</a></footer></main>}

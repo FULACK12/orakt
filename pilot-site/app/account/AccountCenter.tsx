@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from "react";
 import {ArrowUpRight,BookOpen,Building2,Globe2,LogOut,ShieldCheck,UserRound} from "lucide-react";
 import OraktBrandIcon from "../OraktBrandIcon";
 import ReleaseStatus from "../ReleaseStatus";
+import WatchlistEditor from '../WatchlistEditor';
 import useDisplayLanguage from "../useDisplayLanguage";
 import styles from "./account.module.css";
 import {authJsonGet} from "../access/auth-request.mjs";
@@ -70,6 +71,7 @@ export default function AccountCenter(){
           <p className={styles.snapshot}>{zh?"新闻索引时间范围":"News index date range"}: {date(platform!.newsFrom)} — {date(platform!.newsTo)}</p>
         </section>
       </>}
+      {data?.account.membership.status==='active'&&<WatchlistEditor language={language}/>}
       <div className={styles.settingsGrid}>
         <section className={styles.settings}><h2>{zh?"显示偏好":"Display preferences"}</h2><p>{zh?"仅保存在当前浏览器。报告阅读主题与这里保持一致。":"Saved only in this browser. The report reader uses this theme too."}</p><fieldset><legend>{zh?"界面语言":"Language"}</legend><button aria-pressed={zh} onClick={()=>setLanguage("zh")}>中文</button><button aria-pressed={!zh} onClick={()=>setLanguage("en")}>English</button></fieldset><fieldset><legend>{zh?"阅读主题":"Reading theme"}</legend><button aria-pressed={theme==="light"} onClick={()=>chooseTheme("light")}>{zh?"浅色":"Light"}</button><button aria-pressed={theme==="dark"} onClick={()=>chooseTheme("dark")}>{zh?"深色":"Dark"}</button></fieldset></section>
         <section className={styles.security}><h2>{zh?"安全与退出":"Security & sign out"}</h2><p>{zh?"退出会撤销此浏览器的 ORAKT 会话，不会退出 Google 账号，也不会转移钱包资产。":"Signing out revokes this browser’s ORAKT sessions. It does not sign out of Google or move wallet assets."}</p>{data?.account.provider==="local"&&<p>{zh?"忘记密码时，请在登录页使用保存的恢复码。请勿将恢复码分享给任何人。":"Use your saved recovery key on the sign-in page if you forget your password. Never share it."}</p>}<button className={styles.logout} onClick={logout} disabled={busy}><LogOut size={18}/>{busy?(zh?"正在安全退出…":"Signing out…"):(zh?"退出当前登录":"Sign out")}</button>{logoutError&&<p role="alert">{zh?"退出未完成；会话尚未确认撤销，请重试。":"Sign-out could not be confirmed. Please try again."}</p>}</section>

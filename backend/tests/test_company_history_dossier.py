@@ -34,3 +34,8 @@ def test_claim_statements_cannot_bypass_numerical_prose_guard():
     s=section()
     s.grounded_claims=[GroundedClaim(passage_id='PASSAGE:1111111111111111',quote='An original statement long enough for citation.',statement={'zh':'公司净利润为189百万美元。','en':'Net income was 189 million dollars.'})]
     with pytest.raises(ValueError,match='Numerical claims'):validate_section(s,{'FACT:1','PASSAGE:1111111111111111'})
+
+
+def test_repeated_citation_ids_cannot_pad_analysis_length():
+    s=section();s.analysis.zh='说明很短。'+' [PASSAGE:1111111111111111]'*20
+    with pytest.raises(ValueError,match='too brief'):validate_section(s,{'FACT:1','PASSAGE:1111111111111111'})

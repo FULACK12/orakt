@@ -100,6 +100,14 @@ def methodological_errors(section):
   pair=getattr(section,field)
   for lang,text in [('zh',pair.zh),('en',pair.en)]:
    for sentence in re.split(r'[。！？;；\n]|(?<=[.!?])\s+',text):
+    # Narrow regressions observed in reviewed local drafts, not a semantic verifier.
+    negated = re.search(r'不等于|不能|不意味着|并非|不是|不能据此|not |cannot|does not|neither',sentence,re.I)
+    if not negated:
+     if re.search(r'递延收入.{0,35}(?:等同于|接近于|就是).{0,12}(?:已实现的?利润|利润)',sentence) or re.search(r'deferred revenue.{0,75}(?:equivalent to|closer to|equals).{0,20}(?:realized profit|earned profit)',sentence,re.I):
+      errors.append(f'{field}.{lang}: deferred revenue is not realized profit; correlation does not change recognition rules')
+     if ((re.search(r'回购价格.{0,25}(?:高于|低于).{0,20}(?:累计|历史).*平均',sentence) and re.search(r'每股收益.{0,12}(?:正面|负面|提高|降低)',sentence)) or
+         (re.search(r'repurchase.{0,45}price.{0,20}(?:higher|lower).{0,45}(?:average|historical)',sentence,re.I) and re.search(r'(?:positiv|negativ).{0,30}earnings per share|earnings per share.{0,30}(?:positiv|negativ)',sentence,re.I))):
+      errors.append(f'{field}.{lang}: historical repurchase average does not determine EPS accretion')
     if 'NFCI' not in sentence or not re.search(r'季节性调整|seasonal.{0,15}adjust',sentence,re.I):continue
     if not re.search(r'不能|不可|不用于|不得|not |cannot|must not',sentence,re.I):
      errors.append(f'{field}.{lang}: NFCI is not a seasonal-adjustment procedure')

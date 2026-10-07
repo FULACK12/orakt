@@ -53,7 +53,7 @@ def basket_study(data,weights,days):
     return {'state':'retrospective_illustration','points':points,'returnPercent':points[-1]['nav']-100,'maxDrawdownPercent':dd,'observations':len(points),'annualizedReturn':None,'start':str(initial),'end':str(last),'roundTripCostBps':20,'inputHash':hashlib.sha256(json.dumps({s:[[str(d),m[d]] for d in dates] for s,m in maps.items()}).encode()).hexdigest()}
 
 def run(site,cold):
-    root=cold/'orakt/lab-v84';ids=['EQ:AAPL','EQ:NVDA','EQ:AMD','EQ:MSFT','EQ:LULU','TD:SPY','TD:XLK']
+    root=cold/'orakt/lab-v87';ids=['EQ:AAPL','EQ:NVDA','EQ:AMD','EQ:MSFT','EQ:LULU','TD:SPY','TD:XLK']
     with get_session_factory()() as session:
         data={s:series_rows(session,s) for s in ids};sources={s:session.get(MarketSeries,s).source_url for s in ids if session.get(MarketSeries,s)}
     factors=[]
@@ -62,7 +62,13 @@ def run(site,cold):
             study=multifactor(data['EQ:'+ticker],data['TD:SPY'],data['TD:XLK'],mode);study.update(ticker=ticker,sources={s:sources.get(s) for s in ['EQ:'+ticker,'TD:SPY','TD:XLK']})
             write_json(root/f'{ticker}-{mode}.json',study);factors.append({k:v for k,v in study.items() if k!='trades'})
     recipes=[('tech-core',{'zh':'科技核心研究篮子','en':'Technology core study'},{'EQ:AAPL':.35,'EQ:NVDA':.25,'EQ:MSFT':.25,'CASH:USD':.15}),('chip-pair',{'zh':'半导体双公司研究篮子','en':'Semiconductor pair study'},{'EQ:NVDA':.5,'EQ:AMD':.5}),('consumer-tech',{'zh':'消费与科技研究篮子','en':'Consumer & technology study'},{'EQ:LULU':.4,'EQ:AAPL':.4,'CASH:USD':.2})]
-    baskets=[{'id':key,'title':title,'weights':weights,'windows':{str(days):basket_study(data,weights,days) for days in [30,90,365]},'sources':{s:sources.get(s) for s in [*weights,'TD:SPY'] if s!='CASH:USD'},'followers':None} for key,title,weights in recipes]
+    # Fixed economic recipes, specified before calculating returns; no ranking or return gate.
+    recipes.extend([
+        ('equal-tech',{'zh':'科技等权比较','en':'Equal-weight technology'},{'EQ:AAPL':.25,'EQ:NVDA':.25,'EQ:AMD':.25,'EQ:MSFT':.25}),
+        ('cash-buffer',{'zh':'科技与现金缓冲','en':'Technology with cash buffer'},{'EQ:AAPL':.2,'EQ:MSFT':.2,'EQ:NVDA':.1,'CASH:USD':.5}),
+        ('broad-tech',{'zh':'宽基与科技板块','en':'Broad market & technology sector'},{'TD:SPY':.5,'TD:XLK':.3,'CASH:USD':.2}),
+    ])
+    baskets=[{'id':key,'title':title,'weights':weights,'accessTier':'standard' if key in {'tech-core','consumer-tech','broad-tech'} else 'research','windows':{str(days):basket_study(data,weights,days) for days in [30,90,365]},'sources':{s:sources.get(s) for s in [*weights,'TD:SPY'] if s!='CASH:USD'},'followers':None} for key,title,weights in recipes]
     payload={'generatedAt':datetime.now(UTC).isoformat(),'factors':factors,'baskets':baskets,'multipleTests':len(factors),'multipleTestingAdjusted':False,'forwardValidated':False,'priceConvention':'retained close; split/dividend adjustment not fully verified','selectionBias':'current selected constituents; not historical investible universe'}
     write_json(root/'lab-expansion.json',payload);write_json(site/'private-data/lab-expansion.json',payload)
     print(json.dumps({'factorExperiments':len(factors),'portfolioStudies':len(baskets),'validFactorStudies':sum(bool(f['points']) for f in factors),'validPortfolioWindows':sum(bool(w['points']) for b in baskets for w in b['windows'].values())}))

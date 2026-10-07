@@ -67,6 +67,8 @@ def add_passages(packet,cold_root):
 def check_claims(claims,passages,required=False):
     known={p['id']:p for p in passages}
     if required and len(claims)<2:raise ValueError('At least two source-grounded claims required')
+    if required and len({c.passage_id if hasattr(c,'passage_id') else c['passage_id'] for c in claims})<2:
+        raise ValueError('At least two distinct source-grounded passages required')
     for claim in claims:
         c=claim.model_dump() if hasattr(claim,'model_dump') else claim
         p=known.get(c['passage_id'])
@@ -123,4 +125,10 @@ def selection_schema(schema, passages, allowed, required_comparisons=(), ledger=
         comparison=comparisons['items']
         if '$ref' in comparison:comparison=schema['$defs'][comparison['$ref'].rsplit('/',1)[-1]]
         comparison['properties']['comparison_id']={'type':'string','enum':list(required_comparisons)}
+        if all('direction' in known[c] and 'periodType' in known[c] for c in required_comparisons):
+            comparisons['items']={'oneOf':[{'type':'object','additionalProperties':False,'required':['comparison_id','direction','period_type'],'properties':{
+                'comparison_id':{'type':'string','const':c},
+                'direction':{'type':'string','const':known[c]['direction']},
+                'period_type':{'type':'string','const':known[c]['periodType']},
+            }} for c in required_comparisons]}
     return schema

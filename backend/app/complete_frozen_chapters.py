@@ -21,6 +21,10 @@ def prepare_evidence(packet, key):
     # Preserve original numbers/dates for reasoning, while the output validator
     # still reserves numerical claims for deterministic source tables.
     evidence = chapter_packet(packet, key)
+    # Legacy frozen packets predate paragraph retrieval. Preserve a bounded
+    # original excerpt without masking values; v13 packets use passages only.
+    if not evidence.get('original_passages'):
+        evidence['excerpts']=[{**e,'text':e['text'][:3000]} for e in packet.get('excerpts',[])[:1]]
     evidence['research_constraints'] = [
         'Do not infer quarter-on-quarter from a year-on-year comparison.',
         'A level change alone does not prove efficiency, demand or causation.',
