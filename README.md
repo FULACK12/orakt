@@ -6,9 +6,17 @@ ORAKT connects company disclosures, event evidence, research reports and verifia
 
 ORAKT existed before this repository export. This is **not a claim that the complete application was written during a hackathon**. Competition name and eligible dates are awaiting the project owner's confirmation. No prior commit dates have been rewritten. A dated, reviewable change list must be supplied before submission to Colosseum.
 
-This source export includes the existing application plus the October 6, 2026 work on cold SEC import, preserved fiscal-period variants, unified workspace navigation, manual portfolio stress scenarios and an opt-in TradingView chart. The report-quality pilot remains rejected; it is not an accepted research result.
+This source-only export was synchronized on October 9, 2026, through the deployed ORAKT v138 application (Sites source commit `31c7fb219b0e0fe631419c894c1a26a416cac4ff`). It includes the existing application and subsequent changes; this synchronization date is not a claim about when every file was originally written. Earlier rejected report attempts remain rejected unless separately reviewed; updating this repository does not approve research results.
 
-The next research increment adds a top-level Alpha lab, new fixed-rule price-path experiments with dual benchmarks and block-bootstrap intervals, official-release-linked macro event windows, and one deterministic evidence review per retained original disclosure. These are exploratory studies and filing checks, not newly approved full investment dossiers. Personalized research is a browser-local draft placeholder; it cannot queue model work or charge accounts.
+## Latest synchronized features
+
+- Bilingual research workspace, company-report review and fiscal-period checks, source-linked evidence reading, improved map controls and responsive landing-page layout.
+- Apple supply-atlas implementation, AAPLx on-chain asset research, and a sourced Hormuz–helium–semiconductor study with conditional investment hypotheses, three map branches, source inspection and user-controlled mechanism playback. Candidate routes are not real-time cargo tracking or confirmed procurement relationships.
+- Alpha-factor study and research UI, with explicit benchmark, methodology and validation limits. Research examples are not guaranteed returns or approved investment signals.
+- Intelligence-market Solana interactions, account administration and tier gates, and monthly USDT/USDC payment implementation with server-side settlement checks. Billing availability requires operator configuration; this source export does not activate payments or contain merchant signing keys.
+- Redesigned account/billing screens and Ask ORAKT, a browser-local chat demo with local history. It does not call a live model, queue research work or charge an account.
+
+The v138 production-source build passed locally. The focused Hormuz/Apple regression suite passed 9/9; the full application suite reported 319/324 passing, with five existing landing-page/educational-copy assertion failures. Those results require the provisioned production inputs described below; they are not a claim that this deliberately data-excluded export can run the entire suite unmodified.
 
 ## Architecture
 

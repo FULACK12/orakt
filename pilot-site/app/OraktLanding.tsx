@@ -14,10 +14,13 @@ import {marketingPages,legacyMarketingPaths,type MarketingPageKey} from "./marke
 import MarketingGuide from "./MarketingGuide";
 import OraktContour from "./OraktContour";
 import SiteFooter from "./SiteFooter";
+import usePublishedMetrics from './usePublishedMetrics';
+import HeroOutlineWord from './HeroOutlineWord';
 
 type Language = "zh" | "en";
 
 type LandingMetrics = {
+  newsRecords?: number;
   events: number;
   articles: number;
   reports: number;
@@ -113,9 +116,9 @@ const copy = {
     chinaMethods: "用户名与密码 · 恢复码找回",
     globalMethods: "Google 身份验证 · 已发布内容只读",
     pilotMethods: "Phantom · Solana 钱包",
-    plansKicker: "PLANS · PREVIEW",
+    plansKicker: "PLANS · MONTHLY",
     plansTitle: "从看见世界，到建立自己的研究系统。",
-    planNote: "以下为产品方案预览，当前尚未开放在线订阅与自动扣费。",
+    planNote: "Signal / Research 支持 Solana USDC、USDT 按月付款，不自动续费。Team 尚未开放。",
     finalTitle: "THE WORLD MOVES\nIN CHAINS.",
     finalBody: "世界以链条运转。ORAKT 让它可见、可查、可验证。",
     finalButton: "进入 ORAKT WORLD",
@@ -209,9 +212,9 @@ const copy = {
     chinaMethods: "Username & password · Saved recovery key",
     globalMethods: "Google identity · Published research",
     pilotMethods: "Phantom · Solana wallet",
-    plansKicker: "PLANS · PREVIEW",
+    plansKicker: "PLANS · MONTHLY",
     plansTitle: "From seeing the world to building a research system of your own.",
-    planNote: "Product-plan preview only. Online subscriptions and automatic billing are not active yet.",
+    planNote: "Signal / Research support monthly Solana USDC or USDT payments, without automatic renewal. Team is not on sale.",
     finalTitle: "THE WORLD MOVES\nIN CHAINS.",
     finalBody: "ORAKT makes those chains visible, traceable and testable.",
     finalButton: "ENTER ORAKT WORLD",
@@ -252,7 +255,7 @@ function MotionLine({
       className={`${styles.motionLine} ${outline ? styles.heroOutline : ""}`}
       aria-hidden="true"
     >
-      {Array.from(text).map((character, index) => (
+      {outline && text === "MOVES" ? <HeroOutlineWord className={styles.outlineWord} /> : Array.from(text).map((character, index) => (
         <i
           className={styles.motionGlyph}
           key={`${character}-${index}`}
@@ -385,7 +388,8 @@ function ProductModule({
   );
 }
 
-export default function OraktLanding({ metrics, page="home" }: { metrics: LandingMetrics; page?:"home"|MarketingPageKey }) {
+export default function OraktLanding({ metrics:initialMetrics, page="home" }: { metrics: LandingMetrics; page?:"home"|MarketingPageKey }) {
+  const {metrics,stale}=usePublishedMetrics(initialMetrics);
   const [language, setLanguage] = useDisplayLanguage();
   const rootRef = useRef<HTMLElement | null>(null);
   const t = copy[language];
@@ -419,6 +423,7 @@ export default function OraktLanding({ metrics, page="home" }: { metrics: Landin
   );
 
   const stats = [
+    ...(Number.isSafeInteger(metrics.newsRecords)?[{value:metrics.newsRecords!,zh:'已收录新闻索引',en:'Indexed news records'}]:[]),
     { value: metrics.events, zh: "本地地理事件", en: "Geolocated events" },
     { value: metrics.articles, zh: "可分析正文", en: "Content-ready articles" },
     { value: metrics.reports, zh: "可查验研究报告", en: "Auditable reports" },
@@ -465,19 +470,13 @@ export default function OraktLanding({ metrics, page="home" }: { metrics: Landin
             </div>
           </div>
         </div>
-        <div className={styles.heroTelemetry} aria-hidden="true">
-          <span><i /> SIGNAL / {formatter.format(metrics.events)}</span>
-          <span><i /> EVIDENCE / {formatter.format(metrics.articles)}</span>
-          <span><i /> RESEARCH / PUBLISHED DATA</span>
-        </div>
-        <div className={styles.heroStatus}><i /><span>{t.live}</span><b>{new Date(metrics.generatedAt).toISOString().slice(0, 10)}</b></div>
         <a className={styles.scrollCue} href="#proof"><i /><span>{t.scroll}</span></a>
       </section>
 
       <section className={styles.statRail} aria-label="Published data coverage">
         <div className={styles.marquee}>
           {[0, 1].map((group) => <div className={styles.marqueeGroup} key={group} aria-hidden={group === 1 ? true : undefined}>
-            {stats.map((stat) => <div className={styles.statItem} key={stat.en}><strong>{formatter.format(stat.value)}</strong><span>{language === "zh" ? stat.zh : stat.en}</span><i /></div>)}
+            {stats.map((stat) => <div className={styles.statItem} key={stat.en} title={`${language==='zh'?'已发布库截至':'Published library as of'} ${metrics.generatedAt.slice(0,10)}${stale?' · Offline / 上次数据':''}`}><strong>{formatter.format(stat.value)}</strong><span>{language === "zh" ? stat.zh : stat.en}</span><i /></div>)}
           </div>)}
         </div>
       </section>
@@ -490,7 +489,7 @@ export default function OraktLanding({ metrics, page="home" }: { metrics: Landin
         </div>
         <div className={styles.methodRail} data-orakt-reveal>
           {t.steps.map((step, index) => (
-            <div key={step}><span>0{index + 1}</span><b>{step}</b>{index < t.steps.length - 1 && <i />}</div>
+            <div key={step} style={{'--step':index} as React.CSSProperties}><span>0{index + 1}</span><b>{step}</b>{index < t.steps.length - 1 && <i />}</div>
           ))}
         </div>
       </section>
@@ -498,6 +497,14 @@ export default function OraktLanding({ metrics, page="home" }: { metrics: Landin
       <section className={styles.systemIntro}>
         <p>{t.systemKicker}</p>
         <h2>{t.systemTitle}</h2>
+      </section>
+      <section className={styles.cryptoBridge}>
+        <span className={styles.eyebrow}>ORAKT × SOLANA</span>
+        <h2>{language==='zh'?'让信息有出处，让资产有上下文。':'Provenance for information. Context for assets.'}</h2>
+        <p>{language==='zh'?'从原始新闻、可核验的主张到事件与资产暴露，把研究连接至 Solana 与代币化资产生态。内容哈希与审核历史可以被查验；链上记录不替代事实核查。':'Connect original news, verifiable claims and events to asset exposure across Solana and tokenized-asset ecosystems. Content hashes and review histories are inspectable; an on-chain record does not replace fact checking.'}</p>
+        <div><span>SOURCE</span><i>→</i><span>CLAIM</span><i>→</i><span>EVENT</span><i>→</i><span>ASSET</span></div>
+        <a href={accessHref('/platform/assets')}>{language==='zh'?'探索新闻与链上资产':'Explore news & on-chain assets'} ↗</a>
+        <small>{language==='zh'?'当前存证使用 Solana Devnet；主网交易未开放。资产关联是研究线索，不是买卖建议。':'Current provenance uses Solana Devnet. Mainnet trading is not enabled. Asset links are research leads, not trading advice.'}</small>
       </section>
 
       <section className={styles.modules}>
@@ -622,11 +629,11 @@ export default function OraktLanding({ metrics, page="home" }: { metrics: Landin
         <div className={styles.planGrid} data-orakt-reveal>
           {productPlans.map((plan, index) => (
             <article key={plan.name} data-accent={plan.accent}>
-              <header><span>0{index + 1}</span><b>{plan.key==="team"?"PLANNED":"PREVIEW"}</b></header>
+              <header><span>0{index + 1}</span><b>{plan.key==="team"?"PLANNED":plan.key==="explorer"?"FREE":"MONTHLY"}</b></header>
               <h3>{plan.name}</h3>
               <div className={styles.price}><small>US$</small><strong>{plan.price}</strong><span>/ MO</span></div>
               <ul>{(language === "zh" ? plan.featuresZh : plan.featuresEn).map((item) => <li key={item}><i />{item}</li>)}</ul>
-              <a href={plan.key==="team"?"/roadmap#next":index===0?accessHref(plan.returnTo,plan.key):"/membership#access-levels"}>{plan.key==="team"?(language==="zh"?"了解规划":"Explore the roadmap"):index===0?t.access:language==="zh"?"了解授权方式":"How access works"}<Arrow /></a>
+              <a href={plan.key==="team"?"/roadmap#next":index===0?accessHref(plan.returnTo,plan.key):"/account/billing"}>{plan.key==="team"?(language==="zh"?"了解规划":"Explore the roadmap"):index===0?t.access:language==="zh"?"按月开通":"Monthly checkout"}<Arrow /></a>
             </article>
           ))}
         </div>

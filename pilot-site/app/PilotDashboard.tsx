@@ -4,7 +4,9 @@ import useWorkspaceChrome from './useWorkspaceChrome';
 import {reportForReading} from './report-reading.mjs';
 import {ReadingText} from './ReadingReferences';
 import useWatchlist from './useWatchlist';
-import {economicValue, metricCount, finiteNumber, reportFilterDate} from "./metric-format.mjs";
+import {isCompanyReport,reportHref} from './report-taxonomy.mjs';
+import CompanyReportCoverage from './CompanyReportCoverage';
+import {economicValue, metricCount, finiteNumber, reportFilterDate, reportDisplayDate} from "./metric-format.mjs";
 import CompanyDossier from "./CompanyDossier";
 import ReportEvidence from './ReportEvidence';
 import PeerFactorStudy from "./PeerFactorStudy";
@@ -13,8 +15,10 @@ import FinancialPeriodLedger from "./FinancialPeriodLedger";
 import ReportMarketCoverage from "./ReportMarketCoverage";
 import DataLibrary from "./DataLibrary";
 import MarketsWorkspace from "./MarketsWorkspace";
-import PersonalResearch from "./PersonalResearch";
-import {chainGeoJSON,hormuzChain} from "./chain-catalog";
+import MapChains from './MapChains';
+import AppleMapInspector from './AppleMapInspector';
+import useResearchData from './useResearchData';
+import AssetIntelligence from './AssetIntelligence';
 import MacroEventReports from "./MacroEventReports";
 import DisclosureReviews from "./DisclosureReviews";
 import IntelligenceMarket from "./platform/intelligence/IntelligenceMarket";
@@ -50,6 +54,7 @@ import {
   X,
 } from "lucide-react";
 import type { GeoJSONSource, Map as MapLibreMap, Marker } from "maplibre-gl";
+import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import Link from "next/link";
 import OraktBrandIcon from "./OraktBrandIcon";
 import MarketExpansion from "./MarketExpansion";
@@ -70,9 +75,11 @@ const CompanyFinancialCharts=lazy(()=>import('./CompanyFinancialCharts'));
 const EvidenceChains=lazy(()=>import('./EvidenceChains'));
 const PortfolioLab=lazy(()=>import('./PortfolioLab'));
 const AlphaLab=lazy(()=>import('./AlphaLab'));
+const PersonalResearch=lazy(()=>import('./PersonalResearch'));
+const HormuzMapInspector=lazy(()=>import('./HormuzMapInspector'));
 
 type Language = "zh" | "en";
-type Tab = "map" | "evidence" | "sec" | "data" | "portfolio" | "intelligence" | "markets" | "alpha" | "chains" | "personal";
+type Tab = "map" | "evidence" | "sec" | "data" | "portfolio" | "intelligence" | "assets" | "markets" | "alpha" | "chains" | "personal";
 type WindowKey = "7d" | "30d" | "90d" | "all";
 type MobilePanel = "layers" | "events" | "detail" | null;
 type AnalysisMode = "news_first" | "hypothesis_first";
@@ -2500,6 +2507,90 @@ function VirtualList<T>({
   );
 }
 
+function FullResearchBody({report,language}:{report:EvidenceReport;language:Language}) {
+  const t=copy[language],accessRights={reports:true};
+  return <>
+              {language==="en"&&!report.translations?.en&&!report.dossier&&<p role="status" className="orakt-boundary">The English body for this archived report is not available yet. The Chinese original is shown; changing the interface language does not constitute a translation.</p>}
+              {report.researchCompletion&&<ResearchCompletion data={report.researchCompletion} language={language}/>}
+              {report.peerStudy&&<PeerFactorStudy data={report.peerStudy} language={language}/>}
+              {report.ticker && accessRights?.reports && <Suspense fallback={<p role="status">{language==='zh'?'加载财务图表…':'Loading financial charts…'}</p>}><CompanyFinancialCharts key={report.id} ticker={report.ticker} asOf={report.historical?.asOf||report.createdAt?.slice(0,10)} periodEnd={report.historical?.periodEnd} language={language}/></Suspense>}
+              {report.dossier&&<CompanyDossier dossier={report.dossier} language={language}/>}
+              {!report.dossier&&report.financialSupplement&&<FinancialPeriodLedger ledger={report.financialSupplement.financialLedger} language={language}/>}
+              {report.financialSupplement?.marketCoverage&&<ReportMarketCoverage items={report.financialSupplement.marketCoverage} language={language}/>}
+              {report.dataReadiness && (
+                <DataReadinessPanel
+                  readiness={report.dataReadiness}
+                  language={language}
+                />
+              )}
+              {report.disclosureCoverage && (
+                <DisclosureCoveragePanel
+                  coverage={report.disclosureCoverage}
+                  language={language}
+                />
+              )}
+              {report.analysisMode === "news_first" && (
+                <section className="news-understanding">
+                  <header>
+                    <span>
+                      <Newspaper size={15} />
+                      {report.historical ? (language==="zh"?"历史财报审阅":"Historical filing review") : t.newsUnderstanding}
+                    </span>
+                    <div>
+                      <b>{report.newsReport.documentsReviewed}</b>{" "}
+                      {t.documentsRead} ·{" "}
+                      <b>{report.newsReport.fullContentReviewed}</b>{" "}
+                      {t.contentRead} ·{" "}
+                      <b>{report.newsReport.headlineOnlyExcluded}</b>{" "}
+                      {t.headlineExcluded}
+                    </div>
+                  </header>
+                  <h2>{report.newsReport.headline}</h2>
+                  <p>{report.newsReport.narrative}</p>
+                  <div className="news-fact-grid">
+                    <div>
+                      <b>{t.reportedFacts}</b>
+                      <ul>
+                        {report.newsReport.facts.map((item) => (
+                          <li key={item}>
+                            <Check size={13} />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <b>{t.openQuestions}</b>
+                      <ul>
+                        {report.newsReport.uncertainties.map((item) => (
+                          <li key={item}>
+                            <CircleAlert size={13} />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+              )}
+              <section className="executive-summary">
+                <span>{t.executive}</span>
+                <h2>{report.verdict}</h2>
+                <p><ReadingText text={report.thesis}/></p>
+              </section>
+              {report.tradingScenario && (
+                <TradingScenarioPanel
+                  scenario={report.tradingScenario}
+                  language={language}
+                />
+              )}
+              {report.canslim && (
+                <CanslimPanel scorecard={report.canslim} language={language} />
+              )}
+              <ReportEvidence report={report} language={language}/>
+  </>;
+}
+
 export default function PilotDashboard({
   initialTab = "map",
 }: {
@@ -2522,9 +2613,17 @@ export default function PilotDashboard({
     null,
   );
   const [conflictEnabled, setConflictEnabled] = useState(true);
+  const [warEventsEnabled,setWarEventsEnabled]=useState(true);
+  const [thermalEventsEnabled,setThermalEventsEnabled]=useState(false);
   const [severityEnabled, setSeverityEnabled] = useState(true);
   const [economyEnabled, setEconomyEnabled] = useState(false);
   const [chainEnabled,setChainEnabled]=useState(false);
+  const [mapChainSelection,setMapChainSelection]=useState<string[]>([]);
+  const [mapChainView,setMapChainView]=useState<any>({logistics:true,risks:true,query:'',active:null});
+  const mapChainLinkLoaded=useRef(false);
+  const {data:mapChainData,error:mapChainError}=useResearchData(tab==='map'?'/api/map-chains':null);
+  useEffect(()=>{const requested=new URLSearchParams(window.location.search).get('chain');if(!mapChainLinkLoaded.current&&mapChainData?.limit&&mapChainData.chains?.some((c:any)=>c.id===requested)){mapChainLinkLoaded.current=true;setMapChainSelection([requested!]);}},[mapChainData]);
+  useEffect(()=>{if(chainEnabled&&mapChainData?.chains?.length){setMapChainSelection([mapChainData.chains.find((c:any)=>c.id==='hormuz-helium')?.id||mapChainData.chains[0].id]);setChainEnabled(false);}},[chainEnabled,mapChainData]);
   const [economicError,setEconomicError]=useState('');
   const [economicRetry,setEconomicRetry]=useState(0);
   const [economicIndicator, setEconomicIndicator] = useState("FP.CPI.TOTL.ZG");
@@ -2637,12 +2736,13 @@ export default function PilotDashboard({
       const haystack =
         `${item.title} ${item.location} ${item.country} ${item.eventType}`.toLowerCase();
       return (
+        (item.eventType==='thermal_anomaly'?thermalEventsEnabled:warEventsEnabled)&&
         age >= 0 &&
         age <= maxDays &&
         (!normalized || haystack.includes(normalized))
       );
     });
-  }, [cursorDate, events, query, windowKey]);
+  }, [cursorDate, events, query, windowKey,warEventsEnabled,thermalEventsEnabled]);
   const selected =
     events.find((item) => item.id === selectedId) ??
     events[0] ??
@@ -2710,7 +2810,7 @@ export default function PilotDashboard({
           const ticker = item.ticker || item.tradingScenario?.ticker || "";
           const reportDate = reportFilterDate(item, dateBasis);
           if ((reportFrom || reportTo) && !reportDate) return false;
-          return (
+          return (isCompanyReport(item)&&
             (reportMarket === "all" || market === reportMarket) &&
             (reportCompany === "all" ||
               `${market}:${ticker}` === reportCompany) &&
@@ -2728,7 +2828,7 @@ export default function PilotDashboard({
         const ticker = item.ticker || item.tradingScenario?.ticker || "";
         const reportDate = reportFilterDate(item, appliedDateBasis);
         if ((appliedReportFrom || appliedReportTo) && !reportDate) return false;
-        return (
+        return (isCompanyReport(item)&&
           (appliedReportMarket === "all" || market === appliedReportMarket) &&
           (appliedReportCompany === "all" ||
             `${market}:${ticker}` === appliedReportCompany) &&
@@ -2747,6 +2847,8 @@ export default function PilotDashboard({
   );
   const localReports = useMemo(()=>[...filteredReports].sort((a,b)=>Number(watchedTickers.includes(b.ticker||''))-Number(watchedTickers.includes(a.ticker||''))),[filteredReports,watchedTickers]);
   useEffect(()=>{
+    // The chain page owns its report query. Redirecting it to itself reloads forever.
+    if(tab !== 'evidence')return;
     if(deepLinkLoaded.current || !accessRights?.reports || !allLocalReports.length)return;
     const params=new URLSearchParams(window.location.search);
     if(params.get("view")==="operations")setEvidenceView("operations");
@@ -2754,9 +2856,10 @@ export default function PilotDashboard({
     if(!requested)return;
     deepLinkLoaded.current=true;
     const match=allLocalReports.find(r=>r.id===requested);
+    if(match&&!isCompanyReport(match)){window.location.replace(reportHref(match));return;}
     if(match){setEvidenceView("single");setReportVersion(match.id);void loadLocalReport(match);}
     else setReportFilterNotice(language==="zh"?"这个报告版本未发布或无权查看。":"Report revision is unavailable or access is required.");
-  },[allLocalReports,accessRights]);
+  },[allLocalReports,accessRights,tab]);
   const listedLocalReports = useMemo(
     () => localReports.slice(0, 60),
     [localReports],
@@ -3164,8 +3267,8 @@ export default function PilotDashboard({
         if (!response.ok) throw new Error("economic request failed");
         return response.json();
       })
-      .then((payload: { observations: EconomicObservation[] }) => {
-        if(active){setEconomicData(payload.observations ?? []);if(!payload.observations?.length)setEconomicError('此指标/年份暂无有效观测 · No observations for this indicator/year');}
+      .then((payload: { observations: EconomicObservation[]; delivery?:string; retrievedAt?:string }) => {
+        if(active){setEconomicData(payload.observations ?? []);if(!payload.observations?.length)setEconomicError('此指标/年份暂无有效观测 · No observations for this indicator/year');else if(payload.delivery==='cached')setEconomicError(`World Bank 缓存 / cached · ${payload.retrievedAt?.slice(0,10)} · 非实时 / not live`);}
       })
       .catch((error: Error) => {
         if(active){setEconomicData([]);setEconomicError(error.name==='AbortError'?'数据源超时，请重试 · Provider timed out; retry':'数据源暂不可用，请重试 · Provider unavailable; retry');}
@@ -3173,14 +3276,6 @@ export default function PilotDashboard({
       .finally(() => {clearTimeout(timeout);if(active)setEconomicLoading(false)});
     return () => {active=false;clearTimeout(timeout);controller.abort()};
   }, [economicIndicator, economyEnabled, economicRetry, cursorDate.getUTCFullYear()]);
-  useEffect(()=>{
-    const map=mapRef.current;if(tab!=='map'||!map||!map.isStyleLoaded())return;
-    if(!map.getSource('research-chain'))map.addSource('research-chain',{type:'geojson',data:chainGeoJSON() as any});
-    if(!map.getLayer('research-chain-lines'))map.addLayer({id:'research-chain-lines',type:'line',source:'research-chain',filter:['==',['geometry-type'],'LineString'],paint:{'line-color':'#c4a5ff','line-width':3,'line-dasharray':[2,2]}});
-    if(!map.getLayer('research-chain-points'))map.addLayer({id:'research-chain-points',type:'circle',source:'research-chain',filter:['==',['geometry-type'],'Point'],paint:{'circle-radius':10,'circle-color':'#c4a5ff','circle-stroke-color':'#fff','circle-stroke-width':2}});
-    for(const id of ['research-chain-lines','research-chain-points'])map.setLayoutProperty(id,'visibility',chainEnabled?'visible':'none');
-    if(chainEnabled)map.fitBounds([[49,24],[58,34]],{padding:60,duration:600,maxZoom:5});
-  },[chainEnabled,mapReady,tab]);
   useEffect(() => {
     if (tab !== "map" || !mapContainer.current) return;
     let disposed = false;
@@ -3194,10 +3289,13 @@ export default function PilotDashboard({
         .then((maplibregl) => {
           if (disposed || !mapContainer.current) return;
     maplibreRef.current = maplibregl;
+    // v6 requires an explicit bundled worker; raster tiles alone do not test it.
+    maplibregl.setWorkerUrl(mapWorkerUrl);
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: {
         version: 8,
+        glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
         sources: {
           "osm-de": {
             type: "raster",
@@ -3284,6 +3382,7 @@ export default function PilotDashboard({
         filter: ["has", "point_count"],
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
+          "text-font": ["Noto Sans Regular"],
           "text-size": 10,
         },
         paint: {
@@ -3366,7 +3465,7 @@ export default function PilotDashboard({
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
           "text-size": 10,
-          "text-font": ["Open Sans Bold"],
+          "text-font": ["Noto Sans Regular"],
         },
         paint: {
           "text-color": "#09080f",
@@ -3500,7 +3599,7 @@ export default function PilotDashboard({
   }, [mapBootNonce, tab]);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
     const source = map.getSource("conflicts") as GeoJSONSource | undefined;
     if (!source) return;
     source.setData({
@@ -3559,7 +3658,7 @@ export default function PilotDashboard({
   }, [conflictEnabled, mapReady, severityEnabled, visibleEvents]);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
     const source = map.getSource("supply-chain") as GeoJSONSource | undefined;
     if (!source) return;
     source.setData({
@@ -3955,12 +4054,11 @@ export default function PilotDashboard({
   const layerControls = (
     <div className="layer-controls">
       <p>{t.layerHelp}</p>
-      <label className="toggle-row"><span>{language==='zh'?'证据链：霍尔木兹—氦气':'Evidence chain: Hormuz–helium'}</span><input type="checkbox" checked={chainEnabled} onChange={e=>setChainEnabled(e.target.checked)}/></label>
-      {chainEnabled&&<div className="chain-map-note"><b>{language==='zh'?'虚线 = 待验证传导；位置仅为区域示意':'Dashed lines = unverified links; regional reference points'}</b><p>{language==='zh'?'这是无事件日期的研究情景，不随事件时间轴伪装为已发生新闻。末端芯片影响尚未定位到企业。':'Undated research scenario, not timeline-filtered event news. No chipmaker impact location is established.'}</p>{hormuzChain.nodes.map((n,i)=><button key={n.id} onClick={()=>n.coordinates?mapRef.current?.flyTo({center:n.coordinates as [number,number],zoom:5}):changeTab('chains')}>{i+1}. {language==='zh'?n.zh:n.en}</button>)}<button onClick={()=>changeTab('chains')}>{language==='zh'?'展开证据与缺口':'Inspect evidence and gaps'}</button></div>}
+      <MapChains map={mapRef.current} ready={mapReady} language={language} data={mapChainData} error={mapChainError} selected={mapChainSelection} setSelected={setMapChainSelection} view={mapChainView} setView={setMapChainView}/>
       <label className="toggle-row">
         <span>
           <i className="layer-dot" />
-          {t.showConflict}
+          {language==='zh'?'事件图层总开关':'Event layers'}
         </span>
         <input
           type="checkbox"
@@ -3968,6 +4066,8 @@ export default function PilotDashboard({
           onChange={(event) => setConflictEnabled(event.target.checked)}
         />
       </label>
+      <label className="toggle-row"><span>{language==='zh'?'战争与冲突':'War & conflict'}</span><input type="checkbox" disabled={!conflictEnabled} checked={warEventsEnabled} onChange={e=>setWarEventsEnabled(e.target.checked)}/></label>
+      <label className="toggle-row"><span>{language==='zh'?'NASA 热异常（不是战争证据）':'NASA thermal anomalies (not conflict evidence)'}</span><input type="checkbox" disabled={!conflictEnabled} checked={thermalEventsEnabled} onChange={e=>setThermalEventsEnabled(e.target.checked)}/></label>
       <label className={`toggle-row ${!conflictEnabled ? "disabled" : ""}`}>
         <span>
           <i className="severity-swatch" />
@@ -4266,10 +4366,11 @@ export default function PilotDashboard({
             ['alpha',Activity,'Alpha 因子','Alpha factors'],
             ['portfolio',Layers3,'组合实验室','Portfolio lab'],
             ['intelligence',Newspaper,'情报市场','Intelligence market'],
+            ['assets',Layers3,'链上资产','On-chain assets'],
             ['markets',Activity,'市场行情','Markets'],
             ['data',Database,'研究资料库','Research library'],
             ['chains',Activity,'证据链推演','Evidence chains'],
-            ['personal',BrainCircuit,'专属研究','Personal research'],
+            ['personal',BrainCircuit,'询问 ORAKT','Ask ORAKT'],
           ] as const).map(([item,Icon,zh,en]) => (
             <button
               key={item}
@@ -4354,6 +4455,8 @@ export default function PilotDashboard({
           </aside>
           <div className="map-stage">
             <div ref={mapContainer} className="map-canvas" />
+            {mapChainSelection.includes('apple-network')&&<div className="apple-map-hud"><b>AAPL / GLOBAL SUPPLY ATLAS</b><span>{language==='zh'?'187 家供应商 · 603 条可定位记录 · 参考路线':'187 suppliers · 603 located records · reference routes'}</span><a href="/platform/chains?chain=apple-network">{language==='zh'?'完整研究':'Full study'} ↗</a></div>}
+            {mapChainSelection.includes('hormuz-helium')&&!mapChainSelection.includes('apple-network')&&<div className="apple-map-hud hormuz-map-hud"><b>HORMUZ → He → SEMICONDUCTORS</b><span>{language==='zh'?'青：氦气 · 橙：能源 · 绿：缓冲 / 虚线：推演，非实时货运':'Cyan: helium · amber: energy · lime: buffers / dashed: hypotheses, not live cargo'}</span><a href="/platform/chains?chain=hormuz-helium">{language==='zh'?'完整报告与投资设想':'Full study & investment hypotheses'} ↗</a></div>}
             {mapLoadState !== "ready" && (
               <div
                 className={`map-boot-status ${mapLoadState === "error" ? "is-error" : ""}`}
@@ -4473,7 +4576,7 @@ export default function PilotDashboard({
               </div>
             </div>
           </div>
-          <aside className="detail-panel">{selectedDetails}</aside>
+<aside className="detail-panel">{mapChainSelection.includes('apple-network')?<AppleMapInspector active={mapChainView.active} language={language}/>:mapChainSelection.includes('hormuz-helium')?<Suspense fallback={<p>…</p>}><HormuzMapInspector chain={mapChainData?.chains?.find((c:any)=>c.id==='hormuz-helium')} active={mapChainView.active} language={language} onSelect={(n:any)=>setMapChainView((v:any)=>({...v,active:n}))}/></Suspense>:selectedDetails}</aside>
           <div className="mobile-map-dock" aria-label="Map tools">
             <button
               className={mobilePanel === "layers" ? "active" : ""}
@@ -4550,7 +4653,7 @@ export default function PilotDashboard({
                     <div className="mobile-event-list">{eventList}</div>
                   </>
                 )}
-                {mobilePanel === "detail" && selectedDetails}
+                {mobilePanel === "detail" && (mapChainSelection.includes('apple-network')?<AppleMapInspector active={mapChainView.active} language={language}/>:mapChainSelection.includes('hormuz-helium')?<Suspense fallback={<p>…</p>}><HormuzMapInspector chain={mapChainData?.chains?.find((c:any)=>c.id==='hormuz-helium')} active={mapChainView.active} language={language} onSelect={(n:any)=>setMapChainView((v:any)=>({...v,active:n}))}/></Suspense>:selectedDetails)}
               </div>
             </section>
           )}
@@ -4617,6 +4720,8 @@ export default function PilotDashboard({
           {tab === "evidence" && evidenceView === "single" && (
             <>
           <section className="report-filter-bar">
+            <CompanyReportCoverage language={language}/>
+            <p className="report-category-note">{language==='zh'?`单公司财报研究：${allLocalReports.filter(isCompanyReport).length} 份，统一按财务期间与九章模板查阅。旧版五维／多维研究已归入证据链，历史尚未全部补齐。`:`Periodic company research: ${allLocalReports.filter(isCompanyReport).length} reports using a nine-chapter template. Legacy multidimensional research is in Evidence chains; historical coverage is incomplete.`} <a href="/platform/chains">{language==='zh'?'查看五维研究完整报告 →':'Read legacy research reports →'}</a></p>
             <label className="report-date-basis"><span>{language==="zh"?"筛选日期口径":"Date basis"}</span><select value={dateBasis} onChange={e=>setDateBasis(e.target.value)}><option value="generated">{language==="zh"?"报告生成日期":"Generated date"}</option><option value="evidence">{language==="zh"?"证据截止日期":"Evidence cutoff"}</option></select></label>
             <header>
               <div>
@@ -4694,7 +4799,7 @@ export default function PilotDashboard({
                   aria-label={
                     language === "zh" ? "报告起始日期" : "Report start date"
                   }
-                   type="date"
+                   type={language==='en'?'text':'date'} placeholder="YYYY-MM-DD" lang={language==='en'?'en':'zh-CN'} pattern="\d{4}-\d{2}-\d{2}"
                    value={reportFrom}
                    onChange={(event) => {
                      setReportFrom(event.target.value);
@@ -4708,7 +4813,7 @@ export default function PilotDashboard({
                   aria-label={
                     language === "zh" ? "报告结束日期" : "Report end date"
                   }
-                   type="date"
+                   type={language==='en'?'text':'date'} placeholder="YYYY-MM-DD" lang={language==='en'?'en':'zh-CN'} pattern="\d{4}-\d{2}-\d{2}"
                    value={reportTo}
                    onChange={(event) => {
                      setReportTo(event.target.value);
@@ -4980,9 +5085,7 @@ export default function PilotDashboard({
                           : item.model.replace("ollama:", "")}
                       </span>
                       <time>
-                        {new Date(item.historical?.periodEnd || item.dataCutoff || item.createdAt).toLocaleDateString(
-                          language === "zh" ? "zh-CN" : "en-CA",
-                        )}
+                        {reportDisplayDate(item.historical?.periodEnd || item.dataCutoff || item.createdAt, language)}
                       </time>
                     </footer>
                   </button>
@@ -5178,84 +5281,7 @@ export default function PilotDashboard({
                 </section>
               )}
               <details className="historical-report-note"><summary>{language==='zh'?'研究口径与版本记录':'Research scope & version history'}</summary><p>{report.model} · {language==='zh'?'实际生成':'Generated'}: {report.createdAt}</p>{report.historical&&<><p>{language==='zh'?'证据截止':'Evidence cutoff'}: {report.historical.asOf} · {language==='zh'?'数据库补建研究，不作为当时已发布的预测参与胜率统计。':'Reconstructed database research; not counted as a prediction published at the historical date.'}</p><ul>{(report.historical.corrections||[]).map((v:string,i:number)=><li key={i}>{v}</li>)}</ul></>}</details>
-              {language==="en"&&!report.translations?.en&&!report.dossier&&<p role="status" className="orakt-boundary">The English body for this archived report is not available yet. The Chinese original is shown; changing the interface language does not constitute a translation.</p>}
-              {report.researchCompletion&&<ResearchCompletion data={report.researchCompletion} language={language}/>}
-              {report.peerStudy&&<PeerFactorStudy data={report.peerStudy} language={language}/>}
-              {report.ticker && accessRights?.reports && <Suspense fallback={<p role="status">{language==='zh'?'加载财务图表…':'Loading financial charts…'}</p>}><CompanyFinancialCharts key={report.id} ticker={report.ticker} asOf={report.historical?.asOf||report.createdAt?.slice(0,10)} periodEnd={report.historical?.periodEnd} language={language}/></Suspense>}
-              {report.dossier&&<CompanyDossier dossier={report.dossier} language={language}/>}
-              {!report.dossier&&report.financialSupplement&&<FinancialPeriodLedger ledger={report.financialSupplement.financialLedger} language={language}/>}
-              {report.financialSupplement?.marketCoverage&&<ReportMarketCoverage items={report.financialSupplement.marketCoverage} language={language}/>}
-              {report.dataReadiness && (
-                <DataReadinessPanel
-                  readiness={report.dataReadiness}
-                  language={language}
-                />
-              )}
-              {report.disclosureCoverage && (
-                <DisclosureCoveragePanel
-                  coverage={report.disclosureCoverage}
-                  language={language}
-                />
-              )}
-              {report.analysisMode === "news_first" && (
-                <section className="news-understanding">
-                  <header>
-                    <span>
-                      <Newspaper size={15} />
-                      {report.historical ? (language==="zh"?"历史财报审阅":"Historical filing review") : t.newsUnderstanding}
-                    </span>
-                    <div>
-                      <b>{report.newsReport.documentsReviewed}</b>{" "}
-                      {t.documentsRead} ·{" "}
-                      <b>{report.newsReport.fullContentReviewed}</b>{" "}
-                      {t.contentRead} ·{" "}
-                      <b>{report.newsReport.headlineOnlyExcluded}</b>{" "}
-                      {t.headlineExcluded}
-                    </div>
-                  </header>
-                  <h2>{report.newsReport.headline}</h2>
-                  <p>{report.newsReport.narrative}</p>
-                  <div className="news-fact-grid">
-                    <div>
-                      <b>{t.reportedFacts}</b>
-                      <ul>
-                        {report.newsReport.facts.map((item) => (
-                          <li key={item}>
-                            <Check size={13} />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <b>{t.openQuestions}</b>
-                      <ul>
-                        {report.newsReport.uncertainties.map((item) => (
-                          <li key={item}>
-                            <CircleAlert size={13} />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </section>
-              )}
-              <section className="executive-summary">
-                <span>{t.executive}</span>
-                <h2>{report.verdict}</h2>
-                <p><ReadingText text={report.thesis}/></p>
-              </section>
-              {report.tradingScenario && (
-                <TradingScenarioPanel
-                  scenario={report.tradingScenario}
-                  language={language}
-                />
-              )}
-              {report.canslim && (
-                <CanslimPanel scorecard={report.canslim} language={language} />
-              )}
-              <ReportEvidence report={report} language={language}/>
+              <FullResearchBody report={report} language={language}/>
             </article>
           )}
             </main>
@@ -5510,10 +5536,11 @@ export default function PilotDashboard({
       {tab === "data" && <DataLibrary language={language}/>}
       {tab === "portfolio" && <Suspense fallback={<p role="status">{language==='zh'?'加载组合工具…':'Loading portfolio tools…'}</p>}><PortfolioLab language={language}/></Suspense>}
       {tab === "intelligence" && <IntelligenceMarket embedded displayLanguage={language}/>}
+      {tab === "assets" && <AssetIntelligence language={language}/>}
       {tab === "markets" && <MarketsWorkspace language={language}/>}
       {tab === "alpha" && <Suspense fallback={<p role="status">{language==='zh'?'加载 Alpha 工具…':'Loading Alpha tools…'}</p>}><AlphaLab language={language}/></Suspense>}
-      {tab === "personal" && <PersonalResearch language={language}/>}
-      {tab === "chains" && <Suspense fallback={<p role="status">{language==='zh'?'加载证据链…':'Loading chains…'}</p>}><EvidenceChains language={language} catalog={allLocalReports} onMap={()=>{setChainEnabled(true);changeTab('map')}}/></Suspense>}
+      {tab === "personal" && <Suspense fallback={<p role="status">{language==='zh'?'正在打开询问 ORAKT…':'Opening Ask ORAKT…'}</p>}><PersonalResearch language={language}/></Suspense>}
+      {tab === "chains" && <Suspense fallback={<p role="status">{language==='zh'?'加载证据链…':'Loading chains…'}</p>}><EvidenceChains language={language} renderReport={(r,l)=><FullResearchBody report={r} language={l}/>} onMap={()=>{setChainEnabled(true);changeTab('map')}}/></Suspense>}
 
     </main>
   );

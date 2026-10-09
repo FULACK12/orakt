@@ -12,6 +12,13 @@ CONCEPTS={
  'balance':'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents',
 }
 
+# Modern filings can tag the same statement-wide FX line with the expanded
+# disposal-group/discontinued-operations concept. Never fill it with zero or
+# infer it as a balancing residual. Retain the exact source tag and reject
+# conflicting values if both tags occur in the same period.
+FX_CONCEPTS=(CONCEPTS['fx'],
+ 'EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations')
+
 
 def packet_passages(packet):
     known={}
@@ -36,10 +43,14 @@ def cash_bridge(packet):
                 'meaning':b['meaning'],'source':'reviewed_original_html_table'}
     beginning=str(date.fromisoformat(start)-timedelta(days=1))
     def find(concept,lo,hi):
-        rows=[f for f in packet['facts'] if f['concept']==concept and f.get('unit')=='USD' and f.get('period_start')==lo and f.get('period_end')==hi and f.get('filed_at',packet['as_of_date'])<=packet['as_of_date']]
+        concepts=FX_CONCEPTS if concept==CONCEPTS['fx'] else (concept,)
+        rows=[f for f in packet['facts'] if f['concept'] in concepts and f.get('unit')=='USD' and f.get('period_start')==lo and f.get('period_end')==hi and f.get('filed_at',packet['as_of_date'])<=packet['as_of_date']]
         values={Decimal(str(f['value'])) for f in rows}
         if len(values)!=1 or not all(v.is_finite() for v in values):raise ValueError('Missing/conflicting exact-period fact: '+concept)
-        return {'value':str(next(iter(values))),'evidence_refs':sorted({f['evidence_id'] for f in rows})}
+        result={'value':str(next(iter(values))),'evidence_refs':sorted({f['evidence_id'] for f in rows})}
+        if concept==CONCEPTS['fx'] and any(f['concept']!=concept for f in rows):
+            result['sourceConcepts']=sorted({f['concept'] for f in rows})
+        return result
     try:
         values={k:find(c,start,end) for k,c in CONCEPTS.items() if k!='balance'}
         values['opening']=find(CONCEPTS['balance'],None,beginning)

@@ -37,6 +37,21 @@ def load_frozen_packet(source_path, cold_root):
         from app.historical_earnings_report import FilingText
         parser=FilingText();parser.feed(filing.read_bytes().decode('utf-8'))
         validate_context(packet,parser.clean())
+    if packet.get('accounting_transition_ids'):
+        from app.dossier_passages import validate_transition_context
+        from app.historical_earnings_report import FilingText
+        parser=FilingText();parser.feed(filing.read_bytes().decode('utf-8'))
+        validate_transition_context(packet,parser.clean())
+    if packet.get('earnings_context_ids'):
+        from app.dossier_earnings_context import validate_context
+        from app.historical_earnings_report import FilingText
+        parser=FilingText();parser.feed(filing.read_bytes().decode('utf-8'))
+        validate_context(packet,parser.clean())
+    if packet.get('review_context_ids'):
+        from app.dossier_review_context import validate_context
+        from app.historical_earnings_report import FilingText
+        parser=FilingText();parser.feed(filing.read_bytes().decode('utf-8'))
+        validate_context(packet,parser.clean())
     return original, raw
 
 

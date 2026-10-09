@@ -5,3 +5,4 @@
 @media(max-width:1120px){.scene{height:590px}.caption h4{font-size:26px}.canvas{top:150px;height:calc(100% - 208px)}.footer span:last-child{display:none}}
 @media(max-width:820px){.scene{height:640px}.caption h4{font-size:30px}.footer span:last-child{display:block}}
 @media(max-width:520px){.scene{height:560px}.header,.footer{left:18px;right:18px}.header{font-size:9px;letter-spacing:.04em}.caption{left:20px;right:20px;top:81px}.caption h4{font-size:26px}.caption p{font-size:9px}.canvas{top:155px;height:calc(100% - 205px)}.footer{font-size:9px}.footer span:last-child{display:none}}
+.scene .canvas{top:10px;height:calc(100% - 20px)}.scene{height:auto;aspect-ratio:1.12}.scene .header{top:auto;bottom:8px;pointer-events:none}.scene .header button{pointer-events:auto}

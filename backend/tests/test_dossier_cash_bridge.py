@@ -42,6 +42,28 @@ def test_duplicate_identical_facts_keep_all_provenance():
     assert b['state']=='matched' and len(b['values']['operating']['evidence_refs'])==2
 
 
+def test_expanded_fx_tag_reconciles_without_inventing_a_residual():
+    from app.dossier_cash_bridge import FX_CONCEPTS
+    p=packet();p['facts'][3]['concept']=FX_CONCEPTS[1]
+    b=cash_bridge(p)
+    assert b['state']=='matched'
+    assert b['values']['fx']['sourceConcepts']==[FX_CONCEPTS[1]]
+    assert b['values']['fx']['evidence_refs']==['fx']
+
+
+@pytest.mark.parametrize('problem',['conflict','wrong_period','future','wrong_currency','unrelated_tag','wrong_sign'])
+def test_expanded_fx_tag_is_not_an_unconditional_alias(problem):
+    from app.dossier_cash_bridge import FX_CONCEPTS
+    p=packet();f=p['facts'][3];f['concept']=FX_CONCEPTS[1]
+    if problem=='conflict':p['facts'].append({**f,'concept':CONCEPTS['fx'],'value':6})
+    elif problem=='wrong_period':f['period_start']='2026-05-30'
+    elif problem=='future':f['filed_at']='2026-10-01'
+    elif problem=='wrong_currency':f['unit']='EUR'
+    elif problem=='unrelated_tag':f['concept']='EffectOfExchangeRateOnOtherAssets'
+    else:f['value']=-5
+    assert cash_bridge(p)['state']==('mismatch' if problem=='wrong_sign' else 'unavailable')
+
+
 def test_cross_chapter_retrieval_requires_consistent_original():
     p={'id':'p','text':'Original exact passage'}
     assert len(packet_passages({'chapter_passages':{'a':[p],'b':[p]}}))==1

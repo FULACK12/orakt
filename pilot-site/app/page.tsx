@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OraktLanding from "./OraktLanding";
 import snapshotManifest from "../snapshot/snapshot-manifest.json";
+import reportIndex from '../snapshot/research-report-index.json';
 
 export const metadata: Metadata = {
   title: "ORAKT · 观因 by INSOLVE TECH | See what moves the world",
@@ -12,9 +13,10 @@ export default function Home() {
   return (
     <OraktLanding
       metrics={{
+        newsRecords: snapshotManifest.remoteSnapshot.newsIndexRecords,
         events: snapshotManifest.localTotals.geolocatedEvents,
         articles: snapshotManifest.localTotals.substantiveArticles,
-        reports: snapshotManifest.remoteSnapshot.localResearchReports,
+        reports: reportIndex.reports.length,
         companies:
           snapshotManifest.remoteSnapshot.activeChinaSectorLeaders +
           snapshotManifest.remoteSnapshot.activeUsSectorLeaders,

@@ -105,7 +105,7 @@ test("research workspace exposes appearance controls and five separate modules",
   const html = await response.text();
   assert.match(html,/正在核对账号权限与报告目录/);
   const source=await readFile(new URL("../app/PilotDashboard.tsx",import.meta.url),"utf8");
-  for (const label of ["切换全局明暗主题", "单公司报告", "宏观事件横向报告", "建仓观察", "组合实验室", "加密市场", "Alpha 因子", "专属研究"]) assert.ok(source.includes(label));
+  for (const label of ["切换全局明暗主题", "单公司报告", "宏观事件横向报告", "建仓观察", "组合实验室", "加密市场", "Alpha 因子", "询问 ORAKT"]) assert.ok(source.includes(label));
   assert.match(html,/class="theme-toggle"/);assert.doesNotMatch(html,/class="report-theme-picker"/);
   assert.match(html,/data-report-theme="light"/);
   assert.doesNotMatch(html,/class="entry-watchlist"/); // not mixed into the default report panel
@@ -142,6 +142,28 @@ test('new historical dossier is privately served with nine bilingual chapters an
  assert.match(report.translations.en.question,/Nine-chapter/);assert.equal(report.dossier.cashBridge.residual,'0');
  assert.ok(report.dossier.chapters.every(c=>c.analysis.zh&&c.analysis.en));
  assert.match(response.headers.get('x-robots-tag'),/noindex/);
+});
+
+test('reviewed NVDA latest-period report is individually authorized and bilingual',async()=>{
+ const app=await worker(),path='/api/research-report?id=dossier-NVDA-20260826-da949048';
+ assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
+ const response=await app.fetch(authorizedRequest(path),env,ctx);assert.equal(response.status,200);
+ const {report}=await response.json();assert.equal(report.dossier.chapters.length,9);
+ assert.equal(report.dossier.periodEnd,'2026-07-26');assert.equal(report.dossier.asOf,'2026-08-26');
+ assert.equal(report.dossier.review.state,'assistant_reviewed_research_only');assert.equal(report.confidence,null);
+ assert.equal(report.dossier.eligibleForPredictiveBacktest,false);assert.equal(report.dossier.validatedAlpha,false);
+ assert.match(report.translations.en.thesis,/Data Center/);assert.match(response.headers.get('x-robots-tag'),/noindex/);
+});
+
+test('reviewed MSFT annual report retains authorization, bilingual content and reconciled cash',async()=>{
+ const app=await worker(),path='/api/research-report?id=dossier-MSFT-20260729-e8b00c5f';
+ assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
+ const response=await app.fetch(authorizedRequest(path),env,ctx);assert.equal(response.status,200);
+ const {report}=await response.json();assert.equal(report.dossier.chapters.length,9);
+ assert.equal(report.dossier.periodEnd,'2026-06-30');assert.equal(report.dossier.asOf,'2026-07-29');
+ assert.equal(report.dossier.cashBridge.state,'matched');assert.equal(Number(report.dossier.cashBridge.residual),0);
+ assert.equal(report.confidence,null);assert.equal(report.dossier.validatedAlpha,false);
+ assert.match(report.translations.en.thesis,/Azure/);assert.match(response.headers.get('x-robots-tag'),/noindex/);
 });
 
 test("serves the official homepage publicly without exposing the pilot", async () => {
@@ -218,7 +240,7 @@ test("compact login chooser links to isolated provider pages without embedding f
 });
 
 test("interactive auth forms wait for the bounded session check",async()=>{
- const source=await readFile(new URL("../app/access/AccessPortal.tsx",import.meta.url),"utf8");
+ const source=(await readFile(new URL("../app/access/AccessPortal.tsx",import.meta.url),"utf8")).replace(/\\u([0-9A-Fa-f]{4})/g,(_,code)=>String.fromCharCode(parseInt(code,16))).replace(/\s+/g,'');
  assert.match(source,/authJsonGet\("\/api\/access\/session",\{signal:controller.signal,timeoutMs:8000\}\)/);
  assert.match(source,/sessionState==="ready"&&method==="google"/);
  assert.match(source,/sessionState==="ready"&&method==="phantom"/);
@@ -280,7 +302,9 @@ test("renders the read-only product only after explicit platform navigation", as
   assert.match(html, /组合实验室/);
   assert.doesNotMatch(html, />SEC 审核</);
   assert.match(html, /地图指标/);
-  assert.match(html, /战争与冲突点位/);
+  assert.match(html, /事件图层总开关/);
+  assert.match(html, /战争与冲突/);
+  assert.match(html, /NASA 热异常（不是战争证据）/);
   assert.match(html, /国家经济指标/);
   assert.match(html, /供应商工厂与制造区域/);
   assert.match(html, /事件回放/);
@@ -734,7 +758,7 @@ test("does not expose private reviewer history in the public release", async () 
 });
 test("six standalone marketing pages are public and contain only their own moved section",async()=>{
  const app=await worker();
- const expected={lab:"FACTOR / OOS MATRIX",company:"INSOLVE TECH · COMPANY",research:"CAUSAL AUDIT",roadmap:"PRODUCT DIRECTION",membership:"Phantom · Solana 钱包",plans:"尚未开放在线订阅与自动扣费"};
+ const expected={lab:"FACTOR / OOS MATRIX",company:"INSOLVE TECH · COMPANY",research:"CAUSAL AUDIT",roadmap:"PRODUCT DIRECTION",membership:"Phantom · Solana 钱包",plans:"不自动续费"};
  for(const [page,marker] of Object.entries(expected)){
   const response=await app.fetch(new Request("http://localhost/"+page),env,ctx);assert.equal(response.status,200,page);
   const html=await response.text();assert.ok(html.includes(marker),page);assert.ok(html.includes('data-marketing-page="'+page+'"'));
@@ -761,6 +785,10 @@ test('research levels are enforced by server APIs, including direct detail URLs 
   fixture.sql.prepare("UPDATE member_accounts SET plan='signal',grant_kind='complimentary',expires_at=? WHERE id=?").run(Date.now()+86400000,paid.row.id);
   const paths=await (await get('/api/evidence-chain-index')).json();assert.equal(paths.chains.length,12);
   assert.equal((await get('/api/evidence-chain?id='+paths.chains[0].id)).status,200);
+  assert.equal((await get('/api/research-report?id='+paths.chains[0].id)).status,200);
+  const fullCatalog=JSON.parse(await readFile(new URL('../snapshot/research-report-index.json',import.meta.url),'utf8'));
+  const outside=fullCatalog.reports.find(r=>!r.historical&&!paths.chains.some(c=>c.id===r.id));
+  assert.ok(outside);assert.equal((await get('/api/research-report?id='+outside.id)).status,403);
   assert.equal((await get('/api/evidence-chain?id=unknown')).status,403);
   assert.equal((await (await get('/api/alpha-lab')).json()).experiments.length,1);
   assert.equal((await get('/api/portfolio-study?recipe=china-us&start=2026-01-01&end=2026-09-22&tier=research')).status,403);
@@ -773,7 +801,8 @@ test('research levels are enforced by server APIs, including direct detail URLs 
 });
 test('new workspace APIs enforce account and plan boundaries',async()=>{
  const app=await worker();
- for(const path of ['/api/account/watchlist','/api/crypto-market','/api/evidence-chain-index'])assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
+ for(const path of ['/api/account/watchlist','/api/crypto-market','/api/evidence-chain-index','/api/company-report-inventory'])assert.equal((await app.fetch(new Request('http://localhost'+path),env,ctx)).status,401);
+ const coverage=await app.fetch(authorizedRequest('/api/company-report-inventory?q=AAPL&market=us'),env,ctx);assert.equal(coverage.status,200);const coverageBody=await coverage.json();assert.equal(coverageBody.complete,false);assert.equal(coverageBody.companies[0].ticker,'AAPL');assert.ok(coverageBody.companies.length<=25);assert.ok(JSON.stringify(coverageBody).length<30000);
  const save=await app.fetch(authorizedRequest('/api/account/watchlist',{method:'PUT',headers:{Origin:'http://localhost','Content-Type':'application/json','X-ORAKT-Preferences':'watchlist'},body:JSON.stringify({tickers:['AAPL','NVDA']})}),env,ctx);
  assert.equal(save.status,200);assert.deepEqual((await save.json()).tickers,['AAPL','NVDA']);
  const index=await (await app.fetch(authorizedRequest('/api/evidence-chain-index'),env,ctx)).json();assert.ok(index.chains.length>0);assert.ok(index.chains.every(c=>c.nodes.length>0));assert.ok(!index.chains.find(c=>c.id==='dossier-NVDA-20090820-97979407'));assert.doesNotMatch(JSON.stringify(index),/evidenceGaps|financialLedger/);

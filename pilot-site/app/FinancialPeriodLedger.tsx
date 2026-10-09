@@ -9,7 +9,8 @@ const labels:Record<string,[string,string]>={
  NetCashProvidedByUsedInOperatingActivities:['经营活动现金流','Operating cash flow'],PaymentsToAcquirePropertyPlantAndEquipment:['购置固定资产支出','Capital expenditure'],
  SimplifiedFreeCashFlow:['简化自由现金流','Simplified free cash flow'],InventoryNet:['存货','Inventory'],StockholdersEquity:['股东权益','Shareholders’ equity'],
  CashAndCashEquivalentsAtCarryingValue:['现金及现金等价物','Cash and cash equivalents']};
-const periods:Record<string,[string,string]>={quarter:['单季度','Quarter'],six_month_cumulative:['累计六个月','Six months cumulative'],nine_month_cumulative:['累计九个月','Nine months cumulative'],annual:['年度','Annual'],instant:['时点余额','Point-in-time balance']};
+// Duration classification alone cannot distinguish a fiscal year from a rolling year.
+const periods:Record<string,[string,string]>={quarter:['单季度','Quarter'],six_month_cumulative:['累计六个月','Six months cumulative'],nine_month_cumulative:['累计九个月','Nine months cumulative'],annual:['十二个月区间（见起止日）','Twelve-month window (see dates)'],instant:['时点余额','Point-in-time balance']};
 const dimensions:Record<string,[string,string]>={
  'srt:ProductOrServiceAxis=aapl:IPadMember':['iPad','iPad'],'srt:ProductOrServiceAxis=aapl:IPhoneMember':['iPhone','iPhone'],'srt:ProductOrServiceAxis=aapl:MacMember':['Mac','Mac'],
  'srt:ProductOrServiceAxis=aapl:WearablesHomeandAccessoriesMember':['可穿戴、家居及配件','Wearables, Home & Accessories'],'srt:ProductOrServiceAxis=us-gaap:ProductMember':['产品合计','Total products'],'srt:ProductOrServiceAxis=us-gaap:ServiceMember':['服务','Services'],

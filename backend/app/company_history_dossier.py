@@ -99,7 +99,10 @@ def chapter_packet(packet, key):
     def compact(f):return {k:f.get(k) for k in ['evidence_id','concept','value','unit','period_start','period_end']}
     comparisons=[c for c in packet['financial_ledger']['comparisons'] if relevant.search(c['concept'])]
     # Consolidated figures first, then the dimensional operating breakdown.
-    comparisons.sort(key=lambda c:(' [' in c['concept'],c['concept'],c['periodType']))
+    core=['RevenueFromContractWithCustomerExcludingAssessedTax','SalesRevenueNet','Revenues',
+          'GrossProfit','OperatingIncomeLoss','NetIncomeLoss','NetCashProvidedByUsedInOperatingActivities',
+          'CashAndCashEquivalentsAtCarryingValue','Assets','Liabilities','StockholdersEquity']
+    comparisons.sort(key=lambda c:(' [' in c['concept'],core.index(c['concept']) if c['concept'] in core else len(core),c['concept'],c['periodType']))
     ledger={"accountingRules":packet['financial_ledger']['accountingRules'],"comparisons":[{**{k:c[k] for k in ['id','concept','unit','periodType','comparisonBasis','direction','change','changePercent','evidence_refs']},"current":compact(c['current']),"previous":compact(c['previous'])} for c in comparisons[:8]]}
     # An explicit allow-list avoids copying the entire filing, all chapters and
     # duplicate excerpts into every request. The immutable source retains them.
@@ -154,12 +157,33 @@ def validate_section(section, allowed, ledger=None, required_comparisons=(), tec
                 raise ValueError('Internal evidence masking placeholder leaked into report prose')
             narrative=re.sub(r"PASSAGE:[a-f0-9]{16}|BULK:[a-f0-9]{64}|FACT:\d+|IX:[A-Za-z0-9_.-]+|SEC:\d{10}-\d{2}-\d{6}|MARKET:[A-Za-z0-9:._-]+","",value)
             narrative=re.sub(r"\b10-[QK](?:/A)?\b","",narrative)  # SEC form names are not numerical claims
+            # Explicit source-quoted year labels preserve period attribution.
+            # A bare number, amount or percentage is still not permitted prose.
+            years=set(re.findall(r'\b(?:19|20)\d{2}\b',' '.join(c.quote for c in section.grounded_claims)))
+            for comparison in (ledger or {}).get('comparisons',[]):
+                for side in ('current','previous'):
+                    row=comparison.get(side,{})
+                    years.update(str(row[k])[:4] for k in ('period_start','period_end') if row.get(k) and re.match(r'^(?:19|20)\d{2}-\d{2}-\d{2}$',str(row[k])))
+            if years:
+                alternatives='|'.join(sorted(years))
+                def year_label(match):
+                    before=narrative[max(0,match.start()-35):match.start()]
+                    after=narrative[match.end():match.end()+22]
+                    if re.search(r'(?:[$€£¥]|USD|CNY|EUR)\s*$',before,re.I) or re.match(r'\s*(?:%|[.,]\d|dollars\b|USD\b|million\b|billion\b|美元|元|股|万元|亿元)',after,re.I):
+                        return match.group()
+                    if (re.search(r'(?:price|amount|revenue|income|profit|EPS)\s+(?:was|is|of|at)\s*$',before,re.I)
+                        or re.search(r'(?:价格|金额|销售额|收入|利润)(?:为|是|达到)\s*$',before)) and not after.startswith('年'):
+                        return match.group()
+                    # Evidence-quoted years can coordinate (2008 and 2009 / 2008、2009年).
+                    # This is a lexical exception, NOT source entailment approval.
+                    return ''
+                narrative=re.sub(r'(?<![\d.])(?:'+alternatives+r')(?!\d)',year_label,narrative)
             for term in sorted(technical_terms,key=len,reverse=True):narrative=re.sub(r'(?<![A-Za-z0-9_])'+re.escape(term)+r'(?![A-Za-z0-9_%])','',narrative)
             narrative=re.sub(r"(?<![\d.])\b[1-9][）)]", "", narrative)  # list ordinals are not financial quantities
             if re.search(r"\d",narrative):
-                raise ValueError(f"Numerical claims belong in deterministic source tables, not bilingual model prose: {field}.{language}")
+                raise ValueError(f"Numerical claims belong in deterministic source tables, not bilingual model prose: {field}.{language}. For necessary source-quoted year labels only, use YYYY年 / in YYYY; other amounts stay in tables.")
         if not re.search(r"[\u4e00-\u9fff]",pair.zh) or re.search(r"[\u4e00-\u9fff]",pair.en):
-            raise ValueError("Both Chinese and English text are required")
+            raise ValueError(f"Both Chinese and English text are required: {field}. zh must contain Chinese; en must be fully English without untranslated Chinese terms.")
     # Citation identifiers must never pad a thin paragraph past the quality gate.
     def prose_length(value):
         clean=re.sub(r'PASSAGE:[a-f0-9]{16}|BULK:[a-f0-9]{64}|FACT:\d+|IX:[A-Za-z0-9_.-]+|SEC:\d{10}-\d{2}-\d{6}|MARKET:[A-Za-z0-9:._-]+','',value)

@@ -61,8 +61,49 @@ def add_passages(packet,cold_root):
     raw=path.read_bytes()
     if hashlib.sha256(raw).hexdigest()!=packet['raw_sha256']:raise ValueError('Original filing changed')
     parser=FilingText();parser.feed(raw.decode('utf-8',errors='replace'));text=parser.clean()
-    packet['chapter_passages']={key:retrieve_passages(text,key,packet['raw_sha256']) for key in TOPICS}
+    # Broader frozen retrieval pool; the writer still selects a bounded four
+    # passages. Eight keyword-ranked hits often omitted current MD&A entirely.
+    packet['chapter_passages']={key:retrieve_passages(text,key,packet['raw_sha256'],limit=24) for key in TOPICS}
+    add_accounting_transition_context(packet,text)
+    from app.dossier_earnings_context import add_context
+    add_context(packet,text)
     return packet
+
+
+def add_accounting_transition_context(packet,text):
+    """Keep both sides of the observed historical/new-policy transition.
+
+    Exact same-filing spans, not an inferred summary. Keyword retrieval alone
+    selected the superseded rule and dropped the immediately following rule.
+    Existing frozen packets are never mutated on load.
+    """
+    old=re.search(r'Under the historical accounting principles',text,re.I)
+    new=re.search(r'The new accounting principles generally',text,re.I)
+    if not old or not new or not 0<new.start()-old.start()<2500:return
+    contexts=[]
+    for begin,stop in ((old.start(),new.start()),(new.start(),min(len(text),new.start()+1800))):
+        if begin==new.start():
+            # End after a complete sentence, retaining the recognition rule.
+            endings=list(re.finditer(r'[.!?](?:\s|$)',text[begin:stop]))
+            if endings:stop=begin+endings[-1].end()
+        raw=text[begin:stop];value=raw.strip();start=begin+len(raw)-len(raw.lstrip())
+        digest=hashlib.sha256((packet['raw_sha256']+':'+str(start)+':'+value).encode()).hexdigest()
+        contexts.append({'id':'PASSAGE:'+digest[:16],'start':start,'end':start+len(value),
+            'text':value,'sourceHash':packet['raw_sha256'],'score':0})
+    packet['accounting_transition_ids']=[p['id'] for p in contexts]
+    for key in ('business','financial','capital','valuation','factors','conclusion'):
+        known={p['id'] for p in packet['chapter_passages'][key]}
+        packet['chapter_passages'][key].extend(dict(p) for p in contexts if p['id'] not in known)
+
+
+def validate_transition_context(packet,text):
+    for pid in packet.get('accounting_transition_ids',[]):
+        spans=[p for rows in packet['chapter_passages'].values() for p in rows if p['id']==pid]
+        if not spans:raise ValueError('Missing accounting transition context')
+        for p in spans:
+            digest=hashlib.sha256((packet['raw_sha256']+':'+str(p['start'])+':'+p['text']).encode()).hexdigest()
+            if p['sourceHash']!=packet['raw_sha256'] or text[p['start']:p['end']]!=p['text'] or pid!='PASSAGE:'+digest[:16]:
+                raise ValueError('Accounting transition context differs from original')
 
 def check_claims(claims,passages,required=False):
     known={p['id']:p for p in passages}

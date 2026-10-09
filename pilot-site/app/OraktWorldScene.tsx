@@ -75,8 +75,8 @@ export default function OraktWorldScene({language}:{language:"zh"|"en"}){
     tile(x-12,z-8,10,lift+20,13,color);tile(x+12,z-8,10,lift+20,13,color);tile(x,z+13,10,lift+20,13,color);
    }
    const [cx,cy]=project(x,z,lift);
-   ctx.font=`500 ${11/sceneScale}px system-ui`;ctx.textAlign="center";ctx.fillStyle="#d9e5e9";ctx.fillText(language==="zh"?station.zh:station.en,cx,cy+39/sceneScale);
-   ctx.font=`${8/sceneScale}px monospace`;ctx.fillStyle=color;ctx.fillText(station.code,cx,cy+54/sceneScale);
+
+
   };
   const draw=()=>{
    const t=timeRef.current;
@@ -139,10 +139,8 @@ export default function OraktWorldScene({language}:{language:"zh"|"en"}){
   return ()=>{cancelAnimationFrame(frame);resize.disconnect();};
  },[playing,globePoints,language]);
  return <div ref={ref} className={styles.scene} data-scene="world" data-running={playing} data-animation="loop">
-  <div className={styles.header}><span><i/> ORAKT WORLD <b>/ 01</b></span><button type="button" onClick={()=>setPaused(value=>!value)} disabled={reduced} aria-pressed={paused||reduced} aria-label={language==="zh"?(paused?"播放世界动画":"暂停世界动画"):(paused?"Play world animation":"Pause world animation")}>{paused||reduced?"▶":"Ⅱ"}</button></div>
-  <div className={styles.caption}><span>GLOBAL OBSERVATORY</span><h4>{language==="zh"?"一个世界，多重传导。":"One world. Many connections."}</h4><p>{language==="zh"?"定位事件 / 连接产业 / 追踪影响":"LOCATE / CONNECT / TRACE"}</p></div>
+  <div className={styles.header}><span/><button type="button" onClick={()=>setPaused(value=>!value)} disabled={reduced} aria-pressed={paused||reduced} aria-label={language==="zh"?(paused?"播放世界动画":"暂停世界动画"):(paused?"Play world animation":"Pause world animation")}>{paused||reduced?"▶":"Ⅱ"}</button></div>
   <canvas ref={canvasRef} className={styles.canvas} role="img" aria-label={language==="zh"?"立体全球信号观测站，新闻、宏观、供应链与市场通过光路联结。概念动画，非实时数据。":"Isometric global observatory linking news, macro, supply and markets. Concept animation, not live data."}/>
   {unavailable&&<div className={styles.notice} role="status"><span>{language==="zh"?"地图轮廓暂不可用，当前显示网络示意。":"Map outline unavailable. Showing the network schematic."}</span><button type="button" onClick={()=>setUnavailable(false)}>{language==="zh"?"重新加载":"Retry"}</button></div>}
-  <div className={styles.footer}><span>{language==="zh"?"地理底图 · Natural Earth":"GEOGRAPHY · NATURAL EARTH"}</span><span>{language==="zh"?"信号网络示意 · 非实时":"NETWORK CONCEPT · NOT LIVE"}</span></div>
  </div>;
 }

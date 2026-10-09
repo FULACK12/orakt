@@ -4,7 +4,7 @@ export function researchTier(access){
 }
 export function workspaceAccess(access){
  const tier=researchTier(access);
- return {tier,alpha:{experiments:tier==='research'?3:tier==='signal'?1:0,multifactor:tier==='research',auditArchive:tier==='research'},portfolio:{recipes:tier==='research'?'all':tier==='signal'?'standard':'preview',maxDays:tier==='research'?3660:tier==='signal'?366:0,customStress:tier==='research'},chains:{limit:tier==='research'?null:tier==='signal'?12:0,framework:true},billing:'manual_entitlements_only',basis:'research_depth_and_tool_scope_not_promised_returns'};
+ return {tier,alpha:{experiments:tier==='research'?3:tier==='signal'?1:0,multifactor:tier==='research',auditArchive:tier==='research'},portfolio:{recipes:tier==='research'?'all':tier==='signal'?'standard':'preview',maxDays:tier==='research'?3660:tier==='signal'?366:0,customStress:tier==='research'},chains:{limit:tier==='research'?null:tier==='signal'?12:0,mapLimit:tier==='research'?5:tier==='signal'?1:0,framework:true},billing:'monthly_non_recurring',basis:'research_depth_and_tool_scope_not_promised_returns'};
 }
 export function visibleAlpha(data,access){
  const tier=researchTier(access),experiments=tier==='research'?data.experiments:tier==='signal'?data.experiments.slice(0,1):[];

@@ -1,9 +1,10 @@
+import {DEVNET_RPC,DEVNET_GENESIS} from './solana-network.mjs';
 import {createHash,randomUUID} from 'node:crypto';
 import {decodeAddress} from './wallet-auth.mjs';
 const json=(v,s=200)=>Response.json(v,{status:s,headers:{'Cache-Control':'private, no-store'}});
 const MEMO='MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
-const RPC='https://api.devnet.solana.com';
-const GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1';
+const RPC=DEVNET_RPC;
+const GENESIS=DEVNET_GENESIS;
 export const newsMemo=r=>`ORAKT:news:v1:${r.id}:${r.content_hash}`;
 export function newsHash(v){return createHash('sha256').update(JSON.stringify({title:v.title,body:v.body,sourceUrls:v.sourceUrls,eventDate:v.eventDate})).digest('hex');}
 export function validSource(v){try{const u=new URL(v);return u.protocol==='https:'&&!u.username&&!u.password&&u.hostname.includes('.')&&v.length<=1200;}catch{return false;}}

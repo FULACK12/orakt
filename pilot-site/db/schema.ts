@@ -1,4 +1,10 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+export const billingOrders=sqliteTable('billing_orders',{
+ id:text('id').primaryKey(),memberId:text('member_id').notNull().references(()=>memberAccounts.id),
+ plan:text('plan').notNull(),currency:text('currency').notNull(),network:text('network').notNull(),mint:text('mint').notNull(),recipient:text('recipient').notNull(),payer:text('payer').notNull(),reference:text('reference').notNull(),amountUnits:text('amount_units').notNull(),
+ createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull(),status:text('status').notNull().default('pending'),
+ signature:text('signature'),paidAt:integer('paid_at'),accessFrom:integer('access_from'),accessUntil:integer('access_until'),settlementRevision:integer('settlement_revision'),activeMemberKey:text('active_member_key'),
+},t=>[uniqueIndex('idx_billing_reference').on(t.reference),uniqueIndex('idx_billing_signature').on(t.signature),uniqueIndex('idx_billing_active_member').on(t.activeMemberKey),index('idx_billing_member_created').on(t.memberId,t.createdAt)]);
 export const memberWatchlists=sqliteTable('member_watchlists',{
  memberId:text('member_id').primaryKey().references(()=>memberAccounts.id),
  tickers:text('tickers').notNull().default('[]'),

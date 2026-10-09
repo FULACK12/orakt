@@ -98,7 +98,7 @@ def chapter_schema(claims):
     return {'type':'object','additionalProperties':False,'properties':props,'required':list(props)}
 
 
-def bind_narrative_context(draft, allowed):
+def bind_narrative_context(draft, allowed, *, unreviewed_archive=False):
     """Append model-selected evidence context, not fabricated proof of causality."""
     text={};contexts={}
     for key in ('analysis','mechanism','counterEvidence','evidenceGaps','validationPlan'):
@@ -107,6 +107,11 @@ def bind_narrative_context(draft, allowed):
         if set(pair)!={'support_ids','zh','en'}:raise ValueError('Unexpected narrative fields')
         suffix=' ['+', '.join(ids)+']'
         text[key]={'zh':pair['zh']+suffix,'en':pair['en']+suffix};contexts[key]=ids
+    # Archiving a rejected draft must retain its exact bad prose. This does not
+    # approve it: only the explicit all-field assistant repair uses this path.
+    # Unknown/duplicate support IDs and malformed fields remain rejected above.
+    if unreviewed_archive:
+        return text,contexts
     m=text['mechanism']
     if not re.search(r'如果|若|条件|假设',m['zh']) or not re.search(r'\bif\b|conditional|hypothes',m['en'],re.I):
         raise ValueError('mechanism must explicitly be a conditional hypothesis, not established issuer performance')

@@ -115,3 +115,6 @@
   .legal { width: calc(100% - 32px); padding: 18px 0; }
 }
 @media (prefers-reduced-motion: reduce) { .methodRow { transition: none; } }
+/* Shared language and policy controls remain available on every login method. */
+.languageChoice{margin-left:auto;border:1px solid #ffffff36;border-radius:8px;min-height:42px;padding:8px 14px;background:#10151e;color:#eef3f8;cursor:pointer;white-space:nowrap;font:inherit}
+.policyNote{max-width:480px;margin:12px auto 32px;padding:0 24px;color:#b8c5d1;font-size:12px;line-height:1.9}.policyNote a{color:#c4f176;text-decoration:underline;text-underline-offset:3px}

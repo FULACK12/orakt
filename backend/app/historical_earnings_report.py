@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import re
+import sqlite3
 from datetime import UTC, datetime
 from html.parser import HTMLParser
 from pathlib import Path
@@ -89,7 +90,7 @@ def build_packet(session, *, ticker: str, cold_root: Path, accession: str | None
         select(CompanyFiling)
         .where(
             CompanyFiling.ticker == ticker,
-            CompanyFiling.form.in_(["10-Q", "10-K"]) if accession else CompanyFiling.form == "10-Q",
+            CompanyFiling.form.in_(["10-Q", "10-K", "10-Q/A", "10-K/A", "20-F", "20-F/A", "40-F", "40-F/A"]) if accession else CompanyFiling.form == "10-Q",
             CompanyFiling.accession_number == accession if accession else True,
         )
         .order_by(CompanyFiling.filed_at, CompanyFiling.accession_number)
@@ -115,10 +116,15 @@ def build_packet(session, *, ticker: str, cold_root: Path, accession: str | None
             .order_by(CompanyFinancialFact.concept, CompanyFinancialFact.period_end)
         ).all()
         from app.sec_cold_facts import cold_facts_for_filing
-        cold_facts=cold_facts_for_filing(cold_root,ticker,filing.accession_number,filing.filed_at,filing.report_date)
-        if len(cold_facts or rows) < 10:
-            skipped += 1
-            continue
+        fact_read_warning=None
+        try:
+            cold_facts=cold_facts_for_filing(cold_root,ticker,filing.accession_number,filing.filed_at,filing.report_date)
+        except sqlite3.OperationalError as exc:
+            if 'locked' not in str(exc).lower() and 'busy' not in str(exc).lower():raise
+            # Same-accession DB / original inline facts remain valid evidence;
+            # a running bulk import must not hide an already retained filing.
+            cold_facts=[]
+            fact_read_warning='Cold variant import busy; used only same-accession database and original inline facts, not a latest-value substitute.'
         raw = path.read_bytes()
         parser = FilingText()
         parser.feed(raw.decode("utf-8", errors="replace"))
@@ -139,6 +145,15 @@ def build_packet(session, *, ticker: str, cold_root: Path, accession: str | None
             }
             for r in rows
         ]
+        selected_facts=cold_facts or facts
+        inline_fallback=False
+        if len(selected_facts)<10:
+            from app.inline_filing_facts import monetary_facts
+            inline,_=monetary_facts(raw.decode('utf-8',errors='replace'),filed_at=str(filing.filed_at),source_url=filing.source_url)
+            inline=[f for f in inline if f.get('period_end') and f['period_end']<=str(filing.report_date)]
+            selected_facts=selected_facts+inline;inline_fallback=bool(inline)
+        if len(selected_facts)<10:
+            skipped+=1;continue
         return {
             "version": VERSION,
             "mode": "historical_reconstruction",
@@ -153,7 +168,9 @@ def build_packet(session, *, ticker: str, cold_root: Path, accession: str | None
             "raw_sha256": hashlib.sha256(raw).hexdigest(),
             "full_text_characters": len(text),
             "excerpts": excerpts(text),
-            "facts": cold_facts or facts,
+            "facts": selected_facts,
+            "fact_read_warning": fact_read_warning,
+            "original_inline_fact_fallback": inline_fallback,
             "older_filings_without_sufficient_local_body_or_facts": skipped,
             "limitations": [LIMITATION, "节选并非全文输入；现金流累计九个月不等于单季现金流。"],
         }

@@ -43,7 +43,20 @@ def mask_financial_numbers(text):
  return re.sub(r'(?<![A-Za-z0-9])\d[\d,.%/-]*','[value in source table]',text)
 
 def disclosed_product_terms(excerpts):
- return sorted(set(re.findall(r'\b(?:H|B|GB|MI)\d{2,4}[A-Z]?\b',' '.join(e['text'] for e in excerpts))))
+ text=' '.join(e['text'] for e in excerpts)
+ terms=set(re.findall(r'\b(?:H|B|GB|MI)\d{2,4}[A-Z]?\b',text))
+ # Source-attested product identifiers are not financial quantities. In
+ # particular, masking Microsoft 365 makes the writer reconstruct its name.
+ terms.update(re.findall(r'\b(?:Microsoft|Office|Dynamics) 365\b',text))
+ # Exact disclosed aircraft program names, not arbitrary hyphenated numbers.
+ # These otherwise become "MQ-[value in source table]" in redacted views.
+ terms.update(re.findall(r'\b(?:MQ-25|T-7A|KC-46A?|VC-25B)\b',text))
+ # Retain the full source-attested program label, never a bare numeric name
+ # that could also be a revenue, delivery quantity or percentage.
+ terms.update(re.findall(r'\b(?:737|777X|787) program\b',text))
+ if re.search(r'\bMicrosoft\b',text):
+  terms.update(re.findall(r'\bE[35]\b',text))
+ return sorted(terms)
 
 
 def disclosed_reference_terms(packet):

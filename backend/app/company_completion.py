@@ -8,6 +8,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
 import httpx
+from pypdf.errors import PdfReadError
 from sqlalchemy import select, text
 from app.core.config import get_settings
 from app.db.session import get_session_factory
@@ -18,6 +19,7 @@ from app.companies import _submission_rows, _submission_rows_from_columns, _hist
 
 REPORT_FORMS=('10-K','10-Q','10-K/A','10-Q/A','20-F','20-F/A','40-F','40-F/A')
 SOURCE_FORMS=REPORT_FORMS+('8-K','8-K/A','6-K','6-K/A','DEF 14A','DEFA14A')
+DOCUMENT_ERRORS=(httpx.HTTPError,ValueError,OSError,PdfReadError)
 
 def now():return datetime.now(UTC).isoformat()
 
@@ -214,7 +216,7 @@ async def collect_cn(root,cutoff):
         seen+=1
         try:
          outcome,_=await _retain_announcement(s,client=client,archive=archive,source=source,announcement=ann);s.commit();created+=int(outcome=='created')
-        except (httpx.HTTPError,ValueError,OSError) as e:
+        except DOCUMENT_ERRORS as e:
          s.rollback();errors+=1
          mark(db,'cn-document',ann.announcement_id,leader.ticker,'failed',{'errorType':type(e).__name__})
          if isinstance(e,httpx.HTTPStatusError) and e.response.status_code in (403,429):raise InterruptedError('source_access_backoff')

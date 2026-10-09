@@ -30,8 +30,8 @@ test('citation presentation preserves originals, links groups and does not inven
  const refs=renderToStaticMarkup(React.createElement(References,{references:view.readingReferences,language:'zh'}));assert.match(refs,/id="reading-source-1"/);assert.match(refs,/当前发布版本未附此段原文/);assert.match(refs,/Original source A/);
  assert.equal(reportForReading(null,'zh'),null);assert.deepEqual(readingReferences(undefined),[]);assert.equal(readableEvidenceText('ordinary passage',[],'en'),'ordinary passage');assert.equal(reportForReading(report,'en').thesis,'增长 〔Ref 2 · Ref 1〕');
 });
-for(const language of ['zh','en'])test(`real nine-chapter dossier has readable linked citations in ${language}`,()=>{
- const d=JSON.parse(readFileSync(new URL('../private-data/company-dossiers/dossier-NVDA-20090820-97979407.json',import.meta.url))),view=reportForReading({dossier:d},language);
+for(const id of ['dossier-NVDA-20090820-97979407','dossier-NVDA-20260826-da949048','dossier-MSFT-20260729-e8b00c5f'])for(const language of ['zh','en'])test(`${id} has readable nine chapters and linked citations in ${language}`,()=>{
+ const d=JSON.parse(readFileSync(new URL('../private-data/company-dossiers/'+id+'.json',import.meta.url))),view=reportForReading({dossier:d},language);
  assert.ok(view.readingReferences.length>0);assert.ok(view.readingReferences.every(r=>r.quote));
  for(const chapter of view.dossier.chapters)for(const key of ['analysis','mechanism','counterEvidence','uncertainty','evidenceSummary'])if(chapter[key]?.[language])assert.doesNotMatch(chapter[key][language],/PASSAGE:/);
  const html=renderToStaticMarkup(React.createElement(Dossier,{dossier:view.dossier,language}));assert.equal((html.match(/id="chapter-/g)||[]).length,9);assert.match(html,/href="#reading-source-/);assert.doesNotMatch(html,/NaN|undefined/);

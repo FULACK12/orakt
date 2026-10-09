@@ -14,10 +14,10 @@ export async function memberFor(env,identity,active=false){
  return {row,access:accessFor(row,env,now)};
 }
 export function accessFor(row,env,now=Date.now()){
- const isAdmin=admin(row,env),active=row.status==='active',paidPlan=['signal','research'].includes(row.plan),expired=paidPlan&&(!Number.isSafeInteger(row.expires_at)||row.expires_at<=now||!['manual_paid','complimentary'].includes(row.grant_kind));
+ const isAdmin=admin(row,env),active=row.status==='active',paidPlan=['signal','research'].includes(row.plan),expired=paidPlan&&(!Number.isSafeInteger(row.expires_at)||row.expires_at<=now||!['manual_paid','complimentary','onchain_paid'].includes(row.grant_kind));
  const effectivePlan=active&&paidPlan&&!expired?row.plan:'explorer';
  return {role:isAdmin?'admin':'member',status:row.status,plan:row.plan,effectivePlan,grantKind:row.grant_kind,expiresAt:row.expires_at?new Date(row.expires_at).toISOString():null,expired,
- permissions:{map:active,reports:active&&(isAdmin||effectivePlan!=='explorer'),research:active&&(isAdmin||effectivePlan==='research'),manageUsers:active&&isAdmin,generateAI:false},billing:'manual_only'};
+ permissions:{map:active,reports:active&&(isAdmin||effectivePlan!=='explorer'),research:active&&(isAdmin||effectivePlan==='research'),manageUsers:active&&isAdmin,generateAI:false},billing:'monthly_non_recurring'};
 }
 export function publicMember(member,identity){return {provider:member.row.provider,displayName:member.row.display_name,accountId:member.row.id,previousAccountId:member.row.legacy_ref,expiresAt:identity.expiresAt,createdAt:new Date(member.row.created_at).toISOString(),membership:member.access};}
 
@@ -40,6 +40,7 @@ export async function memberAdminResponse(request,env,actor){
   if(url.pathname==='/api/admin/users'&&request.method==='GET'){
    const pendingLocalAccounts=(await env.DB.prepare("SELECT COUNT(*) AS n FROM local_auth_accounts a WHERE NOT EXISTS (SELECT 1 FROM member_accounts m WHERE m.provider = 'local' AND m.subject = a.id)").bind().first()).n;
    const stats=await env.DB.prepare(`SELECT COUNT(*) AS totalAccounts, MIN(first_seen_at) AS trackedSince, SUM(CASE WHEN last_seen_at >= ? THEN 1 ELSE 0 END) AS active24h, SUM(CASE WHEN last_seen_at >= ? THEN 1 ELSE 0 END) AS active7d, SUM(CASE WHEN last_seen_at >= ? THEN 1 ELSE 0 END) AS active30d, SUM(CASE WHEN status = 'active' AND plan <> 'explorer' AND expires_at > ? AND grant_kind = 'manual_paid' THEN 1 ELSE 0 END) AS manuallyConfirmedPaid, SUM(CASE WHEN status = 'active' AND plan <> 'explorer' AND expires_at > ? AND grant_kind = 'complimentary' THEN 1 ELSE 0 END) AS complimentary, SUM(CASE WHEN status = 'suspended' THEN 1 ELSE 0 END) AS suspended FROM member_accounts`).bind(now-86400000,now-7*86400000,now-30*86400000,now,now).first();
+   stats.onchainPaid=(await env.DB.prepare("SELECT COUNT(*) AS n FROM member_accounts WHERE status = 'active' AND plan IN ('signal','research') AND grant_kind = 'onchain_paid' AND expires_at > ?").bind(now).first()).n;
    const providers=await env.DB.prepare("SELECT provider, COUNT(*) AS accounts FROM member_accounts GROUP BY provider").bind().all();
    const q=(url.searchParams.get('q')??'').trim().slice(0,80),page=Math.min(10000,Math.max(1,parseInt(url.searchParams.get('page')??'1')||1)),like=`%${q}%`;
    const where=" WHERE (id LIKE ? OR display_name LIKE ? OR provider LIKE ?)";

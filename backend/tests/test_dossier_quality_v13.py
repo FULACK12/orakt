@@ -29,11 +29,33 @@ def test_balance_basis_and_direction_are_not_cashflow_yoy():
  s.analysis.zh='现金及等价物余额较上年末增长。'
  assert not balance_narrative_errors(s,ledger('CashAndCashEquivalentsAtCarryingValue','increase'))
 
+
+def test_aircraft_identifiers_require_source_attestation_and_do_not_allow_amounts():
+ packet={'excerpts':[{'text':'MQ-25 and T-7A contracts cost $890 million in 2026.'}]}
+ terms=disclosed_reference_terms(packet)
+ assert set(terms)=={'MQ-25','T-7A'}
+ s=section();s.analysis.en+=' MQ-25 and T-7A remain development programs.'
+ validate_section(s,{'FACT:1'},technical_terms=terms)
+ for extra in [' KC-46A delivery.', ' $890 million.', ' MQ-25% growth.', ' MQ-250 aircraft.']:
+  other=s.model_copy(deep=True);other.analysis.en+=extra
+  with pytest.raises(ValueError,match='Numerical'):
+   validate_section(other,{'FACT:1'},technical_terms=terms)
+
 def test_no_false_flags_for_negation_hypotheses_or_valid_methodology():
  s=section();s.analysis.zh='不能据此推断流动负债上升。若流动负债上升，需要另行分析。'
  assert not balance_narrative_errors(s,ledger())
  s.validationPlan.zh='使用NFCI进行季节性调整。';assert methodological_errors(s)
  s.validationPlan.zh='NFCI是金融状况指标，不能用于季节性调整。';assert not methodological_errors(s)
+
+
+def test_commercial_aircraft_requires_full_attested_program_label():
+ terms=disclosed_reference_terms({'excerpts':[{'text':'737 program, 777X program, and 787 program inventory; 737 deliveries.'}]})
+ assert set(terms)=={'737 program','777X program','787 program'}
+ s=section();s.analysis.en+=' The 737 program and 777X program differ from the 787 program.'
+ validate_section(s,{'FACT:1'},technical_terms=terms)
+ for extra in [' Revenue $737.', ' 737 deliveries.', ' 787% growth.', ' 777 program.', ' 737 program9.']:
+  other=s.model_copy(deep=True);other.analysis.en+=extra
+  with pytest.raises(ValueError,match='Numerical'):validate_section(other,{'FACT:1'},technical_terms=terms)
 
 def test_english_direct_balance_contradiction():
  s=section();s.analysis.en+=' Current liabilities increased.'

@@ -1,10 +1,11 @@
+import {DEVNET_RPC,DEVNET_GENESIS} from './solana-network.mjs';
 import {randomUUID} from 'node:crypto';
 import {Buffer} from 'node:buffer';
 import {decodeAddress} from './wallet-auth.mjs';
 import {unsignedMemo,validReceipt,validSource} from './news-publication.mjs';
 import {KINDS,hash,contributor,reputation,verification,intelligenceMemo} from './intelligence-policy.mjs';
 const json=(v,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'private, no-store'}});
-const RPC='https://api.devnet.solana.com',GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1';
+const RPC=DEVNET_RPC,GENESIS=DEVNET_GENESIS;
 async function rpc(method,params=[]){const r=await fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('rpc');const p=await r.json();if(p.error)throw Error('rpc');return p.result;}
 async function input(request){
  if(request.headers.get('Origin')!==new URL(request.url).origin||request.headers.get('X-ORAKT-Intelligence')!=='review'||!request.headers.get('Content-Type')?.startsWith('application/json'))throw {status:403,error:'same_origin_required'};

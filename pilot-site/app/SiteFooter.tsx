@@ -32,6 +32,8 @@ export const footerGroups=[
   {href:"/account",zh:"账号中心",en:"Account center"},
   {href:"/access/recover",zh:"恢复账号",en:"Account recovery"},
   {href:"/membership#account-help",zh:"常见问题与帮助",en:"Account help"},
+  {href:"/privacy",zh:"隐私与账号数据",en:"Privacy & account data"},
+  {href:"/terms",zh:"使用条件与研究风险",en:"Use conditions & risks"},
  ]},
 ] as const;
 

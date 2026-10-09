@@ -22,7 +22,8 @@ test("grants fail closed for expiry, invalid kinds, suspension and unbound admin
 });
 test("free catalog is sanitized; bodies, raw files and premium aggregates require server authorization",async t=>{
  const {env}=setup(t),app=await worker();
- const index=await (await app.fetch(req("/api/research-report-index"),env,ctx)).json();assert.equal(index.reports.length,JSON.parse(readFileSync(new URL('../snapshot/research-report-index.json',import.meta.url),'utf8')).reports.length);assert.deepEqual(Object.keys(index.reports[0]).sort(),["companyName","createdAt","id","marketRegion","sector","ticker"].sort());
+ const index=await (await app.fetch(req("/api/research-report-index"),env,ctx)).json();assert.equal(index.reports.length,JSON.parse(readFileSync(new URL('../snapshot/research-report-index.json',import.meta.url),'utf8')).reports.length);assert.deepEqual(Object.keys(index.reports[0]).sort(),["companyName","createdAt","id","marketRegion","sector","ticker","reportHref","reportKind","templateVersion"].sort());
+ for(const row of index.reports){assert.match(row.reportHref,/^\/platform\/(research|chains)\?report=/);assert.equal(row.thesis,undefined);assert.equal(row.dossier,undefined);assert.equal(row.evidence,undefined);}
  for(const path of ["/api/research-report?id=local-566&plan=research","/api/sec-evidence","/api/entry-backtest-status","/api/semiconductor-comparison","/api/supply-chain-sites","/api/admin/users"])assert.equal((await app.fetch(req(path),env,ctx)).status,403,path);
  assert.equal((await app.fetch(req("/snapshot/research-reports/local-566.json"),env,ctx)).status,404);
  assert.equal((await app.fetch(req("/api/research/generate","reader","POST",{}),env,ctx)).status,405);

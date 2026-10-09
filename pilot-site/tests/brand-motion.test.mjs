@@ -13,7 +13,9 @@ test("motion controls preserve an offscreen pause and a reduced-motion fallback"
   const hook=await readFile(new URL("../app/useSceneActivity.ts",import.meta.url),"utf8");
   assert.match(hook,/IntersectionObserver/);assert.match(hook,/document.hidden/);assert.match(hook,/prefers-reduced-motion/);
   const chain=await readFile(new URL("../app/OraktChainScene.tsx",import.meta.url),"utf8");
-  assert.match(chain,/cancelAnimationFrame/);assert.match(chain,/aria-pressed/);assert.match(chain,/非投资结论/);
+  assert.match(chain,/useSceneActivity/);assert.match(chain,/aria-pressed/);assert.match(chain,/概念动画/);
+  assert.match(chain,/if\(reduced\|\|paused\|\|e.pointerType==='touch'\)return/);
+  assert.match(chain,/data-running=\{running&&!paused\}/);
 });
 
 test("paused scenes preserve progress and resume at the exact remaining time",()=>{
@@ -39,7 +41,7 @@ test("marquee repeats complete equal-width groups and hides the duplicate from r
   const source=await readFile(new URL("../app/OraktLanding.tsx",import.meta.url),"utf8");
   const css=await readFile(new URL("../app/OraktLanding.module.css",import.meta.url),"utf8");
   assert.match(source,/\[0, 1\]\.map/);assert.match(source,/aria-hidden=\{group === 1/);
-  assert.match(css,/width:max\(100vw, 1280px\)/);assert.match(css,/translateX\(-50%\)/);
+  assert.match(css,/\.marqueeGroup\s*\{[^}]*width:max-content;[^}]*min-width:0/);assert.match(css,/translateX\(-50%\)/);
 });
 
 test("contour wordmark is vector-only, bounded and explicitly pausable",async()=>{
@@ -55,21 +57,26 @@ test("contour wordmark is vector-only, bounded and explicitly pausable",async()=
 });
 
 test("new world and chain scenes have isolated styles, bounded geometry and accessible playback",async()=>{
- for(const [component,stylesheet] of [["OraktWorldScene.tsx","OraktWorldScene.module.css"],["OraktChainScene.tsx","OraktProductScenes.module.css"]]){
+ for(const [component,stylesheet] of [["OraktWorldScene.tsx","OraktWorldScene.module.css"],["OraktChainScene.tsx","OraktMatrix.module.css"]]){
   const source=await readFile(new URL(`../app/${component}`,import.meta.url),"utf8");
   const css=await readFile(new URL(`../app/${stylesheet}`,import.meta.url),"utf8");
   assert.ok(source.includes(`./${stylesheet}`));
   for(const [,name] of source.matchAll(/styles\.(\w+)/g))assert.ok(css.includes(`.${name}`),`${component} uses missing style ${name}`);
-  assert.match(source,/data-animation="loop"/);assert.match(source,/aria-pressed/);
-  assert.match(source,/cancelAnimationFrame/);assert.match(source,/if\s*\(!?playing\)/);
-  assert.match(css,/44px/);assert.match(css,/@media\(max-width:520px\)/);
+  assert.match(source,/data-animation="(loop|matrix)"/);assert.match(source,/aria-pressed/);
+  assert.match(source,/useSceneActivity/);
+  if(component==='OraktWorldScene.tsx'){
+    assert.match(source,/cancelAnimationFrame/);assert.match(source,/if\s*\(!?playing\)/);
+    assert.match(css,/44px/);assert.match(css,/@media\(max-width:520px\)/);
+  }else{
+    assert.match(source,/onPointerLeave=\{reset\}/);assert.match(css,/\.scene\[data-running=true\][^{]+\{animation:corePulse/);
+  }
  }
  const world=await readFile(new URL("../app/OraktWorldScene.tsx",import.meta.url),"utf8");
  assert.match(world,/validateLandPoints/);assert.match(world,/controller\.abort/);assert.match(world,/resize\.disconnect/);
  assert.match(world,/devicePixelRatio\|\|1,1\.75/);assert.match(world,/now-last>=32/);
  assert.match(world,/非实时数据/);assert.match(world,/not live data/);
  const chain=await readFile(new URL("../app/OraktChainScene.tsx",import.meta.url),"utf8");
- assert.match(chain,/length:30/);assert.match(chain,/useId/);assert.match(chain,/clock\.current\.reset/);
+ assert.match(chain,/length:64/);assert.match(chain,/Math.max\(0,1-Math.hypot/);assert.match(chain,/setPaused\(v=>!v\);reset\(\)/);
  assert.doesNotMatch(chain,/paperBack|documentStack|evidencePaper/);
 });
 

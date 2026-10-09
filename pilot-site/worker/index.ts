@@ -1,4 +1,12 @@
 import {workspaceAccess,visibleAlpha,visibleChains} from './research-tiers.mjs';
+import {mapChains} from './map-chains.mjs';
+import appleNetworkSnapshot from '../snapshot/apple-network-v132.json';
+import {appleResearch} from './apple-research.mjs';
+import {hormuzResearch} from './hormuz-research.mjs';
+import {assetLinks} from './asset-links.mjs';
+import {aaplxProfile,aaplxReport} from './aaplx-research.mjs';
+import {billingResponse} from './billing.mjs';
+import {hormuzChain} from '../app/chain-catalog';
 import {portfolioCatalog,portfolioStudy} from './portfolio-studies.mjs';
 import packedPortfolioPrices from '../generated/private-portfolio-prices.mjs';
 /** Cloudflare Worker entry point for the vinext-starter template. */
@@ -15,17 +23,21 @@ import chainIndex from '../generated/private-chain-index.mjs';
 import {memberFor,publicMember,memberAdminResponse} from "./membership.mjs";
 import {publicationResponse} from "./publication.mjs";
 import {newsPublicationResponse} from "./news-publication.mjs";
+import {intelligenceNetwork} from './intelligence-network.mjs';
 import {intelligenceResponse} from './intelligence-market.mjs';
 import researchOperations from "../snapshot/orakt-research-ops.json";
 import usHistoryCoverage from "../private-data/us-history-coverage.json";
 import secBulkImport from "../private-data/sec-bulk-import.json";
 import alphaLab from "../private-data/alpha-lab.json";
+import factorStudy from "../private-data/factor-study-v134.json";
 import macroEvents from "../private-data/macro-events.json";
 import disclosureReviews from "../private-data/disclosure-reviews.json";
 import companyCharts from "../generated/private-charts.mjs";
 import labExpansion from "../generated/private-labs.mjs";
 import {accessPagePaths} from "../app/access/access-navigation.mjs";
 import conflictSnapshot from "../snapshot/conflicts.json";
+import economicCache from "../snapshot/economic-cache.json";
+import {annualObservations} from "./economic-observations.mjs";
 import entryBacktestStatus from "../snapshot/entry-backtest-status.json";
 import equityReportCatalog from "../snapshot/equity-report-catalog.json";
 import researchReportIndexSnapshot from "../snapshot/research-report-index.json";
@@ -37,12 +49,17 @@ import {articles} from '../app/knowledge/articles';
 import {watchlistResponse} from './watchlist.mjs';
 import {cryptoMarketResponse} from './crypto-market.mjs';
 import {visibleLab} from './lab-access.mjs';
+import {classifyReport} from '../app/report-taxonomy.mjs';
+import packedReportInventory from '../generated/private-report-inventory.mjs';
+import {inventoryPage} from './report-inventory.mjs';
 
 const researchReportIds = new Set(
   researchReportIndexSnapshot.reports.map((report) => report.id),
 );
 
 interface Env {
+  ORAKT_SOLANA_PAYMENTS_ENABLED?: string;
+  ORAKT_SOLANA_RPC_URL?: string;
   ORAKT_ADMIN_ACCOUNT_ID?: string;
   ORAKT_ADMIN_REFERENCE?: string;
   LOCAL_AUTH_ENABLED?: string;
@@ -79,7 +96,11 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/app-version" && request.method === "GET") {
-      return publicApiResponse(jsonResponse({version: "89"}));
+      return publicApiResponse(jsonResponse({version: "138"}));
+    }
+    if(url.pathname==='/api/public-stats'){
+      if(request.method!=='GET')return publicApiResponse(jsonResponse({error:'method_not_allowed'},405));
+      return publicApiResponse(jsonResponse({newsRecords:snapshotManifest.remoteSnapshot.newsIndexRecords,events:snapshotManifest.localTotals.geolocatedEvents,articles:snapshotManifest.localTotals.substantiveArticles,reports:researchReportIndexSnapshot.reports.length,companies:snapshotManifest.remoteSnapshot.activeChinaSectorLeaders+snapshotManifest.remoteSnapshot.activeUsSectorLeaders,generatedAt:snapshotManifest.generatedAt,checkedAt:new Date().toISOString(),mode:'published_library_not_live_feed'}));
     }
     if(['GET','HEAD'].includes(request.method)&&url.pathname==='/robots.txt')return new Response(request.method==='HEAD'?null:'User-agent: *\nAllow: /knowledge\nDisallow: /api/\nDisallow: /platform\nDisallow: /account\nDisallow: /admin/\nDisallow: /snapshot/\nDisallow: /access\nSitemap: https://orakt.com/sitemap.xml\n',{headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'public, max-age=3600'}});
     if(['GET','HEAD'].includes(request.method)&&url.pathname==='/sitemap.xml'){
@@ -121,7 +142,7 @@ const worker = {
     if(url.pathname.startsWith("/admin/")&&!member.access.permissions.manageUsers)return protectedResponse(new Response("Administrator access required. Return to /account to find your account reference.",{status:403}));
     if (url.pathname === "/api/account/overview" && request.method === "GET") {
       return protectedResponse(jsonResponse({
-        account:publicMember(member,identity), checkedAt:new Date().toISOString(), scope:"published_read_only", subscription:"manual_entitlements_only",
+        account:publicMember(member,identity), checkedAt:new Date().toISOString(), scope:"published_read_only", subscription:"monthly_non_recurring",
         platform:{
           reports:researchReportIndexSnapshot.reports.length,
           companies:equityReportCatalog.companies.length,
@@ -140,20 +161,32 @@ const worker = {
     }
 
     if(member.access.status!=="active")return protectedResponse(jsonResponse({error:"account_suspended"},403));
+    if(url.pathname.startsWith('/api/billing/'))return protectedResponse(await billingResponse(request,env,member));
     if(url.pathname==='/api/account/watchlist')return protectedResponse(await watchlistResponse(request,env,member,equityReportCatalog.companies));
     if(url.pathname==='/api/crypto-market')return protectedResponse(await cryptoMarketResponse(request));
     if(url.pathname==='/api/workspace-access'&&request.method==='GET')return protectedResponse(jsonResponse(workspaceAccess(member.access)));
+    if(url.pathname==='/api/map-chains'&&request.method==='GET')return protectedResponse(jsonResponse(mapChains(member.access,hormuzChain,supplyChainSitesSnapshot,appleNetworkSnapshot)));
+    if(url.pathname==='/api/apple-research'&&request.method==='GET')return protectedResponse(workspaceAccess(member.access).chains.mapLimit?jsonResponse({report:appleResearch,network:mapChains(member.access,hormuzChain,supplyChainSitesSnapshot,appleNetworkSnapshot).chains[0]}):jsonResponse({error:'plan_required'},403));
+    if(url.pathname==='/api/hormuz-research'&&request.method==='GET')return protectedResponse(workspaceAccess(member.access).chains.mapLimit?jsonResponse({report:hormuzResearch,network:hormuzChain}):jsonResponse({error:'plan_required'},403));
+    if(url.pathname==='/api/asset-intelligence'&&request.method==='GET'){
+      const source=await intelligenceResponse(new Request(new URL('/api/intelligence',url),request),env,member);
+      return protectedResponse(source.ok?jsonResponse(assetLinks(await source.json())):source);
+    }
     if(url.pathname==='/api/evidence-chain-index'&&request.method==='GET')return protectedResponse(jsonResponse(visibleChains(chainIndex,member.access)));
+    if(url.pathname==='/api/aaplx-profile'&&request.method==='GET')return protectedResponse(jsonResponse(aaplxProfile));
+    if(url.pathname==='/api/aaplx-report'&&request.method==='GET')return protectedResponse(member.access.permissions.reports||member.access.permissions.research?jsonResponse(aaplxReport):jsonResponse({locked:true,tier:'explorer'}));
     if(['/api/portfolio-catalog','/api/portfolio-study'].includes(url.pathname)&&request.method==='GET'){
       const prices=JSON.parse(gunzipSync(Buffer.from(packedPortfolioPrices,'base64')).toString('utf8'));
       try{return protectedResponse(jsonResponse(url.pathname==='/api/portfolio-catalog'?portfolioCatalog(prices,member.access):portfolioStudy(prices,member.access,{recipe:url.searchParams.get('recipe'),start:url.searchParams.get('start'),end:url.searchParams.get('end')})));}
       catch(e){return protectedResponse(jsonResponse({error:(e as Error).message},(e as any).status||400));}
     }
+    if(url.pathname==='/api/intelligence/network')return protectedResponse(await intelligenceNetwork(request));
     if(url.pathname==='/api/intelligence'||url.pathname==='/api/intelligence/asset')return protectedResponse(await intelligenceResponse(request,env,member));
     if(url.pathname==="/api/news-publication")return protectedResponse(await newsPublicationResponse(request,env,member));
     if(url.pathname==="/api/publication/requests")return protectedResponse(await publicationResponse(request,env,member,researchOperations.provenance));
     if(url.pathname==="/api/publication/status"&&request.method==="GET")return protectedResponse(member.access.permissions.reports?jsonResponse({generatedAt:researchOperations.generatedAt,records:researchOperations.provenance,canSubmit:member.access.permissions.manageUsers,broadcastEnabled:false}):jsonResponse({error:"plan_required"},403));
     if(url.pathname==="/api/alpha-lab"&&request.method==="GET")return protectedResponse(jsonResponse(visibleAlpha(alphaLab,member.access)));
+    if(url.pathname==="/api/alpha-study"&&request.method==="GET")return protectedResponse(jsonResponse(member.access.permissions.reports||member.access.permissions.research?factorStudy:{locked:true,tier:'explorer'}));
     if(url.pathname==="/api/lab-expansion"&&request.method==="GET")return protectedResponse(jsonResponse(visibleLab(JSON.parse(gunzipSync(Buffer.from(labExpansion,'base64')).toString('utf8')),member.access)));
     if(url.pathname==='/api/company-charts'&&request.method==='GET'){
       if(!member.access.permissions.reports)return protectedResponse(jsonResponse({error:'plan_required'},403));
@@ -196,16 +229,18 @@ const worker = {
     }
 
     if (url.pathname === "/api/research-reports" && request.method === "GET") {
-      return protectedResponse(jsonResponse(member.access.permissions.reports?researchReportIndexSnapshot:freeReportCatalog()));
+      return protectedResponse(jsonResponse(member.access.permissions.reports?classifiedReportCatalog():freeReportCatalog()));
     }
 
     if (url.pathname === "/api/research-report-index" && request.method === "GET") {
-      return protectedResponse(jsonResponse(member.access.permissions.reports?researchReportIndexSnapshot:freeReportCatalog()));
+      return protectedResponse(jsonResponse(member.access.permissions.reports?classifiedReportCatalog():freeReportCatalog()));
     }
+    if(url.pathname==='/api/company-report-inventory'&&request.method==='GET')return protectedResponse(jsonResponse(inventoryPage(JSON.parse(gunzipSync(Buffer.from(packedReportInventory,'base64')).toString('utf8')),url)));
 
     if (["/api/research-report","/api/evidence-chain"].includes(url.pathname) && request.method === "GET") {
       const reportId = url.searchParams.get("id") ?? "";
-      if(url.pathname==='/api/evidence-chain'&&!visibleChains(chainIndex,member.access).chains.some((r:any)=>r.id===reportId))return protectedResponse(jsonResponse({error:'path_not_available_for_plan'},403));
+      const chainRecord=chainIndex.find((r:any)=>r.id===reportId);
+      if((url.pathname==='/api/evidence-chain'||chainRecord?.reportKind==='evidence_research')&&!visibleChains(chainIndex,member.access).chains.some((r:any)=>r.id===reportId))return protectedResponse(jsonResponse({error:'path_not_available_for_plan'},403));
       if (!researchReportIds.has(reportId))
         return protectedResponse(jsonResponse({ error: "report not found" }, 404));
       const packed=(privateReports as Record<string,string>)[reportId];
@@ -298,28 +333,17 @@ async function economicIndicatorResponse(url: URL): Promise<Response> {
   if(!Number.isInteger(year)||year<1960||year>new Date().getUTCFullYear())return jsonResponse({error:'invalid year'},422);
   const endpoint = `https://api.worldbank.org/v2/country/${countries}/indicator/${encodeURIComponent(indicator)}?format=json&date=${Math.max(1960,year-9)}:${year}&per_page=1000`;
   try {
-    const upstream = await fetch(endpoint, { headers: { "User-Agent": "ORAKT/1.0" },signal:AbortSignal.timeout(10000) });
+    const upstream = await fetch(endpoint, { headers: { "User-Agent": "ORAKT/1.0" },signal:AbortSignal.timeout(6000) });
     if (!upstream.ok) throw new Error(`World Bank ${upstream.status}`);
     const payload = await upstream.json() as [unknown, Array<{ country: { value: string }; countryiso3code: string; date: string; value: number | null }>];
-    const rows = Array.isArray(payload?.[1]) ? payload[1] : [];
-    const latest = new Map<string, (typeof rows)[number]>();
-    for (const row of rows) {
-      if (typeof row.value!=='number'||!Number.isFinite(row.value)||Number(row.date)>year||!ECONOMIC_COUNTRIES[row.countryiso3code]) continue;
-      const existing=latest.get(row.countryiso3code);if(existing&&Number(existing.date)>=Number(row.date))continue;
-      latest.set(row.countryiso3code, row);
-    }
-    const observations = [...latest.values()].map((row) => ({
-      country: row.country.value,
-      iso2: ECONOMIC_COUNTRIES[row.countryiso3code].iso2,
-      date: row.date,
-      value: row.value,
-      unit: config.unit,
-      indicator,
-      coordinates: ECONOMIC_COUNTRIES[row.countryiso3code].coordinates,
-    }));
-    return jsonResponse({ indicator, provider: "World Bank", year, observations,sourceUrl:endpoint,coverage:{countriesRequested:Object.keys(ECONOMIC_COUNTRIES).length,countriesAvailable:observations.length},basis:'annual_latest_through_year_not_publication_vintage' });
+    if(!Array.isArray(payload?.[1]))throw new Error('Invalid World Bank response');
+    const observations=annualObservations(payload[1],ECONOMIC_COUNTRIES,indicator,config.unit,year);
+    return jsonResponse({ indicator, provider: "World Bank", year, observations,sourceUrl:endpoint,delivery:'live',coverage:{countriesRequested:Object.keys(ECONOMIC_COUNTRIES).length,countriesAvailable:observations.length},basis:'annual_latest_through_year_not_publication_vintage' });
   } catch {
-    return jsonResponse({ error: "economic provider unavailable", observations: [] }, 502);
+    const cached=(economicCache.series as Record<string,any>)[indicator];
+    if(!cached)return jsonResponse({ error: "economic provider unavailable", observations: [] }, 502);
+    const observations=annualObservations(cached.rows,ECONOMIC_COUNTRIES,indicator,config.unit,year);
+    return jsonResponse({indicator,provider:'World Bank',year,observations,sourceUrl:cached.sourceUrl,delivery:'cached',retrievedAt:economicCache.retrievedAt,providerUpdatedAt:cached.providerUpdatedAt,coverage:{countriesRequested:Object.keys(ECONOMIC_COUNTRIES).length,countriesAvailable:observations.length},basis:'annual_latest_through_year_not_publication_vintage'});
   }
 }
 
@@ -333,7 +357,7 @@ function jsonResponse(
   return new Response(JSON.stringify(payload), { status, headers });
 }
 
-const allowedReturnPaths = new Set(["/platform/markets","/platform/alpha","/platform/personal","/platform/intelligence","/platform","/platform/chains","/platform/research","/platform/filings","/platform/data","/platform/publish","/platform/news","/platform/portfolio","/account","/admin/users"]);
+const allowedReturnPaths = new Set(["/platform/assets","/account/billing","/platform/markets","/platform/alpha","/platform/personal","/platform/intelligence","/platform","/platform/chains","/platform/research","/platform/filings","/platform/data","/platform/publish","/platform/news","/platform/portfolio","/account","/admin/users"]);
 async function accountIdentity(request:Request,env:Env) {
   const local=await readLocalSession(request,env);
   if(local)return {subject:local.accountId,provider:"local",displayName:local.username,accountId:local.accountId.slice(0,16),expiresAt:new Date(local.expiresAt).toISOString(),createdAt:new Date(local.createdAt).toISOString()};
@@ -345,7 +369,8 @@ async function accountIdentity(request:Request,env:Env) {
   if(subject&&email)return {subject,provider:"chatgpt",displayName:"ChatGPT",accountId:createHmac("sha256",env.PILOT_SESSION_SECRET!).update("chatgpt:"+subject).digest("hex").slice(0,16),expiresAt:null,createdAt:null};
   return null;
 }
-function freeReportCatalog(){return {access:"catalog_only",reports:researchReportIndexSnapshot.reports.map(({id,ticker,marketRegion,createdAt,companyName,sector}:any)=>({id,ticker,marketRegion,createdAt,companyName,sector}))};}
+function classifiedReportCatalog(){return {...researchReportIndexSnapshot,reports:researchReportIndexSnapshot.reports.map(classifyReport)};}
+function freeReportCatalog(){return {access:"catalog_only",reports:researchReportIndexSnapshot.reports.map((r:any)=>{const {id,ticker,marketRegion,createdAt,companyName,sector,reportKind,templateVersion,reportHref}=classifyReport(r);return {id,ticker,marketRegion,createdAt,companyName,sector,reportKind,templateVersion,reportHref};})};}
 async function accessSessionResponse(request:Request,env:Env,url:URL):Promise<Response>{
   if(request.method==="GET"){
     const identity=await accountIdentity(request,env);
@@ -381,7 +406,7 @@ function protectedResponse(response: Response): Response {
 function isPublicWebsiteRequest(request: Request, url: URL): boolean {
   if (!["GET", "HEAD"].includes(request.method)) return false;
   return (
-    ["/","/lab","/company","/research","/roadmap","/membership","/plans","/knowledge"].includes(url.pathname) ||
+    ["/","/lab","/company","/research","/roadmap","/membership","/plans","/knowledge","/privacy","/terms"].includes(url.pathname) ||
     /^\/knowledge\/[a-z0-9-]+$/.test(url.pathname) ||
     accessPagePaths.has(url.pathname) ||
     url.pathname === "/favicon.svg" ||

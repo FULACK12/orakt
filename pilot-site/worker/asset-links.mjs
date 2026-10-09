@@ -1,0 +1,7 @@
+import {aaplxProfile} from './aaplx-research.mjs';
+// Keyword candidates are not validated causal links, trade signals or mint verification.
+const catalog=[['AAPL','Apple','AAPLx',['apple','苹果']],['NVDA','NVIDIA','NVDAx',['nvidia','英伟达']],['TSLA','Tesla','TSLAx',['tesla','特斯拉']],['GOOGL','Alphabet','GOOGLx',['alphabet','google','谷歌']],['SOL','Solana',null,['solana']],['BTC','Bitcoin',null,['bitcoin','比特币']],['ETH','Ethereum',null,['ethereum','以太坊']]];
+export function assetLinks(intelligence){
+ const items=intelligence.items.filter(i=>i.state==='approved');
+ return {network:'solana:devnet',provenanceNetwork:'solana:devnet',executionEnabled:false,checkedAt:intelligence.checkedAt,assets:catalog.map(([ticker,name,tokenLabel,keywords])=>({ticker,name,tokenLabel,mint:ticker==='AAPL'?aaplxProfile.mint:null,mintStatus:ticker==='AAPL'?aaplxProfile.mintStatus:'not_verified',network:ticker==='AAPL'?aaplxProfile.network:null,issuerUrl:ticker==='AAPL'?'https://assets.backed.fi/products/apple-xstock':tokenLabel?'https://xstocks.com/':'https://solana.com/',links:items.filter(i=>{const text=[i.payload.title,i.payload.summary,...(i.payload.claims||[])].join(' ').toLowerCase();return keywords.some(k=>text.includes(k))||new RegExp('\\b'+ticker+'\\b','i').test(text);}).map(i=>({id:i.id,title:i.payload.title,eventDate:i.payload.eventDate,claims:i.payload.claims,sources:i.payload.sources,hash:i.contentHash,verdict:i.verdict,anchors:i.anchors,status:'keyword_candidate_unverified'}))}))};
+}

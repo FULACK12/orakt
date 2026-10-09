@@ -14,10 +14,11 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@solana/web3.js": "1.99.0",
     "drizzle-orm": "0.45.2",
     "jose": "6.2.12",
     "lucide-react": "^1.31.0",
-    "maplibre-gl": "^6.3.0",
+    "maplibre-gl": "6.13.0",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
@@ -46,5 +47,6 @@
     "vite": "8.0.13",
     "wrangler": "4.92.0"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {"ws": "8.22.0"}
 }
