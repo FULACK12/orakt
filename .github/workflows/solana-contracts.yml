@@ -15,12 +15,18 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Compile program and run host unit tests (NOT validator tests)
         working-directory: contracts/solana
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
       - name: Compile release library (NOT SBF deployment binary)
         working-directory: contracts/solana
-        run: cargo build --workspace --release
+        run: cargo build --workspace --release --locked
       - name: Attempt SBF and IDL build using the official pinned Anchor image
-        run: docker run --rm -v "$PWD/contracts/solana:/work" -w /work solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 anchor build
+        run: |
+          docker run --rm -v "$PWD/contracts/solana:/work" -w /work solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 bash -ec '
+            rustup toolchain install 1.89.0 --profile minimal
+            rustup default 1.89.0
+            cargo build-sbf --manifest-path programs/orakt-protocol/Cargo.toml --tools-version v1.56 -- --locked
+            anchor idl build
+          '
       - name: Retain build evidence, never signing keypairs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
