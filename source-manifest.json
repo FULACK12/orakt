@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 3664,
-      "sha256": "949e4e96f5ab83f1463f127f0a0e85a55bfc76b0881cc7645e97f6eb6939ae72"
+      "bytes": 3720,
+      "sha256": "13ffa419f9704ec9cad92d3ae8eb2adaa3aabb1bdf3e21cb4b7a2e7fed13d5af"
     },
     {
       "path": "backend/alembic/env.py",

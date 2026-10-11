@@ -1,9 +1,9 @@
 name: Solana contract source checks
 on:
   push:
-    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
+    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/package*.json', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
   pull_request:
-    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
+    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/package*.json', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
   workflow_dispatch:
 permissions:
   contents: read
