@@ -2512,8 +2512,8 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 7584,
-      "sha256": "1e3205f65bf8a8e140ebade884307c6e26ca154b6a371112ba29b9038ac161c2"
+      "bytes": 9592,
+      "sha256": "e974bd1486bddbbd969bd0995991bcc2a1c6a3d25c0738ed3ea829a0d7e78bb4"
     },
     {
       "path": "contracts/solana/tests/payment-fixtures.mjs",

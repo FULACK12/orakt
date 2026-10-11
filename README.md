@@ -2,6 +2,8 @@
 
 ORAKT connects company disclosures, event evidence, research reports and verifiable submission histories. Product: https://orakt.com
 
+[![Solana contract checks](https://github.com/FULACK12/orakt/actions/workflows/solana-contracts.yml/badge.svg?branch=main)](https://github.com/FULACK12/orakt/actions/workflows/solana-contracts.yml)
+
 ## Honest project and hackathon scope
 
 ORAKT existed before this repository export. This is **not a claim that the complete application was written during a hackathon**. Competition name and eligible dates are awaiting the project owner's confirmation. No prior commit dates have been rewritten. A dated, reviewable change list must be supplied before submission to Colosseum.
@@ -21,6 +23,8 @@ This source-only export was synchronized on October 11, 2026. The v140 applicati
 The v140 production-source build and 38 rendered-page tests passed locally. The focused account/research suite passed 25/25; the full application suite reported 335/340 passing, with five existing landing-page/educational-copy assertion failures. Those results require the provisioned production inputs described below; they are not a claim that this deliberately data-excluded export can run the entire suite unmodified.
 
 For v141, the production-source build, 40 focused disclosure/rendered-page tests and 22 existing billing/trial/news regressions passed. [Contract Actions run 38124334908](https://github.com/FULACK12/orakt/actions/runs/38124334908) passed host compilation, 13 Rust unit tests, SBF/IDL generation and 28 local-validator provenance/permission/trial checks. Payment VM tests, independent audit, current-public-cluster binary compatibility and production receipt integration remain release gates. No custom contract has been deployed. The website links the source, checks and unsatisfied release gates at https://orakt.com/#protocol.
+
+Subsequent [payment validation run 38143268037](https://github.com/FULACK12/orakt/actions/runs/38143268037) passed **25 additional payment checks** and 3 fixture tests, while repeating the 13 Rust and 28 provenance/trial checks successfully. Payments execute against synthetic local-genesis balances, not issuer stablecoins or a public network. Wrong payment inputs, replay, renewal, tier isolation and actual failed-transfer rollback were checked. Independent audit, broader adversarial coverage, production receipt integration and deployment approval remain outstanding. Existing live payments are unchanged; this update spent no real SOL.
 
 ## Architecture
 
