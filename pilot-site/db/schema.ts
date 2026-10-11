@@ -1,4 +1,10 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+export const protocolOrders=sqliteTable('protocol_orders',{
+ orderId:text('order_id').primaryKey(),policyJson:text('policy_json').notNull(),bindingJson:text('binding_json').notNull(),invoice:text('invoice').notNull(),receipt:text('receipt').notNull(),subscription:text('subscription').notNull(),createdAt:integer('created_at').notNull(),
+},t=>[uniqueIndex('idx_protocol_order_receipt').on(t.receipt)]);
+export const protocolSettlements=sqliteTable('protocol_settlements',{
+ receipt:text('receipt').primaryKey(),orderId:text('order_id').notNull(),signature:text('signature').notNull(),memberId:text('member_id').notNull(),proofJson:text('proof_json').notNull(),settledAt:integer('settled_at').notNull(),
+},t=>[uniqueIndex('idx_protocol_settlement_order').on(t.orderId),uniqueIndex('idx_protocol_settlement_signature').on(t.signature)]);
 // Wallet ownership proofs are separate from sign-in identities and paid grants.
 export const accountWalletLinks=sqliteTable('account_wallet_links',{
  address:text('address').primaryKey(),memberId:text('member_id').notNull(),activeMemberKey:text('active_member_key'),verifiedAt:integer('verified_at').notNull(),revokedAt:integer('revoked_at'),changeId:text('change_id').notNull(),
@@ -10,6 +16,7 @@ export const accountWalletAudit=sqliteTable('account_wallet_audit',{
  id:text('id').primaryKey(),memberId:text('member_id').notNull(),address:text('address').notNull(),action:text('action').notNull(),message:text('message').notNull(),signature:text('signature').notNull(),createdAt:integer('created_at').notNull(),
 },t=>[index('idx_account_wallet_audit_member').on(t.memberId,t.createdAt)]);
 export const billingOrders=sqliteTable('billing_orders',{
+ paymentMethod:text('payment_method').notNull().default('spl_transfer'),
  id:text('id').primaryKey(),memberId:text('member_id').notNull().references(()=>memberAccounts.id),
  plan:text('plan').notNull(),currency:text('currency').notNull(),network:text('network').notNull(),mint:text('mint').notNull(),recipient:text('recipient').notNull(),payer:text('payer').notNull(),reference:text('reference').notNull(),amountUnits:text('amount_units').notNull(),
  createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull(),status:text('status').notNull().default('pending'),

@@ -3,13 +3,14 @@ import {Buffer} from 'node:buffer';
 import {PublicKey,Transaction,Keypair} from '@solana/web3.js';
 import {getAssociatedTokenAddressSync,createAssociatedTokenAccountIdempotentInstruction,createTransferCheckedInstruction,TOKEN_PROGRAM_ID} from './solana-payment-instructions.mjs';
 import {catalogFor,MERCHANT,MINTS,PRICES,addCalendarMonth,verifyStablecoinReceipt} from './payment-policy.mjs';
-import {protocolPolicy,protocolPreviewStatus,verifyProtocolReceipt} from './protocol-receipt.mjs';
+import {protocolPolicy,protocolPreviewStatus,verifyProtocolReceipt,protocolCheckoutStatus} from './protocol-receipt.mjs';
+import {protocolCheckoutAction} from './protocol-checkout.mjs';
 import {walletBinding} from './account-wallet.mjs';
 
 const MAINNET_GENESIS='5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
 const fail=(code,status=400)=>Object.assign(Error(code),{status});
-export function publicOrder(row){return {id:row.id,plan:row.plan,currency:row.currency,network:row.network,mint:row.mint,recipient:row.recipient,payer:row.payer,reference:row.reference,amountUnits:row.amount_units,amount:String(BigInt(row.amount_units)/1000000n),createdAt:row.created_at,expiresAt:row.expires_at,status:row.status,signature:row.signature,paidAt:row.paid_at,accessFrom:row.access_from,accessUntil:row.access_until};}
+export function publicOrder(row){return {id:row.id,paymentMethod:row.payment_method||'spl_transfer',plan:row.plan,currency:row.currency,network:row.network,mint:row.mint,recipient:row.recipient,payer:row.payer,reference:row.reference,amountUnits:row.amount_units,amount:String(BigInt(row.amount_units)/1000000n),createdAt:row.created_at,expiresAt:row.expires_at,status:row.status,signature:row.signature,paidAt:row.paid_at,accessFrom:row.access_from,accessUntil:row.access_until};}
 function address(value){try{return typeof value==='string'&&new PublicKey(value).toBase58()===value;}catch{return false;}}
 function activeTerm(row,now){return row.status==='active'&&['signal','research'].includes(row.plan)&&['onchain_paid','manual_paid','complimentary'].includes(row.grant_kind)&&row.expires_at>now;}
 async function smallBody(request){
@@ -54,6 +55,7 @@ export async function preparePayment(order,rpc){
 // row are committed together. A retry can never extend the same payment twice.
 export async function settleOrder(DB,orderId,memberId,signature,paidAt,now=Date.now()){
  const order=await DB.prepare('SELECT * FROM billing_orders WHERE id = ? AND member_id = ?').bind(orderId,memberId).first();
+ if(order?.payment_method==='protocol')throw fail('use_protocol_order_verification',409);
  if(!order)throw fail('order_not_found',404);if(order.status==='settled')return publicOrder(order);
  const member=await DB.prepare('SELECT * FROM member_accounts WHERE id = ?').bind(memberId).first();
  if(!member||member.status!=='active')throw fail('account_suspended',403);
@@ -74,8 +76,15 @@ export async function settleOrder(DB,orderId,memberId,signature,paidAt,now=Date.
 export async function billingResponse(request,env,member,dependencies={}){
  const url=new URL(request.url),now=dependencies.now??Date.now(),rpc=dependencies.rpc||rpcFor(env),catalog=catalogFor(env);
  if(member.access.status!=='active')return json({error:'account_suspended'},403);
- if(url.pathname==='/api/billing/catalog'&&request.method==='GET')return json({...catalog,currentPlan:member.access.effectivePlan,currentExpiresAt:member.access.expiresAt});
+ if(url.pathname==='/api/billing/catalog'&&request.method==='GET')return json({...catalog,protocol:protocolCheckoutStatus(env),currentPlan:member.access.effectivePlan,currentExpiresAt:member.access.expiresAt});
  try{
+  if(url.pathname.startsWith('/api/billing/protocol/')){
+   if(request.method!=='POST')throw fail('method_not_allowed',405);
+   if(request.headers.get('Origin')!==url.origin||request.headers.get('X-ORAKT-Billing')!=='checkout')throw fail('cross_origin_request',403);
+   const body=await smallBody(request);await rate(env,member.row.id,url.pathname,now,url.pathname.endsWith('/orders')?5:10);
+   const result=await protocolCheckoutAction(url.pathname,body,env,member,rpc,now);
+   return json(result.order?{...result,order:publicOrder(result.order)}:result,result.pending?202:200);
+  }
   if(['/api/billing/protocol-status','/api/billing/protocol-preview'].includes(url.pathname)){
    if(!member.access.permissions.manageUsers)throw fail('admin_required',403);
    if(url.pathname.endsWith('/protocol-status')&&request.method==='GET')return json(protocolPreviewStatus(env));
@@ -116,7 +125,7 @@ export async function billingResponse(request,env,member,dependencies={}){
    if(activeTerm(member.row,now)&&member.row.plan!==body.plan)throw fail('renew_same_plan_only',409);
    await env.DB.prepare('UPDATE billing_orders SET active_member_key = NULL WHERE member_id = ? AND expires_at <= ? AND active_member_key IS NOT NULL').bind(member.row.id,now).run();
    const existing=await env.DB.prepare('SELECT * FROM billing_orders WHERE active_member_key = ?').bind(member.row.id).first();
-   if(existing){if(existing.plan!==body.plan||existing.currency!==body.currency||existing.payer!==body.payer)throw fail('pending_order_exists',409);return json({order:publicOrder(existing)});}
+   if(existing){if(existing.payment_method==='protocol'||existing.plan!==body.plan||existing.currency!==body.currency||existing.payer!==body.payer)throw fail('pending_order_exists',409);return json({order:publicOrder(existing)});}
    await assertMainnet(rpc);
    const id=randomUUID(),reference=Keypair.generate().publicKey.toBase58(),created=Math.floor(now/1000)*1000;
    // The reference key is just a random public identifier, never a custody account.
@@ -125,6 +134,7 @@ export async function billingResponse(request,env,member,dependencies={}){
   }
   if(typeof body.orderId!=='string'||body.orderId.length>80||Object.keys(body).some(k=>!['orderId',...(url.pathname.endsWith('/verify')?['signature']:[])].includes(k)))throw fail('invalid_request');
   const row=await env.DB.prepare('SELECT * FROM billing_orders WHERE id = ? AND member_id = ?').bind(body.orderId,member.row.id).first();if(!row)throw fail('order_not_found',404);
+  if(row.payment_method==='protocol')throw fail('use_protocol_order_verification',409);
   const order=publicOrder(row);if(order.status==='settled')return json({order});
   if(url.pathname.endsWith('/prepare')){if(now>=order.expiresAt)throw fail('order_expired',409);if(activeTerm(member.row,now)&&member.row.plan!==order.plan)throw fail('renew_same_plan_only',409);return json(await preparePayment(order,rpc));}
   if(body.signature!==undefined&&(typeof body.signature!=='string'||!/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(body.signature)))throw fail('invalid_signature');

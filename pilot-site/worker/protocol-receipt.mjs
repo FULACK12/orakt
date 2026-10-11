@@ -21,6 +21,11 @@ export function protocolPolicy(env={}){
  if(!address(programId)||programId===FIXTURE||!address(authority)||!(upgradeAuthority==='none'||address(upgradeAuthority))||!/^\d{1,16}$/.test(slot||'')||!Number.isSafeInteger(Number(slot))||Number(slot)<=0)throw fail('protocol_deployment_not_pinned',503);
  return {programId,authority,upgradeAuthority,deploySlot:Number(slot),config:pda(programId,'config',key(authority))[0].toBase58(),genesis:GENESIS};
 }
+export function protocolCheckoutPolicy(env={}){
+ if(env.ORAKT_PROTOCOL_CHECKOUT_ENABLED!=='true')throw fail('protocol_checkout_disabled',503);
+ return protocolPolicy({...env,ORAKT_PROTOCOL_PREVIEW_ENABLED:'true'});
+}
+export function protocolCheckoutStatus(env={}){try{const p=protocolCheckoutPolicy(env);return {enabled:true,programId:p.programId,config:p.config,network:'solana:mainnet-beta',mode:'custom_contract'};}catch(e){return {enabled:false,mode:'custom_contract',reason:e.message};}}
 export function protocolPreviewStatus(env={}){try{const p=protocolPolicy(env);return {enabled:true,mode:'admin_read_only',grantsAccess:false,programId:p.programId,config:p.config,network:'solana:mainnet-beta'};}catch(e){return {enabled:false,mode:'admin_read_only',grantsAccess:false,reason:e.message};}}
 // Canonical commitment to a durable, server-created order. Never an email hash.
 export function orderInvoice(order){return hash(JSON.stringify(['orakt-contract-order-v1',order.id,order.member_id,order.reference]));}
@@ -39,6 +44,22 @@ function bytes(account,owner,length,tag,executable=false){
  return data;
 }
 const alphabet='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+export async function verifyProtocolDeployment(rpc,policy,snapshot){
+ requireThat(await rpc('getGenesisHash')===policy.genesis,'wrong_rpc_network');
+ const a=receiptAddresses(policy,{plan:'signal',payer:policy.authority,id:'deployment',member_id:'deployment',reference:policy.authority});
+ const snap=snapshot||await rpc('getMultipleAccounts',[[policy.programId,policy.config],{encoding:'base64',commitment:'finalized',minContextSlot:policy.deploySlot}]);
+ requireThat(Number.isSafeInteger(snap?.context?.slot)&&snap.context.slot>=policy.deploySlot&&snap.value?.length>=2,'stale_account_snapshot');
+ const program=bytes(snap.value[0],LOADER,36,null,true);
+ requireThat(program.readUInt32LE(0)===2&&pub(program,4)===a.programData,'program_loader_mismatch');
+ const metadata=await rpc('getAccountInfo',[a.programData,{encoding:'base64',commitment:'finalized',minContextSlot:snap.context.slot,dataSlice:{offset:0,length:45}}]);
+ requireThat(Number.isSafeInteger(metadata?.context?.slot)&&metadata.context.slot>=snap.context.slot,'stale_program_snapshot');
+ const pd=bytes(metadata.value,LOADER,45);
+ requireThat(pd.readUInt32LE(0)===3&&pd.readBigUInt64LE(4)===BigInt(policy.deploySlot),'program_upgrade_requires_review');
+ requireThat((policy.upgradeAuthority==='none'&&pd[12]===0)||(pd[12]===1&&pub(pd,13)===policy.upgradeAuthority),'upgrade_authority_mismatch');
+ const config=bytes(snap.value[1],policy.programId,42,'Config');
+ requireThat(pub(config,8)===policy.authority&&config[40]===0&&config[41]===pda(policy.programId,'config',key(policy.authority))[1],'config_paused_or_mismatched');
+ return {slot:metadata.context.slot};
+}
 export function decodeBase58(value,max=128){
  requireThat(typeof value==='string'&&value.length>0&&value.length<=max,'invalid_base58');
  let n=0n;for(const ch of value){const i=alphabet.indexOf(ch);requireThat(i>=0,'invalid_base58');n=n*58n+BigInt(i);}

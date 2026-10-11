@@ -2,6 +2,7 @@
 //! Experimental source only. No live deployment, security audit or automatic trading.
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey;
+use anchor_lang::solana_program::hash::hashv;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, TransferChecked};
 mod calendar;
 
@@ -15,10 +16,22 @@ pub const RESEARCH_UNITS:u64=79_000_000;
 fn nonzero(hash:&[u8;32])->bool {hash.iter().any(|b|*b!=0)}
 fn price(plan:u8,months:u8)->Option<u64>{if !(1..=12).contains(&months){return None;}match plan{1=>SIGNAL_UNITS.checked_mul(months as u64),2=>RESEARCH_UNITS.checked_mul(months as u64),_=>None}}
 fn roles_valid(roles:u8)->bool{roles & !3 == 0}
+// Domain-separated sorted-pair Merkle proof, version 1. Proves inclusion, not truth.
+fn evidence_root(leaf:&[u8;32],proof:&[[u8;32]])->Option<[u8;32]>{
+    if !nonzero(leaf)||proof.len()>16{return None;}
+    let mut node=hashv(&[b"orakt-evidence-leaf-v1",leaf]).to_bytes();
+    for sibling in proof{let (left,right)=if node<=*sibling{(&node,sibling)}else{(sibling,&node)};node=hashv(&[b"orakt-evidence-node-v1",left,right]).to_bytes();}
+    Some(node)
+}
 
 #[program]
 pub mod orakt_protocol {
     use super::*;
+    /// Permissionless inclusion check; no membership or truth attestation.
+    pub fn verify_evidence(ctx:Context<VerifyEvidence>,leaf_hash:[u8;32],proof:Vec<[u8;32]>)->Result<()> {
+        require!(evidence_root(&leaf_hash,&proof)==Some(ctx.accounts.record.evidence_root),ProtocolError::InvalidEvidenceProof);
+        emit!(EvidenceVerified{record:ctx.accounts.record.key(),leaf_hash,evidence_root:ctx.accounts.record.evidence_root});Ok(())
+    }
     pub fn initialize(ctx:Context<Initialize>)->Result<()> {
         ctx.accounts.config.set_inner(Config{authority:ctx.accounts.authority.key(),paused:false,bump:ctx.bumps.config});
         Ok(())
@@ -80,6 +93,10 @@ pub mod orakt_protocol {
     }
 }
 
+#[derive(Accounts)]
+pub struct VerifyEvidence<'info>{
+    #[account(seeds=[b"record",record.series.as_ref(),record.version.to_le_bytes().as_ref()],bump=record.bump)]pub record:Account<'info,Record>,
+}
 #[derive(Accounts)]
 pub struct Initialize<'info>{
     #[account(mut)] pub authority:Signer<'info>,
@@ -168,6 +185,7 @@ pub struct IssueTrial<'info>{
 #[account]#[derive(InitSpace)]pub struct Subscription{pub config:Pubkey,pub wallet:Pubkey,pub plan:u8,pub expires_at:i64,pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Receipt{pub config:Pubkey,pub buyer:Pubkey,pub invoice:[u8;32],pub mint:Pubkey,pub amount:u64,pub plan:u8,pub months:u8,pub paid_at:i64,pub expires_at:i64,pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Trial{pub config:Pubkey,pub subject:[u8;32],pub wallet:Pubkey,pub claimed_at:i64,pub expires_at:i64,pub bump:u8}
+#[event]pub struct EvidenceVerified{pub record:Pubkey,pub leaf_hash:[u8;32],pub evidence_root:[u8;32]}
 #[event]pub struct RoleChanged{pub config:Pubkey,pub wallet:Pubkey,pub roles:u8}
 #[event]pub struct VersionPublished{pub record:Pubkey,pub author:Pubkey,pub content_hash:[u8;32],pub version:u32,pub recorded_at:i64}
 #[event]pub struct SubscriptionPurchased{pub buyer:Pubkey,pub receipt:Pubkey,pub plan:u8,pub amount:u64,pub expires_at:i64}
@@ -181,6 +199,7 @@ pub struct IssueTrial<'info>{
     #[msg("Unsupported mint or decimals")]InvalidMint,
     #[msg("Quote expired or too far in future")]ExpiredQuote,
     #[msg("Amount differs from fixed plan price")]PriceMismatch,
+    #[msg("Evidence inclusion proof does not match committed root")]InvalidEvidenceProof,
 }
 #[cfg(test)]mod tests{
     use super::*;
@@ -188,5 +207,6 @@ pub struct IssueTrial<'info>{
     #[test]fn rejects_unknown_plan_and_term(){assert_eq!(price(0,1),None);assert_eq!(price(3,1),None);assert_eq!(price(2,0),None);assert_eq!(price(2,13),None);}
     #[test]fn only_publish_review_roles(){for n in 0..=3{assert!(roles_valid(n));}assert!(!roles_valid(4));assert!(!roles_valid(255));}
     #[test]fn commitments_not_blank(){assert!(!nonzero(&[0;32]));assert!(nonzero(&[1;32]));}
+    #[test]fn evidence_domains_and_bounds(){let leaf=[1;32];assert_eq!(evidence_root(&leaf,&[]),Some(hashv(&[b"orakt-evidence-leaf-v1",&leaf]).to_bytes()));assert_eq!(evidence_root(&[0;32],&[]),None);assert_eq!(evidence_root(&leaf,&[[2;32];17]),None);assert_ne!(evidence_root(&leaf,&[[2;32]]),evidence_root(&leaf,&[[3;32]]));}
     #[test]fn record_space_covers_all_fields(){assert_eq!(Record::INIT_SPACE,206);assert_eq!(Trial::INIT_SPACE,113);}
 }

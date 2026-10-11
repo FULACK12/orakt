@@ -507,7 +507,7 @@ export default function OraktLanding({ metrics:initialMetrics, page="home" }: { 
         <p>{language==='zh'?'从原始新闻、可核验的主张到事件与资产暴露，把研究连接至 Solana 与代币化资产生态。内容哈希与审核历史可以被查验；链上记录不替代事实核查。':'Connect original news, verifiable claims and events to asset exposure across Solana and tokenized-asset ecosystems. Content hashes and review histories are inspectable; an on-chain record does not replace fact checking.'}</p>
         <div><span>SOURCE</span><i>→</i><span>CLAIM</span><i>→</i><span>EVENT</span><i>→</i><span>ASSET</span></div>
         <a href={accessHref('/platform/assets')}>{language==='zh'?'探索新闻与链上资产':'Explore news & on-chain assets'} ↗</a>
-        <small>{language==='zh'?'已有 Devnet 存证；管理员可通过 Phantom 手动签名发布主网 Memo。具体记录以交易网络和签名核验为准。自定义协议合约尚未部署；不提供自动资产交易。':'Devnet provenance exists; administrators can manually sign mainnet Memo publications with Phantom. Verify each record by its network and signature. Custom protocol contracts are not deployed; no automatic asset trading is provided.'}</small>
+        <small>{language==='zh'?'已有 Devnet 存证；管理员可通过 Phantom 手动签名发布主网 Memo。自定义协议已部署 Devnet 并提供验收交易，主网合约付款未启用。具体记录以网络与签名为准；不提供自动资产交易。':'Devnet provenance exists; administrators can manually sign mainnet Memo publications with Phantom. The custom protocol is deployed on Devnet with acceptance transactions; mainnet contract checkout is disabled. Verify each network and signature. No automatic asset trading.'}</small>
       </section>
       <ProtocolSection language={language}/>
 

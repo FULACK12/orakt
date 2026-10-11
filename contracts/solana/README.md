@@ -1,7 +1,11 @@
 # ORAKT Protocol — experimental Solana contracts
 
-**Status: implementation candidate; NOT deployed, NOT independently audited.**
+**Status: v144 deployed and acceptance-tested on Solana Devnet; mainnet NOT enabled, NOT independently audited.**
 The program ID in `lib.rs` / `Anchor.toml` is a compilation fixture, not a live address. No program keypair, wallet secret, production account identifier, report body or licensed news text is included. Do not send funds to the fixture address.
+
+Devnet program: [`PyvDP4Gg7TZUk7uzb9AQxNwPV7kTVmf3vwfSbgpsmsX`](https://explorer.solana.com/address/PyvDP4Gg7TZUk7uzb9AQxNwPV7kTVmf3vwfSbgpsmsX?cluster=devnet). [Public deployment and acceptance evidence](devnet-deployment.json) contains the binary/source hashes, deploy slot, config/upgrade authority, synthetic mint addresses and finalized test transactions. Chain bytes were compared with the 367,840-byte SBPFv3 build. Fourteen Devnet acceptance checks passed: six content kinds with inclusion proofs, two exact synthetic-token payments and duplicate-invoice simulation rejection, attributed review, immutable retraction, consented 24-hour trial, and pause/resume. The test wallets share one isolated operator; the review fixture is NOT independent assurance. Tests do not publish real research or grant production membership.
+
+Only the fixture program ID and the two mint constants were substituted in the separate Devnet build; use the values in the manifest to reproduce its `lib.rs` SHA-256. `TEST_USDC` / `TEST_USDT` are synthetic test tokens, not issuer stablecoins. The disposable test operator retains upgrade and config authority. Production governance, independent review, fee approval, deployment pins and feature activation are separate release gates.
 
 ## Covered application boundaries
 
@@ -35,7 +39,7 @@ Pinned framework: Anchor 0.31.1, with a checked-in Cargo.lock. Install Rust, Sol
 
 **Payment validation update, October 11, 2026:** [run 38143268037](https://github.com/FULACK12/orakt/actions/runs/38143268037), test-source commit `c6fb85c34fb76d5c40dc9bff21da3403b9ebbc3a`, passed all 13 Rust tests, 3 fixture tests, 28 provenance/trial runtime checks and **25 payment runtime checks**. SBF/IDL generation also passed. This closes the initial local payment-flow test gap, not the independent-audit or production-deployment gates. Historical failed workflow runs remain available; their notification emails do not describe the latest run.
 
-The CI build pins Rust 1.95.0, cargo-build-sbf 4.4.0 and platform-tools v1.57. Its SBPFv0 output is for the pinned legacy local validator only; it is **not a production deployment artifact**. A current-cluster-compatible SBPFv3 migration/build and runtime tests are an additional release gate before public-chain deployment.
+The legacy CI run produced SBPFv0 for its local validator. **v144 supersedes that build**: Rust 1.95.0, cargo-build-sbf 4.4.0 and platform-tools v1.57 now explicitly target SBPFv3. The new binary, IDL build, 14 host tests, 3 fixture checks, 33 provenance/permission/trial checks and 25 payment checks passed locally on Agave 4.3.0 on October 11, 2026. These are observed local results, not a claim that the next GitHub Actions run has completed.
 
 ```sh
 cd contracts/solana
@@ -53,7 +57,9 @@ Before deployment, an operator must generate and securely retain a program keypa
 
 `tests/payments.mjs` exercises the actual SPL transfer CPI, exact payment and receipt fields, sequential UTC calendar-month renewal, lower-tier isolation, invoice replay, amount/term/deadline rejection, wrong mint/owner/recipient/token program, substituted PDAs and pause enforcement. Insufficient-balance and frozen-source cases are submitted with preflight disabled **only on this local ledger**; the test requires a confirmed failing transaction, unchanged token balances/entitlements and absent new receipts. The network fee of a failed local transaction is intentionally not asserted to roll back. Fixture encoding also has three independent Node tests. Inspect the latest Actions result for the runtime outcome; code coverage claims are not a security audit.
 
-## Release gates and remaining work
+## Historical v141–143 release gates
+
+This list records earlier release boundaries. The v144 section below supersedes the build, checkout and test-integration entries; independent review and production approval remain outstanding.
 
 1. Host compile/unit tests and the locked-dependency reruns passed (linked above).
 2. SBF and IDL generation passed for the legacy local-validator target. A current-cluster-compatible build remains required; the fixture binary must not be deployed as-is.
@@ -87,6 +93,24 @@ The bilingual account-center panel uses two separate clicks: connect/review, the
 The signature, exact signed message, account/wallet identifiers and timestamp stay in the private server audit, not on-chain. GET exposes only the current account's binding and ten recent action summaries. Signing proves wallet control, not that the person is unique. This is **not account merging or a new sign-in method**: a wallet with a separate Phantom account is rejected rather than silently transferred. A Phantom account links only its sign-in wallet. Linking/unlinking never changes grants, existing orders, site merchant address or live SPL checkout. Unlink also requires the bound wallet's signature; unexpired pending orders block it. Expired quotes are preserved and do not lock the wallet forever. Lost-wallet recovery and explicit account merging remain separate, unimplemented workflows.
 
 Migration `0016_dizzy_logan.sql` only appends three tables and their indexes. Prior migrations and billing/account records are unchanged. The v143 focused plus rendered suite passed 161 tests, including 22 new binding/client tests using temporary Ed25519 keys and synthetic SQLite identities and two additional receipt-bridge tests. Desktop and 390px Chinese/English layouts were checked with a synthetic read-only local preview; an actual user Phantom signing ceremony was not performed. No real network transaction or SOL expenditure occurred. The custom-contract preview remains default-off and automatic custom-contract entitlement settlement is still unimplemented.
+
+## v144 contract checkout and evidence inclusion
+
+The website implements separately gated `/api/billing/protocol/orders`, `/prepare`, and `/verify` routes. `ORAKT_PROTOCOL_CHECKOUT_ENABLED=true` additionally requires all reviewed deployment pins used by the receipt verifier; it is **not enabled by this release**. Production settlement remains mainnet-only. Devnet receipts cannot unlock production accounts. Legacy SPL checkout rejects contract orders in its preparation, verification and settlement paths.
+
+Each contract order freezes the verified wallet binding and deployment identity, reserves a ten-minute invoice and records receipt/subscription PDAs. Preparation validates the deployed program and authority, requires an existing merchant token account, checks balance and rent, simulates exactly one purchase instruction and returns an unsigned transaction. Only the user's wallet signs/sends. Uncertain outcomes are reconciled using the original receipt address, never by automatically sending a second payment.
+
+A single database transaction writes the settled order, unique receipt/signature record, membership revision and audit. It rechecks the active account revision and exact binding. A failure rolls back every write. Retries cannot grant another term. Access mirrors the contract receipt expiry, preserving a longer same-tier grant, rather than adding a month during late reconciliation. A conflicting active tier requires support reconciliation instead of silently overwriting access. This is explicit-request reconciliation, not an always-on background indexer. Migration 0017 adds two tables and a constant-default payment-method column; existing records/migrations remain intact.
+
+The new `verify_evidence` instruction verifies up to 16 sorted-pair Merkle siblings against an immutable record and emits `EvidenceVerified`, without mutating the record. V1 leaves are SHA-256(`UTF8("orakt-evidence-leaf-v1") || leaf_hash`), where `leaf_hash` is a nonzero SHA-256 commitment to retained evidence bytes. Parents are SHA-256(`UTF8("orakt-evidence-node-v1") || min(left,right) || max(left,right)`). A single leaf has an empty proof. Keep the canonical source bytes and proof off-chain. Inclusion proves neither truth, licensing rights, audit approval nor investment performance.
+
+`tests/build-v3.sh` targets SBPFv3 and downloads checksum-pinned Agave 4.3.0. `tests/prepare-devnet.mjs` creates a separate ignored workspace with disposable test-only operator/program keys and clearly synthetic `TEST_USDC`/`TEST_USDT` mints. It replaces only the fixture ID and mint constants in the isolated build. Mainnet constants, user wallets and production grants are unchanged. Generated secrets are never exported. Preparing an address or binary is not deployment. The user obtained 5 free Devnet SOL after the automatic faucet was rate-limited. Never send mainnet SOL to test identities.
+
+Agave 4's local validator requires a concrete container bind address and `io_uring`. The test launcher derives the container IP, retains a checksum-pinned Docker default seccomp policy with only the three `io_uring` calls added, uses read-only source mounts and publishes only loopback RPC ports. No privileged container or host-wide security change is used. Earlier startup failures were environmental; they were not counted as passing tests.
+
+The website's focused v144 suite passed 181 tests, including 18 contract-checkout tests: concurrency, duplicate callbacks, binding changes, suspension races, pin changes, exact instruction data, receipt recovery, and transaction rollback after an injected database failure. Tests use synthetic local accounts/RPC; they do not grant actual production access. No independent security audit has been performed.
+
+Official build guidance: https://github.com/anza-xyz/cargo-build-sbf#sbfpv3-migration. Validator: https://github.com/anza-xyz/agave/releases/tag/v4.3.0. An architecture check and passing runtime tests are not an independent security audit.
 
 ## References
 

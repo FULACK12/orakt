@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 3242,
-      "sha256": "6e8d5d0c5bbcf11196943a500788cf646c04db2c71b67e16c26b8b55fd03c9b0"
+      "bytes": 2833,
+      "sha256": "8e09fc09695c5936bc2187f1e94ffacdf285ddaf7a40376d518920a5c9f5fcc7"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2496,6 +2496,11 @@
       "sha256": "e0c07bcd1a9fece57dcdc2b837838f9703440913beea3c8d063b5eb5039dd510"
     },
     {
+      "path": "contracts/solana/devnet-deployment.json",
+      "bytes": 10977,
+      "sha256": "97dd7b40e3af1cdfbb55f1c7a9600de47303b3ddcac662bf81a38af693ba04a9"
+    },
+    {
       "path": "contracts/solana/programs/orakt-protocol/Cargo.toml",
       "bytes": 742,
       "sha256": "e6d824baed0cac2b7d2c564d19aea15ca9fa2f625e12998ea91c3695b3c11af3"
@@ -2507,13 +2512,33 @@
     },
     {
       "path": "contracts/solana/programs/orakt-protocol/src/lib.rs",
-      "bytes": 15573,
-      "sha256": "8b5200d57f889552ae72224f358dd0caba8c4f9552bd546cc688c3958f00d98f"
+      "bytes": 17244,
+      "sha256": "982a71b41a9ea0024951dff4829a279bde76ccbedba22f11f0ae95419be36ebc"
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 15658,
-      "sha256": "c12a6739ae466ae52b758a602b888e8e10009ae7e9f655e075b574ba4d350584"
+      "bytes": 21272,
+      "sha256": "23bcd01db352fc977ad86c406bb06db4a20e3d8e5ca8cfc6dfcce8137e20c5b5"
+    },
+    {
+      "path": "contracts/solana/tests/build-v3.sh",
+      "bytes": 1476,
+      "sha256": "2219bafd9ef6703dfa1dd025eee36e113f85d52df24fcf9fd6321afa8b2b18a1"
+    },
+    {
+      "path": "contracts/solana/tests/deploy-devnet.mjs",
+      "bytes": 4826,
+      "sha256": "3e231e22a63d989ea27bb1e144a91a29726de873e6e8b1063edbc93fcff70303"
+    },
+    {
+      "path": "contracts/solana/tests/devnet-smoke.mjs",
+      "bytes": 11493,
+      "sha256": "6e6435e64cf913d98b916f1fc7ad32307311b9722e096249dfc3963fdd7b12b4"
+    },
+    {
+      "path": "contracts/solana/tests/export-devnet-audit.mjs",
+      "bytes": 2673,
+      "sha256": "1a35f2006cd75f1266bc92911d18a4a147fbe8f528744f288ff1e99fdba07dfa"
     },
     {
       "path": "contracts/solana/tests/payment-fixtures.mjs",
@@ -2531,14 +2556,24 @@
       "sha256": "f52980117f3ffd1e28dc91e99edb29a683cd4f0f871e306fd8df75db2415290f"
     },
     {
+      "path": "contracts/solana/tests/prepare-devnet.mjs",
+      "bytes": 3197,
+      "sha256": "e973111a59abd7d61eba1fecfa0b7a05828ce1c5c50fb5cdf5035792ca075def"
+    },
+    {
+      "path": "contracts/solana/tests/resume-devnet-buffer.mjs",
+      "bytes": 4190,
+      "sha256": "d7b04ef9822f874d2c55b280d90ef924c9ec34c03d0d6c633ba9d53c50d6858c"
+    },
+    {
       "path": "contracts/solana/tests/runtime.mjs",
-      "bytes": 6084,
-      "sha256": "17ee4f74e7e9e6ce1e731b15a703db62cc4f12894d89c86b4de228f2adbfd1ca"
+      "bytes": 6727,
+      "sha256": "2f356a3505d49c226a0105be0f6f6187e540617f677b7aa1262a8b345269ba6d"
     },
     {
       "path": "contracts/solana/tests/start-validator.mjs",
-      "bytes": 1292,
-      "sha256": "db73b4b8ecbfea8094e70623fa009c0ceed754bb060a5d98e149291906278548"
+      "bytes": 2545,
+      "sha256": "b8a8fb355e0746092e5457521b262d03f392cff4a8f5edc75bcfd3f1217d8632"
     },
     {
       "path": "pilot-site/app/AaplOnchain.tsx",
@@ -2657,8 +2692,8 @@
     },
     {
       "path": "pilot-site/app/account/billing/page.tsx",
-      "bytes": 20673,
-      "sha256": "1547b17cf42cd91c05ec65e49d348f85f37eed2027b4393cd99f74009d42c521"
+      "bytes": 24136,
+      "sha256": "7381ee3d0c38b3ac9d7eef341c78dfb86ba29c9026479bfd5da0e302dcb58b8c"
     },
     {
       "path": "pilot-site/app/account/billing/payments.css",
@@ -3072,8 +3107,8 @@
     },
     {
       "path": "pilot-site/app/OraktLanding.tsx",
-      "bytes": 34992,
-      "sha256": "2b79ccd9c2f6aefff60269b3c21c5a86bb70c0eb28f7c81c958af8485cb2c18b"
+      "bytes": 35071,
+      "sha256": "80aabbf84fec780004e8f348be19f7d332babc7684fa14da0e184ad41f078176"
     },
     {
       "path": "pilot-site/app/OraktMatrix.module.css",
@@ -3267,13 +3302,13 @@
     },
     {
       "path": "pilot-site/app/ProtocolSection.module.css",
-      "bytes": 3161,
-      "sha256": "7fcbaf4d795283927f3d02a8e06371cc40d535d5ee5dd1502982f03ec8d5f877"
+      "bytes": 3860,
+      "sha256": "9533ebe1ad6b5d238b55e166c36b7e54bdaefff5545a5e2c66841d18993134fd"
     },
     {
       "path": "pilot-site/app/ProtocolSection.tsx",
-      "bytes": 5930,
-      "sha256": "7f04facbca293dded44df63d95eb1321991d7cb17d2ab550d70bf7fc76940107"
+      "bytes": 7609,
+      "sha256": "20c82e81af84b9c937bc4bdbb8eaa2b2df2bfa24bf3fd70ab3685bac0ba4bf6a"
     },
     {
       "path": "pilot-site/app/provenance-wallet.ts",
@@ -3288,7 +3323,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "f966ed39c7b4b82b1a545b5f639dc6149e840173414d73ba360e54b82977966d"
+      "sha256": "52ae1501ecf7d3b47dacc29be9366a897f37ae36aac2d1bc6137b29215002257"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -3382,8 +3417,8 @@
     },
     {
       "path": "pilot-site/app/SiteFooter.tsx",
-      "bytes": 4374,
-      "sha256": "68ad69134a94f063b580c016a51c74f04dc6fa6d7cbb38f3db49610c9ee6690e"
+      "bytes": 4441,
+      "sha256": "7aeb4a8ce6860a5a53007e946d82d2e3338ac0862b377624e9924ff03d84393d"
     },
     {
       "path": "pilot-site/app/StudyCurve.tsx",
@@ -3472,8 +3507,8 @@
     },
     {
       "path": "pilot-site/db/schema.ts",
-      "bytes": 11650,
-      "sha256": "1aff63402972eade7cb783eece766ca96e392db5de4be02d139782e48c1387ce"
+      "bytes": 12559,
+      "sha256": "7286bcaf361ef93a7019d5f6ed257bace0f9fd013e2e37fb784db77a52e1427f"
     },
     {
       "path": "pilot-site/drizzle/0000_solid_silver_fox.sql",
@@ -3561,6 +3596,11 @@
       "sha256": "1f38dd0b9e227c548a80928b830826a61cdc6608c030f514a4b546eda1f5af94"
     },
     {
+      "path": "pilot-site/drizzle/0017_amazing_whiplash.sql",
+      "bytes": 953,
+      "sha256": "c385c5885cf7c63dd6a3cc456f191321ec9a5db3419fd414d1b8ac13517b3928"
+    },
+    {
       "path": "pilot-site/drizzle/meta/0000_snapshot.json",
       "bytes": 2969,
       "sha256": "f415100f98c81173df7efaaf153b7be7918e10ba117819fad650af13571931b4"
@@ -3646,9 +3686,14 @@
       "sha256": "2faaf6816695360d5c7be97e15d928c03ae885b1ff719a4263142cfdab71317b"
     },
     {
+      "path": "pilot-site/drizzle/meta/0017_snapshot.json",
+      "bytes": 53540,
+      "sha256": "fdc9c22d5014f9a6b25b8e99c1da6810fa5f6ba165ea6d019657833344c74c3e"
+    },
+    {
       "path": "pilot-site/drizzle/meta/_journal.json",
-      "bytes": 2490,
-      "sha256": "82b3f82d8dc10941b8d2534f2645b45f1cf47e3bf17a247d412981c0c171b7c4"
+      "bytes": 2635,
+      "sha256": "e6bffd575499cb313c09445e568a64a709376ddab04073782442220fc2b6c538"
     },
     {
       "path": "pilot-site/drizzle.config.ts",
@@ -4151,14 +4196,24 @@
       "sha256": "a1082fe6e97b162b6f0bf30bb660a349d2a26f8285e3d560dd6ea91c927b44ce"
     },
     {
+      "path": "pilot-site/tests/protocol-checkout.test.mjs",
+      "bytes": 11248,
+      "sha256": "0523d89a0010a076963aa4befd8bed5544934d3106ba3b9df71f2c79fc84377c"
+    },
+    {
       "path": "pilot-site/tests/protocol-disclosure.test.mjs",
-      "bytes": 1221,
-      "sha256": "c759cd82e7992730b82131bfbd6fb9a4501d0da4e2e414f6116b9b7027b7c74f"
+      "bytes": 1450,
+      "sha256": "a89a580d49fbb738c235e391123a31017dc1b9030b68eae4acd34be1a1df780b"
+    },
+    {
+      "path": "pilot-site/tests/protocol-fixture.mjs",
+      "bytes": 4817,
+      "sha256": "5031138520e419f3eca8abf405cecc8cdfe85896172d9049a45a6e548e4d0a50"
     },
     {
       "path": "pilot-site/tests/protocol-receipt.test.mjs",
-      "bytes": 16897,
-      "sha256": "5eafba6aa74c48a7bb553410d811784cb35d27c40ae5f7685c18bd4a7f789aa9"
+      "bytes": 12474,
+      "sha256": "85841647c8733185fbc4815788ca828af4814155021b253db3e146564d1e0382"
     },
     {
       "path": "pilot-site/tests/public-copy.test.mjs",
@@ -4272,8 +4327,8 @@
     },
     {
       "path": "pilot-site/worker/billing.mjs",
-      "bytes": 16467,
-      "sha256": "db1dff20802da4f264e1500436589115e0e4cfe49354b510ef9f64decc9be661"
+      "bytes": 17440,
+      "sha256": "b80b57fc9f820ecd307208ff439a89e8aba70a8fdedc265ab7e357895207eefc"
     },
     {
       "path": "pilot-site/worker/crypto-market.mjs",
@@ -4303,7 +4358,7 @@
     {
       "path": "pilot-site/worker/index.ts",
       "bytes": 31872,
-      "sha256": "75e5c530e11c8d1c8ee47eeb6b67ee39a286fb18e1df246474024101049ff7b3"
+      "sha256": "d7ffcd8c71e46d90b85751288dfa673b2f3aab2b572748d0841b480368a08b58"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",
@@ -4366,9 +4421,14 @@
       "sha256": "5a80d5164847b80aab80f72e20414df55ea9a5760fbf11cd70d94fae73b31073"
     },
     {
+      "path": "pilot-site/worker/protocol-checkout.mjs",
+      "bytes": 14696,
+      "sha256": "5e5b94fd12571fa11a613ba35487bfd50831e53458e8880036b1b1423a30ce2c"
+    },
+    {
       "path": "pilot-site/worker/protocol-receipt.mjs",
-      "bytes": 10678,
-      "sha256": "1b0c51e2a16d1a2f9e13e818b0136fa77607eba77347f47c163e99fd2750761d"
+      "bytes": 12802,
+      "sha256": "2812fb3233bfa93f045bbf0ec49b8c0227ab41b503033dab222099493cca0afe"
     },
     {
       "path": "pilot-site/worker/publication.mjs",

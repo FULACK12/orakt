@@ -103,7 +103,7 @@ const worker = {
     if(url.pathname==='/api/research-bridge')return await researchBridgeResponse(request,env);
 
     if (url.pathname === "/api/app-version" && request.method === "GET") {
-      return publicApiResponse(jsonResponse({version: "143"}));
+      return publicApiResponse(jsonResponse({version: "144"}));
     }
     if(url.pathname==='/api/public-stats'){
       if(request.method!=='GET')return publicApiResponse(jsonResponse({error:'method_not_allowed'},405));

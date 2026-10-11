@@ -1,5 +1,11 @@
 # ORAKT — Evidence-linked intelligence
 
+## v144: contract orders and evidence inclusion
+
+This update adds signed-wallet-bound contract orders, pinned-program transaction preparation and atomic replay-safe membership settlement. A unique finalized receipt/signature can be credited only once; retries do not add another month. Legacy SPL payments are isolated. Production contract checkout remains disabled pending reviewed deployment and real-network validation. The new Rust `verify_evidence` instruction checks a bounded Merkle inclusion proof, not truth or investment quality. SBPFv3 builds and separate Devnet-only preparation scripts are included. Preparing a program address is not deployment; generated test keys, test state and private member records are excluded from this repository. No mainnet deployment or expense is authorized by these source changes.
+
+**Devnet is now deployed and acceptance-tested:** [inspect the actual program](https://explorer.solana.com/address/PyvDP4Gg7TZUk7uzb9AQxNwPV7kTVmf3vwfSbgpsmsX?cluster=devnet) and [public deployment/transaction evidence](contracts/solana/devnet-deployment.json). Finalized chain bytes match the SBPFv3 build. Fourteen Devnet checks passed across six registry kinds, inclusion proofs, synthetic-token receipts, duplicate rejection, review/retraction, trial and pause/resume. Local validation passed 14 Rust tests, 3 fixture tests, 33 provenance/trial checks, 25 payment checks and 181 focused website checks. Public test-network tokens are NOT issuer USDC/USDT, do not unlock production memberships, and no mainnet funds were spent. This is not an independent security audit. Earlier v141–143 status descriptions below are historical; this section supersedes their unimplemented checkout and undeployed testnet status.
+
 ORAKT connects company disclosures, event evidence, research reports and verifiable submission histories. Product: https://orakt.com
 
 [![Solana contract checks](https://github.com/FULACK12/orakt/actions/workflows/solana-contracts.yml/badge.svg?branch=main)](https://github.com/FULACK12/orakt/actions/workflows/solana-contracts.yml)
