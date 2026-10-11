@@ -18,7 +18,6 @@ import MarketsWorkspace from "./MarketsWorkspace";
 import MapChains from './MapChains';
 import AppleMapInspector from './AppleMapInspector';
 import useResearchData from './useResearchData';
-import AssetIntelligence from './AssetIntelligence';
 import MacroEventReports from "./MacroEventReports";
 import DisclosureReviews from "./DisclosureReviews";
 import IntelligenceMarket from "./platform/intelligence/IntelligenceMarket";
@@ -76,6 +75,7 @@ const EvidenceChains=lazy(()=>import('./EvidenceChains'));
 const PortfolioLab=lazy(()=>import('./PortfolioLab'));
 const AlphaLab=lazy(()=>import('./AlphaLab'));
 const PersonalResearch=lazy(()=>import('./PersonalResearch'));
+const AssetIntelligence=lazy(()=>import('./AssetIntelligence'));
 const HormuzMapInspector=lazy(()=>import('./HormuzMapInspector'));
 
 type Language = "zh" | "en";
@@ -5536,7 +5536,7 @@ export default function PilotDashboard({
       {tab === "data" && <DataLibrary language={language}/>}
       {tab === "portfolio" && <Suspense fallback={<p role="status">{language==='zh'?'加载组合工具…':'Loading portfolio tools…'}</p>}><PortfolioLab language={language}/></Suspense>}
       {tab === "intelligence" && <IntelligenceMarket embedded displayLanguage={language}/>}
-      {tab === "assets" && <AssetIntelligence language={language}/>}
+      {tab === "assets" && <Suspense fallback={<p role="status">{language==='zh'?'加载链上资产…':'Loading on-chain assets…'}</p>}><AssetIntelligence language={language}/></Suspense>}
       {tab === "markets" && <MarketsWorkspace language={language}/>}
       {tab === "alpha" && <Suspense fallback={<p role="status">{language==='zh'?'加载 Alpha 工具…':'Loading Alpha tools…'}</p>}><AlphaLab language={language}/></Suspense>}
       {tab === "personal" && <Suspense fallback={<p role="status">{language==='zh'?'正在打开询问 ORAKT…':'Opening Ask ORAKT…'}</p>}><PersonalResearch language={language}/></Suspense>}

@@ -1,5 +1,28 @@
 # ORAKT Protocol — experimental Solana contracts
 
+## v146 Meteora integration — separate, read-only Devnet module
+
+ORAKT does not redeploy or claim ownership of Meteora's DBC program. A synthetic
+`OREVTEST / Devnet SOL` pool was created through the official SDK 1.5.13 at
+`9uLUFf1W1zFoiWa4zhhJG9GzeYNKaHVKaHdQMp4BE64G`. It is not AAPLx or a Chinese
+equity, has no redemption or dividend rights, and no swaps were executed by the
+setup. DAMM v2 is the configured graduation destination; graduation is not tested.
+
+The metadata study is committed in ORAKT v145's existing registry, record
+`ASUhxBeGupwFHthJ9St8VBrZSLugXDj4f9vJhDC92Xkm`. Public canonical metadata and proof
+are in `pilot-site/worker/meteora-demo.mjs` and `meteora-proof.mjs`. The website
+reads finalized pool/config/mint/record accounts, checks ownership, fixed layouts,
+network and hashes, and displays the observation time. No swaps, wallets, token
+issuance or transaction signing are available in the web integration. RPC failure
+is an explicit unavailable state, never synthetic balances. Reads are cached for
+up to 60 seconds and do not require changing production secrets or payment flags.
+
+The full SDK is dev-only due to its dependency surface and npm audit findings;
+the hosted worker imports only a generated, bounded read-only layout. Tests compare
+every primitive with the official Anchor decoder. That comparison is not an
+independent security audit. No membership, account grant, payment switch, production
+fund or mainnet deployment was changed by this integration.
+
 ## v145 security changes — Devnet acceptance passed
 
 The new [v145 Devnet program](https://explorer.solana.com/address/2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4?cluster=devnet) passed 24 public-chain checks, including real synthetic-token renewal and guardian recovery. [Immutable acceptance evidence](devnet-deployment-v145.json) records finalized signatures, binary/source hashes and the final payment-OFF state. Local verification passed 14 Rust tests, 45 provenance/recovery runtime checks, 27 synthetic payment runtime checks, 3 fixture tests and 173 focused website/rendering checks. Mainnet remains unauthorized; this is not independent assurance.

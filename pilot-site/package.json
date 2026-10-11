@@ -25,6 +25,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
     "@eslint/js": "9.39.4",
+    "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.13",
     "@next/eslint-plugin-next": "16.2.6",
     "@openai/sites-vite-plugin": "0.1.0",
     "@tailwindcss/postcss": "4.2.1",
@@ -48,5 +49,7 @@
     "wrangler": "4.92.0"
   },
   "type": "module",
-  "overrides": {"ws": "8.22.0"}
+  "overrides": {
+    "ws": "8.22.0"
+  }
 }

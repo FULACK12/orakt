@@ -8,6 +8,7 @@ import appleNetworkSnapshot from '../snapshot/apple-network-v132.json';
 import {appleResearch} from './apple-research.mjs';
 import {hormuzResearch} from './hormuz-research.mjs';
 import {assetLinks} from './asset-links.mjs';
+import {meteoraResponse} from './meteora-reader.mjs';
 import {aaplxProfile,aaplxReport} from './aaplx-research.mjs';
 import {billingResponse} from './billing.mjs';
 import {accountWalletResponse,cancelWalletLink,clearWalletLinkCookie} from './account-wallet.mjs';
@@ -103,7 +104,7 @@ const worker = {
     if(url.pathname==='/api/research-bridge')return await researchBridgeResponse(request,env);
 
     if (url.pathname === "/api/app-version" && request.method === "GET") {
-      return publicApiResponse(jsonResponse({version: "145"}));
+      return publicApiResponse(jsonResponse({version: "146"}));
     }
     if(url.pathname==='/api/public-stats'){
       if(request.method!=='GET')return publicApiResponse(jsonResponse({error:'method_not_allowed'},405));
@@ -176,6 +177,7 @@ const worker = {
     if(url.pathname==='/api/account/wallet')return protectedResponse(await accountWalletResponse(request,env,member));
     if(url.pathname==='/api/account/watchlist')return protectedResponse(await watchlistResponse(request,env,member,equityReportCatalog.companies));
     if(url.pathname==='/api/crypto-market')return protectedResponse(await cryptoMarketResponse(request));
+    if(url.pathname==='/api/meteora-research')return protectedResponse(await meteoraResponse(request));
     if(url.pathname==='/api/workspace-access'&&request.method==='GET')return protectedResponse(jsonResponse(workspaceAccess(member.access)));
     if(url.pathname==='/api/map-chains'&&request.method==='GET')return protectedResponse(jsonResponse(mapChains(member.access,hormuzChain,supplyChainSitesSnapshot,appleNetworkSnapshot)));
     if(url.pathname==='/api/apple-research'&&request.method==='GET')return protectedResponse(workspaceAccess(member.access).chains.mapLimit?jsonResponse({report:appleResearch,network:mapChains(member.access,hormuzChain,supplyChainSitesSnapshot,appleNetworkSnapshot).chains[0]}):jsonResponse({error:'plan_required'},403));

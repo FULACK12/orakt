@@ -1,6 +1,6 @@
 "use client";
 import {useEffect, useState} from "react";
-const VERSION = "145";
+const VERSION = "146";
 export default function ReleaseStatus({language="zh"}:{language?:"zh"|"en"}) {
   const [latest, setLatest] = useState(VERSION);
   useEffect(() => {

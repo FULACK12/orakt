@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 3280,
-      "sha256": "1f6c1a262f44d8e6525415d274dff4ce5eac4a4719293153b31a567b96bdae52"
+      "bytes": 3664,
+      "sha256": "949e4e96f5ab83f1463f127f0a0e85a55bfc76b0881cc7645e97f6eb6939ae72"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2522,8 +2522,8 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 24212,
-      "sha256": "cc72302f4dade89384132689b028b6f7209f0c1bc2e97ab415eb9aef67e95827"
+      "bytes": 25710,
+      "sha256": "9210b0eb81ccbf59d585b9cca2cb47e17119833f5e85bfca891e97427f89e4a2"
     },
     {
       "path": "contracts/solana/tests/build-v3.sh",
@@ -2792,8 +2792,8 @@
     },
     {
       "path": "pilot-site/app/AssetIntelligence.tsx",
-      "bytes": 3665,
-      "sha256": "bfd16c5c0c639d5ed24e269c78d683906495d6acde4c97d9b6b6f0c180c52c88"
+      "bytes": 3757,
+      "sha256": "d3b4f40ee35cd568198ce6bbecf372b08325aec3264c1cf54b4684ab2467cc84"
     },
     {
       "path": "pilot-site/app/chain-catalog.ts",
@@ -3066,6 +3066,16 @@
       "sha256": "aab1452e70d163942b0d9f678be2729b900e695ce8e7277ba12459c61a60193e"
     },
     {
+      "path": "pilot-site/app/MeteoraResearch.module.css",
+      "bytes": 3250,
+      "sha256": "9a8e6ed636fab54be507b3afc6ffd65e6b1187c6bea9a0662299a97f04549881"
+    },
+    {
+      "path": "pilot-site/app/MeteoraResearch.tsx",
+      "bytes": 8109,
+      "sha256": "09382c20812d3a08acea2cd3d4acb597e9d987c63bed7a5b21fca61fc18b5c67"
+    },
+    {
       "path": "pilot-site/app/metric-format.mjs",
       "bytes": 1529,
       "sha256": "52ed71dbcdeedac682ca78506a8f94a6e02348961d5f7850939b296c7333f203"
@@ -3177,8 +3187,8 @@
     },
     {
       "path": "pilot-site/app/PilotDashboard.tsx",
-      "bytes": 216027,
-      "sha256": "7315cbc31ac5bb4e6a81e665c08ed68d4115c28dfa61e0e4139de5f818bfdb81"
+      "bytes": 216163,
+      "sha256": "496db9e2b246216909a51ae9d8413d13c2b0dfcc1086966c1cfad33a056bba80"
     },
     {
       "path": "pilot-site/app/plans/page.tsx",
@@ -3333,7 +3343,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "d795cf804486f34d739320d8882e765fc0f75796249264c000b35b635a908e45"
+      "sha256": "906c77b9883936412c44a5c72bbdd5c99c25e01e04eb973e7c719f66be779597"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -3712,13 +3722,13 @@
     },
     {
       "path": "pilot-site/package-lock.json",
-      "bytes": 379995,
-      "sha256": "1d270adc939272b12da8e2270c90ba691997f2a7d73faebc929106dafe664669"
+      "bytes": 392517,
+      "sha256": "312bb491a77acdf1b0f5543a87bb4c90185069a7b51459177e262e806099d7e6"
     },
     {
       "path": "pilot-site/package.json",
-      "bytes": 1581,
-      "sha256": "9ca8280230fad80b8b48914020b4fc7ba9386b33a0a24f1f13a34fe7a1d75c20"
+      "bytes": 1644,
+      "sha256": "97d1332606656f35a6818f1ec0e980d131b0ae5ce9144391227d0fb3dd8225e0"
     },
     {
       "path": "pilot-site/public/brand/apple-touch-icon.png",
@@ -3761,6 +3771,11 @@
       "sha256": "48f0882e8c119a4eb2006b128b7c8b8eddb0f6596253f20f0497e67e178d5c5b"
     },
     {
+      "path": "pilot-site/scripts/anchor-meteora-demo.mjs",
+      "bytes": 4142,
+      "sha256": "d13bbf695b2132f5d1192bcd9497b9feb760699dbcec1bc909828d88940f5cd7"
+    },
+    {
       "path": "pilot-site/scripts/build-factor-study.mjs",
       "bytes": 7112,
       "sha256": "9e9d358570dc06708a76b00b3f81e21d9ddbcef4be54622063137ac460eed6f5"
@@ -3769,6 +3784,11 @@
       "path": "pilot-site/scripts/capture-aaplx.mjs",
       "bytes": 2073,
       "sha256": "7191a9e76dd6429776cb4a92e1ca278fe592dbe168fe917378fd2b38aaf782f5"
+    },
+    {
+      "path": "pilot-site/scripts/capture-meteora-read.mjs",
+      "bytes": 707,
+      "sha256": "08069694f2df757a364398ca57992a4001d1c96ba8d7546dbd7feee34a2f24da"
     },
     {
       "path": "pilot-site/scripts/clean-dist.mjs",
@@ -3811,9 +3831,19 @@
       "sha256": "979ce2ab0203b37f04237c912c4c52ca676abf61949010c963f72d3e527e9662"
     },
     {
+      "path": "pilot-site/scripts/generate-meteora-layout.mjs",
+      "bytes": 1406,
+      "sha256": "064b216aa6f9d9f9909743d44194a580a8b1682506fd4bb8c9e0a51cfe060000"
+    },
+    {
       "path": "pilot-site/scripts/localize-auth-source.mjs",
       "bytes": 1859,
       "sha256": "b1b60e08292b1d757a381ae168122cd9b986b258b3afca427816d30b2a5250c2"
+    },
+    {
+      "path": "pilot-site/scripts/meteora-devnet-demo.mjs",
+      "bytes": 6032,
+      "sha256": "bb8cfe64d12b97d7a5f7a2e79fea869ccb6b484f5cd3cddd1dafa4ba39de66bb"
     },
     {
       "path": "pilot-site/scripts/pack-private-reports.mjs",
@@ -4186,6 +4216,16 @@
       "sha256": "2213f0ee5bcc2b9169931a1d1ce5c2d841f37933ec654e1805f8901b3d048096"
     },
     {
+      "path": "pilot-site/tests/meteora-live-fixture.mjs",
+      "bytes": 3668,
+      "sha256": "5aa8e01cf15ff9ae34237a7916f1e072b749abcb721307264291c9f2f6d97f96"
+    },
+    {
+      "path": "pilot-site/tests/meteora-reader.test.mjs",
+      "bytes": 5074,
+      "sha256": "e8d5773547365852e3006fd85fae4b5e7b16c3fb48ea11e08d6cbeff87695ae1"
+    },
+    {
       "path": "pilot-site/tests/mu-v107.test.mjs",
       "bytes": 2399,
       "sha256": "deaded9b776c49cbe1e5b44b225afeb03aa0e548a74e3cc8efd2dbc8a9cbad0a"
@@ -4372,8 +4412,8 @@
     },
     {
       "path": "pilot-site/worker/index.ts",
-      "bytes": 31872,
-      "sha256": "63783a5ca2f49e2ae78dcbb116f0c2e2b8cd38b82a35b1d044bcef7245db3dc9"
+      "bytes": 32030,
+      "sha256": "89037f52d6aa20d6820c8817b1a03c15b85a7ec17c6182c46bdc0a985fff77fb"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",
@@ -4419,6 +4459,31 @@
       "path": "pilot-site/worker/membership.mjs",
       "bytes": 11433,
       "sha256": "9741a41a038de9ce8054aeb141355ce96c91c4022b08d0f085767dc7e6e0d931"
+    },
+    {
+      "path": "pilot-site/worker/meteora-demo.mjs",
+      "bytes": 1596,
+      "sha256": "e564e09aaf204a5d05054cba643e51d31991748c3776695dec47ed10e4af2bf2"
+    },
+    {
+      "path": "pilot-site/worker/meteora-layout.mjs",
+      "bytes": 17080,
+      "sha256": "23b00fc2d64cef2a5e38d44c020c241ef7b08d9b7256b81d0c72c759878a5fe7"
+    },
+    {
+      "path": "pilot-site/worker/meteora-NOTICE.md",
+      "bytes": 1462,
+      "sha256": "58869219c9d08768ed353f62ddd41f0a6d1c8b7586e49dbb3161a3b3a6789c8e"
+    },
+    {
+      "path": "pilot-site/worker/meteora-proof.mjs",
+      "bytes": 888,
+      "sha256": "d82189cc48e543dfc30321e76f6b52b66c3024acde11f6c4a89b60b5477ef5e1"
+    },
+    {
+      "path": "pilot-site/worker/meteora-reader.mjs",
+      "bytes": 7777,
+      "sha256": "20e5e09ff01ad0a0f546873f78caf3f3398e88ab8ac41c5c7d52b5ae603bb1f8"
     },
     {
       "path": "pilot-site/worker/news-publication.mjs",

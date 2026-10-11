@@ -1,5 +1,11 @@
 # ORAKT — Evidence-linked intelligence
 
+## v146: evidence-linked Meteora Devnet research
+
+The on-chain assets workspace now reads a real [Meteora DBC test pool](https://explorer.solana.com/address/9uLUFf1W1zFoiWa4zhhJG9GzeYNKaHVKaHdQMp4BE64G?cluster=devnet) and its [ORAKT version commitment](https://explorer.solana.com/address/ASUhxBeGupwFHthJ9St8VBrZSLugXDj4f9vJhDC92Xkm?cluster=devnet). OREVTEST is a synthetic, non-redeemable test asset, NOT Apple or Chinese equity. No swaps were executed. DAMM v2 is the configured graduation destination, not a completed migration.
+
+The authenticated read-only endpoint validates network, program owners, account layouts and the pinned evidence hash; failed reads do not become invented balances. The bilingual UI displays observed reserves, curve price, graduation progress and reproducible source hashes. The official SDK is a development-only dependency; hosted code uses a bounded IDL-derived reader. This is not an independent security audit. No mainnet deployment, production payment migration or charging configuration change is part of v146; the pre-existing legacy checkout setting remains unchanged.
+
 ## v145: safer renewal, independent payment gate and authority recovery
 
 The new [Solana Devnet program](https://explorer.solana.com/address/2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4?cluster=devnet) is finalized and byte-matched to the SBPFv3 build. [Public evidence](contracts/solana/devnet-deployment-v145.json) records 24 Devnet checks, synthetic-token payments and unexpired-term renewal, duplicate rejection, guardian recovery and a final payment-OFF state. v144 remains preserved separately.

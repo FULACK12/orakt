@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {BorshAccountsCoder} from '@coral-xyz/anchor';
+import {DynamicBondingCurveIdl} from '@meteora-ag/dynamic-bonding-curve-sdk';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import layouts from '../worker/meteora-layout.mjs';
+import {layouts as regenerated} from '../scripts/generate-meteora-layout.mjs';
+import {DEMO_EVIDENCE} from '../worker/meteora-demo.mjs';
+import proof from '../worker/meteora-proof.mjs';
+import fixture from './meteora-live-fixture.mjs';
+import {decodeAccount,summarizeAccounts,readMeteora,createMeteoraReader,devnetRpc,units,meteoraResponse,DEVNET_GENESIS} from '../worker/meteora-reader.mjs';
+const clone=()=>structuredClone(fixture),rpc=async(m)=>m==='getGenesisHash'?DEVNET_GENESIS:clone();
+test('generated read-only schemas match the pinned official SDK',()=>assert.deepEqual(layouts,regenerated));
+for(const [name,index]of [['VirtualPool',0],['PoolConfig',1]])test(name+' every primitive matches the official Anchor decoder',()=>{
+ const coder=new BorshAccountsCoder(DynamicBondingCurveIdl),decoded=coder.decode(name,Buffer.from(fixture.value[index].data[0],'base64')),ours=decodeAccount(name,fixture.value[index]);
+ for(const field of layouts[name].fields){const v=field.path.split('.').reduce((a,k)=>a[k],decoded);assert.equal(ours[field.path],v.toString(),field.path);}
+});
+test('real finalized fixture ties DBC pool to ORAKT evidence',()=>{const s=summarizeAccounts(clone());assert.equal(s.evidenceVerified,true);assert.equal(s.quoteReserve,'0.000000000');assert.equal(s.migrated,false);assert.equal(s.migrationOption,'DAMM v2');assert.equal(s.initialBaseFeeBps,100);assert.equal(s.configuredCreatorPermanentLockPct,100);assert.equal(s.graduatedPoolVerified,false);});
+test('source hash reproduces the public on-chain commitment',()=>assert.equal(createHash('sha256').update(JSON.stringify(DEMO_EVIDENCE)).digest('hex'),proof.contentHash));
+test('mainnet is rejected before any accounts request',async()=>{let calls=0;await assert.rejects(readMeteora(async()=>{calls++;return '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';}),/wrong_rpc_network/);assert.equal(calls,1);});
+for(const i of [0,1,2,3,4])test('rejects wrong owner at account '+i,()=>{const f=clone();f.value[i].owner='11111111111111111111111111111111';assert.throws(()=>summarizeAccounts(f));});
+for(const [label,i,offset]of [['pool discriminator',0,0],['pool config',0,72],['pool mint',0,136],['quote mint',1,8],['record content',4,109],['record root',4,141]])test('rejects altered '+label,()=>{const f=clone(),b=Buffer.from(f.value[i].data[0],'base64');b[offset]^=1;f.value[i].data[0]=b.toString('base64');assert.throws(()=>summarizeAccounts(f));});
+test('unsupported/truncated schema rejected, not partially decoded',()=>{const f=clone();f.value[0].data[0]=Buffer.alloc(423).toString('base64');assert.throws(()=>summarizeAccounts(f));});
+test('program must be executable',()=>{const f=clone();f.value[5].executable=false;assert.throws(()=>summarizeAccounts(f));});
+test('fixed large integer display does not lose precision',()=>assert.equal(units('18446744073709551615',9),'18446744073.709551615'));
+test('cache is bounded, timestamped and single-flight',async()=>{let calls=0,now=0;const get=createMeteoraReader(async m=>{calls++;await new Promise(r=>setTimeout(r,2));return rpc(m)},()=>now);const [a,b]=await Promise.all([get(),get()]);assert.equal(calls,2);assert.deepEqual(a,b);now=20000;assert.equal((await get()).cache,'cached');assert.equal(calls,2);now=60001;assert.equal((await get()).cache,'fresh');assert.equal(calls,4);});
+test('upstream failure never becomes live zero balances or stale verification',async()=>{let now=0,failed=false;const get=createMeteoraReader(async m=>{if(failed)throw Error('upstream');return rpc(m)},()=>now);assert.equal((await get()).available,true);now=61000;failed=true;const x=await get();assert.equal(x.available,false);assert.equal(x.state,null);assert.equal(x.mode,'unavailable');});
+test('RPC write methods rejected without touching network',async()=>{await assert.rejects(devnetRpc('sendTransaction',[],()=>{throw Error('must not call')}),/rpc_method_forbidden/);});
+test('bounded RPC response size',async()=>await assert.rejects(devnetRpc('getGenesisHash',[],async()=>new Response('x'.repeat(65537))),/rpc_response_too_large/));
+test('endpoint refuses mutation',async()=>assert.equal((await meteoraResponse(new Request('https://orakt.com/api/meteora-research',{method:'POST'}))).status,405));
+test('route remains behind active account gate',()=>{const src=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');assert.ok(src.indexOf("if(url.pathname==='/api/meteora-research')")>src.indexOf('if(member.access.status!=="active")'));});
+test('runtime never imports the SDK or prepares/signs/broadcasts a transaction',()=>{const src=readFileSync(new URL('../worker/meteora-reader.mjs',import.meta.url),'utf8');assert.doesNotMatch(src,/@meteora-ag|Keypair|signTransaction|sendRawTransaction|new Transaction/);});
