@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 2786,
-      "sha256": "0eaa85db51414cc68828310390c3be49af6fab64a773509134b02af13d635658"
+      "bytes": 3371,
+      "sha256": "1caaae68f56a922f3e899e88d56343a08d7916b0e0befe0545b54b0dc7091d23"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2477,8 +2477,8 @@
     },
     {
       "path": "contracts/solana/.gitignore",
-      "bytes": 43,
-      "sha256": "e98e231232d6abc8c17763395a80ef379d7c221c7a8a380735aef07ebbfdd4ba"
+      "bytes": 55,
+      "sha256": "deae810b986b9c407bc76719cf23cd6972895fa02cb9d03907c2df86f768a5c6"
     },
     {
       "path": "contracts/solana/Anchor.toml",
@@ -2487,8 +2487,8 @@
     },
     {
       "path": "contracts/solana/Cargo.lock",
-      "bytes": 59987,
-      "sha256": "cbede51deae211a5fce00aa99244a596c1f30c565f2b9eae4d7cfda5f2087746"
+      "bytes": 74017,
+      "sha256": "65ed0bd8f80260483837bc30df2ff96da571a1cea7973ba17112f3e1f63097f4"
     },
     {
       "path": "contracts/solana/Cargo.toml",
@@ -2512,8 +2512,8 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 7194,
-      "sha256": "319cc067bd56227fcf1370a0c1b61a9b126b49a82e74de7f51223d981f4330c8"
+      "bytes": 7584,
+      "sha256": "1e3205f65bf8a8e140ebade884307c6e26ca154b6a371112ba29b9038ac161c2"
     },
     {
       "path": "contracts/solana/tests/runtime.mjs",

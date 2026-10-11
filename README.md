@@ -20,7 +20,7 @@ This source-only export was synchronized on October 11, 2026. The v140 applicati
 
 The v140 production-source build and 38 rendered-page tests passed locally. The focused account/research suite passed 25/25; the full application suite reported 335/340 passing, with five existing landing-page/educational-copy assertion failures. Those results require the provisioned production inputs described below; they are not a claim that this deliberately data-excluded export can run the entire suite unmodified.
 
-For v141, the production-source build and 40 focused disclosure/rendered-page tests passed. Contract host compilation and 13 Rust unit tests passed in Actions; SBF/IDL and local-validator checks have separate outcomes visible in the workflow. A configured test is not a passed test, and no custom contract has been deployed or independently audited. The website links the source, current checks and unsatisfied release gates at https://orakt.com/#protocol.
+For v141, the production-source build, 40 focused disclosure/rendered-page tests and 22 existing billing/trial/news regressions passed. [Contract Actions run 38124334908](https://github.com/FULACK12/orakt/actions/runs/38124334908) passed host compilation, 13 Rust unit tests, SBF/IDL generation and 28 local-validator provenance/permission/trial checks. Payment VM tests, independent audit, current-public-cluster binary compatibility and production receipt integration remain release gates. No custom contract has been deployed. The website links the source, checks and unsatisfied release gates at https://orakt.com/#protocol.
 
 ## Architecture
 

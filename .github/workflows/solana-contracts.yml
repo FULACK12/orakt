@@ -21,9 +21,6 @@ jobs:
             contracts/solana/.ci-cache
           key: orakt-solana-tools-1.95-4.4-1.57-v1-${{ hashFiles('contracts/solana/Cargo.lock') }}
           restore-keys: orakt-solana-tools-1.95-4.4-1.57-v1-
-      - name: Resolve newly enabled IDL-only dependencies (lock retained as artifact)
-        working-directory: contracts/solana
-        run: cargo update -p orakt-protocol
       - name: Compile program and run host unit tests (NOT validator tests)
         working-directory: contracts/solana
         run: cargo test --workspace --locked
@@ -38,7 +35,8 @@ jobs:
             rustup default 1.95.0
             if [ ! -x /cache/bin/cargo-build-sbf ]; then cargo install cargo-build-sbf --version 4.4.0 --locked --root /cache; fi
             /cache/bin/cargo-build-sbf --manifest-path programs/orakt-protocol/Cargo.toml --tools-version v1.57 --arch v0 -- --locked
-            anchor idl build
+            mkdir -p target/idl
+            anchor idl build --out target/idl/orakt_protocol.json
           '
       - name: Install locked JavaScript test client (no package lifecycle scripts)
         run: npm ci --ignore-scripts --prefix pilot-site

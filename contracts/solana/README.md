@@ -31,25 +31,25 @@ The deployed website still uses its existing Memo provenance, payment verificati
 
 ## Build and test
 
-Pinned framework: Anchor 0.31.1, with a checked-in Cargo.lock. Install Rust, Solana CLI and Anchor using the official documentation; Windows normally uses WSL. The authoring machine currently has no such toolchain. Host compilation and 13 unit tests passed in GitHub Actions. CI also attempts an SBF/IDL build and a disposable local-validator suite; inspect the actual workflow conclusion, not just this configuration, before treating them as passed. No test is an independent security audit.
+Pinned framework: Anchor 0.31.1, with a checked-in Cargo.lock. Install Rust, Solana CLI and Anchor using the official documentation; Windows normally uses WSL. The authoring machine currently has no such toolchain. [Actions run 38124334908](https://github.com/FULACK12/orakt/actions/runs/38124334908) passed host compilation, 13 unit tests, SBF compilation, IDL generation and 28 disposable local-validator checks. These runtime checks cover provenance, roles, immutable records and account trials, **not stablecoin fund transfers**. No test is an independent security audit. Subsequent runs lock the resolved dependencies and retain `target/idl/orakt_protocol.json` with the binary as a short-lived Actions artifact.
 
 The CI build pins Rust 1.95.0, cargo-build-sbf 4.4.0 and platform-tools v1.57. Its SBPFv0 output is for the pinned legacy local validator only; it is **not a production deployment artifact**. A current-cluster-compatible SBPFv3 migration/build and runtime tests are an additional release gate before public-chain deployment.
 
 ```sh
 cd contracts/solana
-cargo test --workspace
-cargo build --workspace --release
+cargo test --workspace --locked
+cargo build --workspace --release --locked
 # On a compatible Solana/Anchor workstation:
 anchor build
 ```
 
 Before deployment, an operator must generate and securely retain a program keypair and run `anchor keys sync` to replace the compilation fixture ID. Do not upload `target/deploy/*-keypair.json`. There is deliberately no mainnet deploy workflow or automatic deploy command.
 
-## Required release gates (not yet satisfied)
+## Release gates and remaining work
 
-1. Successful host compile/unit tests and reproducible locked dependencies.
-2. Successful `anchor build`, generated IDL and SBF binary hash.
-3. Local-validator / LiteSVM integration tests covering actual signatures, PDA/account substitution, role revocation, duplicate receipts, underpayment, wrong mint/recipient/token program, transfer failure atomicity, reinitialization, suspension and concurrent publishes.
+1. Host compile/unit tests passed. Check the latest locked-dependency rerun before reproducibility claims.
+2. SBF and IDL generation passed for the legacy local-validator target. A current-cluster-compatible build remains required; the fixture binary must not be deployed as-is.
+3. The 28 provenance/permission/trial runtime checks passed. Still required: payment VM tests for duplicate receipts, underpayment, wrong mint/recipient/token program, failed-transfer atomicity and renewals; broader account substitution, reinitialization, suspension and concurrency tests.
 4. Independent contract/security review; resolve findings and document program upgrade authority.
 5. Devnet deployment using clearly identified test assets, or cloned mainnet mint accounts in a local validator; **never describe a fake mint as issuer USDC/USDT**. The current fixed mainnet mints cannot simply be used as Devnet currencies. Choose and review an explicit test-only build configuration before Devnet payment tests.
 6. Implement and test a pinned-deployment server indexer / finalized-receipt verifier and authenticated wallet binding before switching production entitlements.
