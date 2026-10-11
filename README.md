@@ -1,5 +1,11 @@
 # ORAKT — Evidence-linked intelligence
 
+## Signed-order contract candidate — isolated testing, not deployed
+
+The [candidate contract](contracts/solana/README.md#signed-order-candidate--not-deployed-not-a-v145-in-place-upgrade) adds an independent transaction co-signer, subscription-baseline checks and monotonic quote revocation. Orders cannot survive payment shutdown, pause or authority/key changes. This source has a new Governance layout and is **not** an in-place v145 upgrade. Existing Devnet manifests, website readers and live payment settings are unchanged. Hosted signing, a candidate checkout adapter and new isolated Devnet acceptance remain next steps; no mainnet deployment or production charging is enabled by this change.
+
+Observed local checks: 45 provenance/permission, 44 synthetic payment/rollback and 136 fixture/website/readiness regression checks passed, plus SBPFv3 compilation and IDL generation. These are implementation tests, not an independent audit; cancellation races and a dedicated CPI-proxy adversarial test remain documented release gaps.
+
 ## Payment migration preflight — read-only, not activated
 
 New [migration readiness tools](contracts/solana/README.md#migration-readiness-tools--no-account-migration-or-charging-activation) rehearse anonymous Devnet snapshots without touching accounts or charging. They retain remaining legacy access, flag unresolved receipts/tier conflicts and keep wallet-free trials separate. A pinned public-chain inspector verifies the existing v145 binary, deployment identity and payment-OFF state; drift tests mutate in-memory copies only. Observed validation: 54 focused local tests and 15 public-snapshot acceptance checks passed. No program upgrade, mainnet transaction, fee activation or website change is included. Real member migration, independently reviewed quote authorization and production governance remain outstanding.

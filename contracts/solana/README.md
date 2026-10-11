@@ -1,5 +1,66 @@
 # ORAKT Protocol — experimental Solana contracts
 
+## Signed-order candidate — NOT deployed, NOT a v145 in-place upgrade
+
+October 11 local validation: SBPFv3 compilation, IDL generation, 45 provenance/
+permission checks, 44 synthetic payment/rollback checks and 136 fixture/website/
+readiness regression tests passed. The payment suite actually executes rejected
+baseline, insufficient-funds and frozen-account transactions to verify rollback,
+and submits a tampered signed message to the validator. An initial SBF panic from
+`Pubkey::is_on_curve` was caught and removed: the pinned 2.x SDK intentionally does
+not implement that method on-chain. A direct-instruction stack-height guard is
+used instead. A dedicated CPI-proxy adversarial harness is still an audit gap.
+
+The source now requires a dedicated order co-signer **and** the buyer on every
+`purchase`. The Solana runtime verifies signatures over the entire transaction
+message: changing the invoice, plan, amount, accounts, program or blockhash
+invalidates the authorization. The co-signer is not an administrator, guardian
+or merchant and cannot purchase as its own buyer. Only the current administrator
+can configure this key; rotation disables payments. Purchase is restricted to a
+top-level transaction instruction, so CPI/PDA signer privileges cannot substitute
+for the actual transaction signature. Operators must provision a controlled signing
+key; configuring an unusable public key fails closed at purchase, not at configuration.
+
+The new arguments after `deadline` are `quote_epoch: u64` and
+`expected_expires_at: i64` (UTC seconds, zero for a new subscription). The appended
+eleventh account is the configured read-only `quote_signer: Signer`. A purchase
+fails if the governance epoch or the subscription's previous expiry changed.
+Disabling payments, pausing, proposing/cancelling/accepting authority recovery and
+rotating the quote signer increment the epoch. Re-enabling, unpausing or rotating
+A -> B -> A cannot revive an old quote. Accepted authority recovery also clears
+the quote key. The immutable invoice receipt still prevents replay; failed CPI
+transactions roll back payment and entitlement together.
+
+**Compatibility boundary:** candidate Governance is 178 bytes, versus live v145's
+138 bytes. This is a new-program/local-validator candidate, not an account realloc
+or supported in-place upgrade. Keep `devnet-deployment-v145.json`, its binary hash,
+the current web checkout/receipt reader and read-only inspection tools pinned to
+v145. Old unsigned purchase payloads fail closed against this candidate. Do not
+point the existing checkout at the candidate or overwrite the deployed program.
+
+Not yet delivered: hosted quote-signing service, production key provisioning,
+candidate web transaction/receipt adapter, new isolated Devnet deployment and
+end-to-end migration acceptance. A signing service must construct its own exact
+allowlisted transaction from authenticated, server-stored orders and fresh chain
+state; check wallet binding, account status, migration/legacy terms and invoice
+idempotency; never sign arbitrary browser-supplied transaction bytes. Return a
+partially signed transaction for the buyer to sign without rebuilding its message.
+No PII belongs in the on-chain invoice. Signer compromise could authorize orders
+outside website policy, although buyer consent and the fixed merchant/price/term
+constraints still apply. Key custody, outages, replay/race handling and an
+independent security audit remain release gates. Mainnet and real charging are
+not authorized by source tests.
+
+Website account suspension or cancellation is not automatically an on-chain
+revocation: an already co-signed transaction can remain valid until its deadline
+(up to ten minutes), blockhash expiry or governance epoch invalidation. The
+service integration must define this race and cancellation/reconciliation policy;
+per-order on-chain cancellation is not implemented by this candidate. The on-chain
+subscription baseline prevents duplicate renewal races, not off-chain status races.
+
+Mechanism references: [Solana transaction signatures](https://solana.com/docs/core/transactions)
+and [Anchor account constraints](https://www.anchor-lang.com/docs/references/account-constraints).
+
 ## Migration readiness tools — no account migration or charging activation
 
 Run `node contracts/solana/tools/devnet-readiness.mjs` from the repository root

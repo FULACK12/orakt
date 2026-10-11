@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 3993,
-      "sha256": "029141f3ff4f99c9787fa994cb5a005adef364ed7c441aa5aefd1f40482718fd"
+      "bytes": 4005,
+      "sha256": "47477e5855db2721b39df84d4a640fc649f3a14e5fd5da5199a4a3f54cb51e90"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2517,13 +2517,13 @@
     },
     {
       "path": "contracts/solana/programs/orakt-protocol/src/lib.rs",
-      "bytes": 21151,
-      "sha256": "12c438c30c57767d1d7dc5a548ee4b2c21cff065bc54474493eb2bb3ba12a6e6"
+      "bytes": 24143,
+      "sha256": "512807db9e6fd58917428348f659319afe0c6272a5b0e2c02b8e06ec96b1841f"
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 28659,
-      "sha256": "40eb7e544019b9aad120ab37a0f7a970d5b15d9135cf8f97ee05ea8f94a2a2f6"
+      "bytes": 32872,
+      "sha256": "f127bc390fbb8ee7f85a5f19128c30c45b08533f941139dcc68846c382d2d190"
     },
     {
       "path": "contracts/solana/tests/build-v3.sh",
@@ -2567,8 +2567,8 @@
     },
     {
       "path": "contracts/solana/tests/payments.mjs",
-      "bytes": 9894,
-      "sha256": "7f60022151964a208c4fe44977f58dbf44aa7b02c2aff832261dc308fdf18af1"
+      "bytes": 15256,
+      "sha256": "0088457d49981979b8523245acedbbed3b0ad160f9f14a9847320b0fe2bd1416"
     },
     {
       "path": "contracts/solana/tests/prepare-devnet-buffer.mjs",

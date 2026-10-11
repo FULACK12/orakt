@@ -3,6 +3,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey;
 use anchor_lang::solana_program::hash::hashv;
+use anchor_lang::solana_program::instruction::{get_stack_height,TRANSACTION_LEVEL_STACK_HEIGHT};
 use anchor_spl::token::{self, Mint, Token, TokenAccount, TransferChecked};
 mod calendar;
 
@@ -35,26 +36,38 @@ pub mod orakt_protocol {
     pub fn initialize(ctx:Context<Initialize>,guardian:Pubkey)->Result<()> {
         require!(guardian!=Pubkey::default()&&guardian!=ctx.accounts.authority.key(),ProtocolError::InvalidInput);
         ctx.accounts.config.set_inner(Config{authority:ctx.accounts.authority.key(),paused:false,bump:ctx.bumps.config});
-        ctx.accounts.governance.set_inner(Governance{config:ctx.accounts.config.key(),authority:ctx.accounts.authority.key(),guardian,pending:Pubkey::default(),payments_enabled:false,bump:ctx.bumps.governance});
+        ctx.accounts.governance.set_inner(Governance{config:ctx.accounts.config.key(),authority:ctx.accounts.authority.key(),guardian,pending:Pubkey::default(),payments_enabled:false,bump:ctx.bumps.governance,quote_epoch:0,quote_signer:Pubkey::default()});
         Ok(())
     }
     pub fn set_payments_enabled(ctx:Context<Admin>,enabled:bool)->Result<()> {
         require!(ctx.accounts.governance.pending==Pubkey::default(),ProtocolError::RecoveryPending);
+        if !enabled {ctx.accounts.governance.invalidate_quotes()?;}
         ctx.accounts.governance.payments_enabled=enabled;Ok(())
+    }
+    /// Dedicated transaction co-signer; never grant it administrator privileges.
+    /// Every rotation (including A -> B -> A) invalidates outstanding quotes.
+    pub fn set_quote_signer(ctx:Context<Admin>,signer:Pubkey)->Result<()> {
+        let gov=&mut ctx.accounts.governance;
+        require!(gov.pending==Pubkey::default(),ProtocolError::RecoveryPending);
+        require!(signer!=gov.authority&&signer!=gov.guardian&&signer!=MERCHANT&&signer!=Pubkey::default(),ProtocolError::InvalidInput);
+        gov.invalidate_quotes()?;gov.quote_signer=signer;gov.payments_enabled=false;Ok(())
     }
     /// Backup guardian is a privileged recovery authority, NOT a trustless oracle.
     /// Production must use independently controlled multisig governance.
     pub fn propose_authority(ctx:Context<ProposeAuthority>,next:Pubkey)->Result<()> {
         require!(next!=Pubkey::default()&&next!=ctx.accounts.governance.authority&&next!=ctx.accounts.governance.guardian,ProtocolError::InvalidInput);
+        ctx.accounts.governance.invalidate_quotes()?;
         ctx.accounts.governance.pending=next;ctx.accounts.governance.payments_enabled=false;
         emit!(AuthorityProposed{config:ctx.accounts.config.key(),proposer:ctx.accounts.proposer.key(),next});Ok(())
     }
     pub fn accept_authority(ctx:Context<AcceptAuthority>)->Result<()> {
+        ctx.accounts.governance.invalidate_quotes()?;
+        ctx.accounts.governance.quote_signer=Pubkey::default();
         ctx.accounts.governance.authority=ctx.accounts.successor.key();ctx.accounts.governance.pending=Pubkey::default();ctx.accounts.governance.payments_enabled=false;
         emit!(AuthorityAccepted{config:ctx.accounts.config.key(),authority:ctx.accounts.successor.key()});Ok(())
     }
-    pub fn cancel_authority(ctx:Context<Admin>)->Result<()> {ctx.accounts.governance.pending=Pubkey::default();ctx.accounts.governance.payments_enabled=false;Ok(())}
-    pub fn set_paused(ctx:Context<Admin>,paused:bool)->Result<()> {ctx.accounts.config.paused=paused;Ok(())}
+    pub fn cancel_authority(ctx:Context<Admin>)->Result<()> {ctx.accounts.governance.invalidate_quotes()?;ctx.accounts.governance.pending=Pubkey::default();ctx.accounts.governance.payments_enabled=false;Ok(())}
+    pub fn set_paused(ctx:Context<Admin>,paused:bool)->Result<()> {if paused {ctx.accounts.governance.invalidate_quotes()?;}ctx.accounts.config.paused=paused;Ok(())}
     /// Bit 1: publish; bit 2: attest. Zero revokes future writes, never past records.
     pub fn set_roles(ctx:Context<SetRoles>,roles:u8)->Result<()> {
         require!(roles_valid(roles),ProtocolError::InvalidInput);
@@ -87,12 +100,18 @@ pub mod orakt_protocol {
         ctx.accounts.retraction.set_inner(Retraction{record:ctx.accounts.record.key(),author:ctx.accounts.author.key(),reason_hash,recorded_at:Clock::get()?.unix_timestamp,bump:ctx.bumps.retraction});Ok(())
     }
     /// Atomic SPL transfer + immutable receipt. No custody, auto-renewal or delegate.
-    pub fn purchase(ctx:Context<Purchase>,plan:u8,invoice:[u8;32],months:u8,expected_amount:u64,deadline:i64)->Result<()> {
+    pub fn purchase(ctx:Context<Purchase>,plan:u8,invoice:[u8;32],months:u8,expected_amount:u64,deadline:i64,quote_epoch:u64,expected_expires_at:i64)->Result<()> {
+        // Direct transactions only: a caller program cannot manufacture a quote
+        // signature with invoke_signed/PDA privileges. Do not use Pubkey's
+        // is_on_curve here: solana-pubkey 2.x intentionally panics on SBF.
+        require!(get_stack_height()==TRANSACTION_LEVEL_STACK_HEIGHT,ProtocolError::Unauthorized);
         let now=Clock::get()?.unix_timestamp;
+        require!(quote_epoch==ctx.accounts.governance.quote_epoch,ProtocolError::StaleQuote);
         require!(nonzero(&invoice)&&deadline>=now&&deadline<=now.checked_add(600).ok_or(ProtocolError::Overflow)?,ProtocolError::ExpiredQuote);
         let amount=price(plan,months).ok_or(ProtocolError::InvalidInput)?;
         require!(amount==expected_amount,ProtocolError::PriceMismatch);
         let sub=&mut ctx.accounts.subscription;
+        require!(expected_expires_at==sub.expires_at,ProtocolError::SubscriptionChanged);
         if sub.wallet!=Pubkey::default(){require_keys_eq!(sub.wallet,ctx.accounts.buyer.key(),ProtocolError::Unauthorized);require_keys_eq!(sub.config,ctx.accounts.config.key(),ProtocolError::Unauthorized);require!(sub.plan==plan,ProtocolError::InvalidInput);}
         let until=calendar::extend(sub.expires_at,now,months).ok_or(ProtocolError::Overflow)?;
         token::transfer_checked(CpiContext::new(ctx.accounts.token_program.to_account_info(),TransferChecked{from:ctx.accounts.source.to_account_info(),mint:ctx.accounts.mint.to_account_info(),to:ctx.accounts.treasury.to_account_info(),authority:ctx.accounts.buyer.to_account_info()}),amount,6)?;
@@ -199,6 +218,9 @@ pub struct Purchase<'info>{
     pub token_program:Program<'info,Token>,
     pub system_program:Program<'info,System>,
     #[account(has_one=config,seeds=[b"governance",config.key().as_ref()],bump=governance.bump,constraint=governance.payments_enabled && governance.pending==Pubkey::default() @ ProtocolError::PaymentsDisabled)]pub governance:Account<'info,Governance>,
+    // Runtime verifies the signature over the ENTIRE transaction, including its
+    // program, accounts, buyer, invoice, amount, term, epoch and recent blockhash.
+    #[account(address=governance.quote_signer @ ProtocolError::Unauthorized,constraint=quote_signer.key()!=buyer.key() && quote_signer.key()!=governance.authority && quote_signer.key()!=governance.guardian @ ProtocolError::Unauthorized)]pub quote_signer:Signer<'info>,
 }
 #[derive(Accounts)]
 #[instruction(subject:[u8;32])]
@@ -212,7 +234,9 @@ pub struct IssueTrial<'info>{
 }
 
 #[account]#[derive(InitSpace)]pub struct Config{pub authority:Pubkey,pub paused:bool,pub bump:u8}
-#[account]#[derive(InitSpace)]pub struct Governance{pub config:Pubkey,pub authority:Pubkey,pub guardian:Pubkey,pub pending:Pubkey,pub payments_enabled:bool,pub bump:u8}
+// Candidate schema: NOT wire-compatible with the deployed v145 Governance.
+#[account]#[derive(InitSpace)]pub struct Governance{pub config:Pubkey,pub authority:Pubkey,pub guardian:Pubkey,pub pending:Pubkey,pub payments_enabled:bool,pub bump:u8,pub quote_epoch:u64,pub quote_signer:Pubkey}
+impl Governance{fn invalidate_quotes(&mut self)->Result<()>{self.quote_epoch=self.quote_epoch.checked_add(1).ok_or(ProtocolError::Overflow)?;Ok(())}}
 #[account]#[derive(InitSpace)]pub struct Permit{pub config:Pubkey,pub wallet:Pubkey,pub roles:u8,pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Series{pub config:Pubkey,pub author:Pubkey,pub item:[u8;32],pub kind:u8,pub next_version:u32,pub last_hash:[u8;32],pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Record{pub config:Pubkey,pub series:Pubkey,pub author:Pubkey,pub version:u32,pub kind:u8,pub content_hash:[u8;32],pub evidence_root:[u8;32],pub parent_hash:[u8;32],pub recorded_at:i64,pub bump:u8}
@@ -240,6 +264,8 @@ pub struct IssueTrial<'info>{
     #[msg("Evidence inclusion proof does not match committed root")]InvalidEvidenceProof,
     #[msg("Payments disabled independently from publication")]PaymentsDisabled,
     #[msg("Authority recovery pending")]RecoveryPending,
+    #[msg("Quote invalidated by governance change")]StaleQuote,
+    #[msg("Subscription changed since quote authorization")]SubscriptionChanged,
 }
 #[cfg(test)]mod tests{
     use super::*;
@@ -249,4 +275,6 @@ pub struct IssueTrial<'info>{
     #[test]fn commitments_not_blank(){assert!(!nonzero(&[0;32]));assert!(nonzero(&[1;32]));}
     #[test]fn evidence_domains_and_bounds(){let leaf=[1;32];assert_eq!(evidence_root(&leaf,&[]),Some(hashv(&[b"orakt-evidence-leaf-v1",&leaf]).to_bytes()));assert_eq!(evidence_root(&[0;32],&[]),None);assert_eq!(evidence_root(&leaf,&[[2;32];17]),None);assert_ne!(evidence_root(&leaf,&[[2;32]]),evidence_root(&leaf,&[[3;32]]));}
     #[test]fn record_space_covers_all_fields(){assert_eq!(Record::INIT_SPACE,206);assert_eq!(Trial::INIT_SPACE,113);}
+    #[test]fn candidate_governance_layout(){assert_eq!(Governance::INIT_SPACE,170);}
+    #[test]fn quote_epoch_never_wraps(){let mut gov=Governance{config:Pubkey::default(),authority:Pubkey::default(),guardian:Pubkey::default(),pending:Pubkey::default(),payments_enabled:false,bump:0,quote_epoch:u64::MAX,quote_signer:Pubkey::default()};assert!(gov.invalidate_quotes().is_err());assert_eq!(gov.quote_epoch,u64::MAX);gov.quote_epoch=0;assert!(gov.invalidate_quotes().is_ok());assert_eq!(gov.quote_epoch,1);}
 }

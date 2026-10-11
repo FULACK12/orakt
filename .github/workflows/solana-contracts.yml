@@ -44,7 +44,7 @@ jobs:
           node --test contracts/solana/tests/payment-fixtures.test.mjs
           node contracts/solana/tests/start-validator.mjs
           node contracts/solana/tests/runtime.mjs
-      - name: Execute stablecoin payment and rollback tests (synthetic local balances only)
+      - name: Execute co-signed orders, revocation and payment rollback (synthetic local balances only)
         run: node contracts/solana/tests/payments.mjs
       - name: Verify checkout, recovery and wallet binding (no public chain)
         run: node --test pilot-site/tests/protocol-checkout.test.mjs pilot-site/tests/protocol-receipt.test.mjs pilot-site/tests/protocol-security-v145.test.mjs pilot-site/tests/account-wallet.test.mjs
