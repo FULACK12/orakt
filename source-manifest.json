@@ -3722,8 +3722,8 @@
     },
     {
       "path": "pilot-site/package-lock.json",
-      "bytes": 392517,
-      "sha256": "312bb491a77acdf1b0f5543a87bb4c90185069a7b51459177e262e806099d7e6"
+      "bytes": 393465,
+      "sha256": "c737fe4382d5e99769ac8c17fd4ac5f60035a83cd8ef530c9b458e5518206081"
     },
     {
       "path": "pilot-site/package.json",
