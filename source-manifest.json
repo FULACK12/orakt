@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 3720,
-      "sha256": "13ffa419f9704ec9cad92d3ae8eb2adaa3aabb1bdf3e21cb4b7a2e7fed13d5af"
+      "bytes": 3993,
+      "sha256": "029141f3ff4f99c9787fa994cb5a005adef364ed7c441aa5aefd1f40482718fd"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2522,8 +2522,8 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 25710,
-      "sha256": "9210b0eb81ccbf59d585b9cca2cb47e17119833f5e85bfca891e97427f89e4a2"
+      "bytes": 28659,
+      "sha256": "40eb7e544019b9aad120ab37a0f7a970d5b15d9135cf8f97ee05ea8f94a2a2f6"
     },
     {
       "path": "contracts/solana/tests/build-v3.sh",
@@ -2536,6 +2536,11 @@
       "sha256": "d97f870dd75e255c249a23ce02786daab60a1ab549890b6fbe1c9476a7f53dd3"
     },
     {
+      "path": "contracts/solana/tests/devnet-readiness.test.mjs",
+      "bytes": 2643,
+      "sha256": "114eb14c36064ff33b52c2734f590fa6a26fc04d6e232be9083fe0c16d2ba3c0"
+    },
+    {
       "path": "contracts/solana/tests/devnet-smoke.mjs",
       "bytes": 16715,
       "sha256": "ddea0aa69c3349e6b8ca9f713744121599507ca7451b67bee23288ceee4428ba"
@@ -2544,6 +2549,11 @@
       "path": "contracts/solana/tests/export-devnet-audit.mjs",
       "bytes": 2856,
       "sha256": "d12b1dc33c16314e4d4c4a6f748fb049bfd8b1d62b18019446eb0ef2ee5d0698"
+    },
+    {
+      "path": "contracts/solana/tests/migration-preflight.test.mjs",
+      "bytes": 4874,
+      "sha256": "192feeffca7e7940e38a929283da530d7dab1e70c5c675e130ba75be6d0fc96a"
     },
     {
       "path": "contracts/solana/tests/payment-fixtures.mjs",
@@ -2584,6 +2594,26 @@
       "path": "contracts/solana/tests/start-validator.mjs",
       "bytes": 2545,
       "sha256": "b8a8fb355e0746092e5457521b262d03f392cff4a8f5edc75bcfd3f1217d8632"
+    },
+    {
+      "path": "contracts/solana/tools/devnet-readiness-acceptance.mjs",
+      "bytes": 2364,
+      "sha256": "159f1294a1b06a1fe4dbc237e71756be3298147f1a7f36b30b3ad19ca6913c73"
+    },
+    {
+      "path": "contracts/solana/tools/devnet-readiness.mjs",
+      "bytes": 5529,
+      "sha256": "1ed171be7e0e31f2ffc7052b8702b366002242da671bd0fc01f657ab29250f6a"
+    },
+    {
+      "path": "contracts/solana/tools/migration-preflight.mjs",
+      "bytes": 3453,
+      "sha256": "d52768d98ec6c6462fc16b8e2095ee7323f60b6f7dbe3774a501552795275bcd"
+    },
+    {
+      "path": "contracts/solana/tools/migration-rehearsal.mjs",
+      "bytes": 861,
+      "sha256": "46d22b86aad870f036e5043ba062b1da3112387f6798fa7d21f0295902636f07"
     },
     {
       "path": "pilot-site/app/AaplOnchain.tsx",

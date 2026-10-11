@@ -1,5 +1,9 @@
 # ORAKT — Evidence-linked intelligence
 
+## Payment migration preflight — read-only, not activated
+
+New [migration readiness tools](contracts/solana/README.md#migration-readiness-tools--no-account-migration-or-charging-activation) rehearse anonymous Devnet snapshots without touching accounts or charging. They retain remaining legacy access, flag unresolved receipts/tier conflicts and keep wallet-free trials separate. A pinned public-chain inspector verifies the existing v145 binary, deployment identity and payment-OFF state; drift tests mutate in-memory copies only. Observed validation: 54 focused local tests and 15 public-snapshot acceptance checks passed. No program upgrade, mainnet transaction, fee activation or website change is included. Real member migration, independently reviewed quote authorization and production governance remain outstanding.
+
 ## v146: evidence-linked Meteora Devnet research
 
 The on-chain assets workspace now reads a real [Meteora DBC test pool](https://explorer.solana.com/address/9uLUFf1W1zFoiWa4zhhJG9GzeYNKaHVKaHdQMp4BE64G?cluster=devnet) and its [ORAKT version commitment](https://explorer.solana.com/address/ASUhxBeGupwFHthJ9St8VBrZSLugXDj4f9vJhDC92Xkm?cluster=devnet). OREVTEST is a synthetic, non-redeemable test asset, NOT Apple or Chinese equity. No swaps were executed. DAMM v2 is the configured graduation destination, not a completed migration.

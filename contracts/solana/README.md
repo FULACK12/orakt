@@ -1,5 +1,57 @@
 # ORAKT Protocol — experimental Solana contracts
 
+## Migration readiness tools — no account migration or charging activation
+
+Run `node contracts/solana/tools/devnet-readiness.mjs` from the repository root
+to inspect the pinned v145 Devnet program. It reads the program, ProgramData,
+config and governance in one finalized snapshot; checks the complete binary hash,
+deployment slot, loader ownership, PDA identity and upgrade authority; and reports
+the independent payment switch and recovery state. It never reads keys, sends
+transactions or changes flags. Network errors are unverified, not passing checks.
+The result is an RPC observation, not an independent audit or mainnet authorization.
+`node contracts/solana/tools/devnet-readiness-acceptance.mjs` additionally tests
+tampered binary/identity snapshots and payment, pause and authority drift using
+in-memory copies of that public read. It performs no chain mutations. On October
+11, 2026, all 15 checks passed at finalized slot 510004957; payments remained OFF.
+The 54 focused local tests (27 new tool checks plus 27 existing checkout/recovery
+checks) also passed. These counts are not independent audit or migration approval.
+
+`tools/migration-preflight.mjs` classifies anonymized Devnet rehearsal snapshots.
+It preserves every remaining millisecond of paid/complimentary access and keeps
+wallet-free trials separate. Existing unresolved orders, suspended accounts,
+missing wallet bindings, chain/off-chain term conflicts and active legacy terms
+produce blockers. Even a candidate has `chargingAllowed: false`; no balances,
+rights or chain credits are created. It does not verify caller-supplied snapshots.
+
+An operator can run `node contracts/solana/tools/migration-rehearsal.mjs <local.json>`
+with a fresh (at most 60 seconds old), strictly anonymized input:
+
+```json
+{
+  "schema": "orakt-migration-rehearsal-v1",
+  "network": "solana:devnet",
+  "observedAt": 0,
+  "accounts": [{
+    "status": "active", "plan": "explorer", "grantKind": "free",
+    "expiresAt": null, "walletBound": true, "unresolvedOrders": 0,
+    "trialClaimedAt": null, "trialExpiresAt": null,
+    "chain": {"signal": 0, "research": 0}
+  }]
+}
+```
+
+Replace `observedAt` with the actual snapshot UTC epoch milliseconds; all other
+times use the same unit. The example's zero timestamp deliberately fails freshness.
+Do not put emails, wallet addresses, private account IDs or production exports in
+this input/repository. The CLI writes JSON to stdout only; exit 2 means blockers,
+exit 1 means invalid/unverified input, and exit 0 is **not** permission to charge.
+
+Proposed safe default: preserve existing off-chain access and defer new charging
+until its term expires; reverify wallet, receipts and terms before any new order.
+This proposal is not activated. Early conversion, pro-rating, refunds, quote
+authorization and production governance still require a reviewed migration policy.
+These tools do not implement an on-chain import instruction or modify the website.
+
 ## v146 Meteora integration — separate, read-only Devnet module
 
 ORAKT does not redeploy or claim ownership of Meteora's DBC program. A synthetic

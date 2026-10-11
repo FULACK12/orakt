@@ -1,9 +1,9 @@
 name: Solana contract source checks
 on:
   push:
-    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/package*.json', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
+    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/tools/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/package*.json', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
   pull_request:
-    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/package*.json', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
+    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/tools/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', 'pilot-site/package*.json', 'pilot-site/worker/meteora-*', 'pilot-site/tests/meteora-*', 'pilot-site/scripts/generate-meteora-layout.mjs', '.github/workflows/solana-contracts.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -50,6 +50,8 @@ jobs:
         run: node --test pilot-site/tests/protocol-checkout.test.mjs pilot-site/tests/protocol-receipt.test.mjs pilot-site/tests/protocol-security-v145.test.mjs pilot-site/tests/account-wallet.test.mjs
       - name: Verify read-only Meteora decoder against official SDK and retained public fixture
         run: node --test pilot-site/tests/meteora-reader.test.mjs
+      - name: Verify migration rehearsal and read-only inspection guards (no public RPC)
+        run: node --test contracts/solana/tests/migration-preflight.test.mjs contracts/solana/tests/devnet-readiness.test.mjs
       - name: Stop disposable validator
         if: always()
         run: docker stop orakt-validator || true
