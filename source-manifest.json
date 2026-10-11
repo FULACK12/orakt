@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 3371,
-      "sha256": "1caaae68f56a922f3e899e88d56343a08d7916b0e0befe0545b54b0dc7091d23"
+      "bytes": 3242,
+      "sha256": "6e8d5d0c5bbcf11196943a500788cf646c04db2c71b67e16c26b8b55fd03c9b0"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2516,9 +2516,29 @@
       "sha256": "1e3205f65bf8a8e140ebade884307c6e26ca154b6a371112ba29b9038ac161c2"
     },
     {
+      "path": "contracts/solana/tests/payment-fixtures.mjs",
+      "bytes": 3464,
+      "sha256": "9c12b39dfff2800c985a705ad63f49b63aa10794c78d5d8cdadf2788d2ff6ca8"
+    },
+    {
+      "path": "contracts/solana/tests/payment-fixtures.test.mjs",
+      "bytes": 1696,
+      "sha256": "dbd28d7e4aec674f5b631d862ee64d421c24d415b2ddf43f977a6772339ccbd1"
+    },
+    {
+      "path": "contracts/solana/tests/payments.mjs",
+      "bytes": 9190,
+      "sha256": "f52980117f3ffd1e28dc91e99edb29a683cd4f0f871e306fd8df75db2415290f"
+    },
+    {
       "path": "contracts/solana/tests/runtime.mjs",
       "bytes": 6084,
       "sha256": "17ee4f74e7e9e6ce1e731b15a703db62cc4f12894d89c86b4de228f2adbfd1ca"
+    },
+    {
+      "path": "contracts/solana/tests/start-validator.mjs",
+      "bytes": 1292,
+      "sha256": "db73b4b8ecbfea8094e70623fa009c0ceed754bb060a5d98e149291906278548"
     },
     {
       "path": "pilot-site/app/AaplOnchain.tsx",
