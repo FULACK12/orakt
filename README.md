@@ -28,6 +28,10 @@ Subsequent [payment validation run 38143268037](https://github.com/FULACK12/orak
 
 ## Architecture
 
+### v142 receipt-verification bridge
+
+The next website release adds an administrator-only, default-off **read-only** custom-contract receipt verifier. It checks pinned mainnet program/config/deployment/upgrade authority, finalized transaction and account snapshots, exact order/mint/payment fields and a proven Phantom login identity. It does not sign transactions, deploy contracts, settle an order or grant access. Existing checkout and trials are unchanged. The 55 new synthetic preview checks and the combined 99-test billing/identity/trial regression suite passed locally. Public-chain deployment, secure cross-provider wallet linking, an indexer and atomic custom-contract entitlement settlement remain outstanding. See `contracts/solana/README.md` for configuration and boundaries.
+
 ### Experimental custom contracts (not deployed)
 
 `contracts/solana` contains a new Anchor program candidate for versioned report/news/chain/factor/portfolio/AI-draft commitments, attributed reviews and retractions, SPL-stablecoin membership receipts, and optional operator-attested account trial receipts. The website still uses the existing live services; these candidate contracts are not a claim of deployed or audited infrastructure. See the contract README and CI for exact release gates. No live signing key or deployment authorization is included, and AI/factual review stays off-chain.

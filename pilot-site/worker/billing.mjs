@@ -3,6 +3,7 @@ import {Buffer} from 'node:buffer';
 import {PublicKey,Transaction,Keypair} from '@solana/web3.js';
 import {getAssociatedTokenAddressSync,createAssociatedTokenAccountIdempotentInstruction,createTransferCheckedInstruction,TOKEN_PROGRAM_ID} from './solana-payment-instructions.mjs';
 import {catalogFor,MERCHANT,MINTS,PRICES,addCalendarMonth,verifyStablecoinReceipt} from './payment-policy.mjs';
+import {protocolPolicy,protocolPreviewStatus,verifyProtocolReceipt} from './protocol-receipt.mjs';
 
 const MAINNET_GENESIS='5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
@@ -74,6 +75,23 @@ export async function billingResponse(request,env,member,dependencies={}){
  if(member.access.status!=='active')return json({error:'account_suspended'},403);
  if(url.pathname==='/api/billing/catalog'&&request.method==='GET')return json({...catalog,currentPlan:member.access.effectivePlan,currentExpiresAt:member.access.expiresAt});
  try{
+  if(['/api/billing/protocol-status','/api/billing/protocol-preview'].includes(url.pathname)){
+   if(!member.access.permissions.manageUsers)throw fail('admin_required',403);
+   if(url.pathname.endsWith('/protocol-status')&&request.method==='GET')return json(protocolPreviewStatus(env));
+   if(url.pathname.endsWith('/protocol-status')||request.method!=='POST')throw fail('method_not_allowed',405);
+   if(request.headers.get('Origin')!==url.origin||request.headers.get('X-ORAKT-Billing')!=='checkout')throw fail('cross_origin_request',403);
+   const policy=protocolPolicy(env),body=await smallBody(request);
+   if(!body||typeof body.orderId!=='string'||body.orderId.length>80||typeof body.signature!=='string'||Object.keys(body).some(k=>!['orderId','signature'].includes(k)))throw fail('invalid_request');
+   await rate(env,member.row.id,'protocol-preview',now,6);
+   const order=await env.DB.prepare('SELECT * FROM billing_orders WHERE id = ?').bind(body.orderId).first();if(!order)throw fail('order_not_found',404);
+   const target=await env.DB.prepare('SELECT * FROM member_accounts WHERE id = ?').bind(order.member_id).first();if(!target)throw fail('account_not_found',404);
+   const result=await verifyProtocolReceipt({rpc,policy,order,member:target,signature:body.signature,now});
+   const fresh=await env.DB.prepare('SELECT * FROM member_accounts WHERE id = ?').bind(order.member_id).first();
+   if(!fresh||fresh.revision!==target.revision||fresh.status!=='active'||fresh.provider!==target.provider||fresh.subject!==target.subject)throw fail('account_changed_retry',409);
+   const freshOrder=await env.DB.prepare('SELECT * FROM billing_orders WHERE id=?').bind(order.id).first();
+   if(!freshOrder||JSON.stringify(freshOrder)!==JSON.stringify(order))throw fail('order_changed_retry',409);
+   return json({...result,notice:'preview_only_no_membership_or_payment_state_changed'});
+  }
   if(url.pathname==='/api/billing/health'&&request.method==='GET'){
    if(!member.access.permissions.manageUsers)throw fail('admin_required',403);
    await rate(env,member.row.id,'health',now,6);await assertMainnet(rpc);

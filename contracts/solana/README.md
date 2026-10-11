@@ -60,10 +60,25 @@ Before deployment, an operator must generate and securely retain a program keypa
 3. The 28 provenance/permission/trial and 25 local payment checks passed, including actual failed-transfer rollback, duplicate invoices, amount checks, wrong mint/recipient/token program and renewals. Still required: broader adversarial/fuzz coverage, malformed decimals/account data, reinitialization, expired-term runtime tests, suspension integration and concurrency tests. These cases do not establish exhaustive coverage.
 4. Independent contract/security review; resolve findings and document program upgrade authority.
 5. Current payment tests use synthetic local-genesis fixtures. Public test-network deployment is still pending; **never describe a fake mint as issuer USDC/USDT**. The current fixed mainnet mints cannot simply be used as Devnet currencies. Choose and review an explicit test-only build configuration before Devnet payment tests.
-6. Implement and test a pinned-deployment server indexer / finalized-receipt verifier and authenticated wallet binding before switching production entitlements.
+6. A default-off, administrator-only read-only receipt verifier is implemented in website v142; its synthetic RPC and account-database tests do not establish live-network integration. A durable indexer, reviewed deployment pins, contract checkout, authenticated cross-provider wallet linking and atomic entitlement settlement remain required before switching production entitlements.
 7. Quote program rent + transaction fees from the built binary and target RPC. Obtain the owner's network/budget approval and wallet signatures. Register actual program/config addresses and deployment signatures in the public manifest only after verification.
 
 The contracts are useful source deliverables, not a claim of production readiness, decentralized AI or verified investment performance.
+
+## Website receipt preview (v142, default off)
+
+`pilot-site/worker/protocol-receipt.mjs` validates a candidate custom-program purchase without modifying membership, billing orders or membership audit records. It is separate from the existing live SPL-transfer checkout. The endpoints are administrator-only:
+
+- `GET /api/billing/protocol-status` reports configuration status, not a live deployment attestation.
+- `POST /api/billing/protocol-preview` accepts only `{orderId, signature}` with the authenticated same-origin session and `X-ORAKT-Billing: checkout`. It is rate-limited to six requests per minute per administrator. Successful output always includes `mode: admin_read_only` and `grantsAccess: false`; only request-throttling counters may change.
+
+No production flag or deployment pin is supplied by this release. Enabling a separately reviewed deployment requires all of `ORAKT_PROTOCOL_PREVIEW_ENABLED=true`, `ORAKT_PROTOCOL_PROGRAM_ID`, `ORAKT_PROTOCOL_AUTHORITY`, `ORAKT_PROTOCOL_UPGRADE_AUTHORITY` (address or literal `none`), and positive integer `ORAKT_PROTOCOL_DEPLOY_SLOT`. The compilation fixture program ID is rejected. The verifier derives config, receipt, subscription and upgradeable-loader ProgramData PDAs; it pins the mainnet genesis, finalized status/slot, loader ownership, deployment slot and upgrade authority. An upgrade invalidates the pin and requires operator review. A configured pin is a trust assumption, not an independent binary audit or trustless RPC proof.
+
+Only a pending server-created one-calendar-month order is supported. Invoice bytes are SHA-256 of UTF-8 `JSON.stringify(["orakt-contract-order-v1", order.id, order.member_id, order.reference])`; no email is committed. The target must be an active account whose **proven Phantom login subject** equals the payer. Connecting a wallet in the admin panel is not this proof. Google/local accounts are intentionally rejected until secure explicit identity linking exists.
+
+Verification checks the top-level purchase instruction and all nine account positions, strict Anchor account sizes/discriminators/bumps, mint/amount/plan/invoice, fixed merchant and exact source/destination token-balance deltas. Transaction block time and receipt Clock time must both fall in the original order window, differ by at most 60 seconds, and satisfy the contract's ten-minute deadline bound. Receipt expiry must still be active; a later subscription renewal does not extend the returned receipt entitlement. Finalized account reads must not predate the transaction; program metadata is re-read after the receipt snapshot. The server also re-reads the account and order to reject observed changes during RPC verification. This is a read-only snapshot, **not** a concurrency-safe entitlement grant.
+
+Run from `pilot-site`: `node --test tests/protocol-receipt.test.mjs tests/billing.test.mjs tests/membership.test.mjs tests/wallet-auth.test.mjs tests/account-trial-v140.test.mjs tests/account-state.test.mjs`. The 55 new preview checks use synthetic RPC/account fixtures, never public-network transactions; the combined focused suite has 99 tests. Neither these fixtures nor a successful preview authorize funding, deployment, account upgrades or automatic renewal.
 
 ## References
 

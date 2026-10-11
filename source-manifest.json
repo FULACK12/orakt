@@ -2512,8 +2512,8 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 9592,
-      "sha256": "e974bd1486bddbbd969bd0995991bcc2a1c6a3d25c0738ed3ea829a0d7e78bb4"
+      "bytes": 13058,
+      "sha256": "22bb0e2e20aacdb01bfa9c7cee1630c3706f21c0cf4d4e94a125dd51b3d0ecf7"
     },
     {
       "path": "contracts/solana/tests/payment-fixtures.mjs",
@@ -3273,7 +3273,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "20776bcc6e171fc803d684bdca8d1f708232d7443a8557f244ef78ac9c5f3989"
+      "sha256": "a4778aaad758d08e2f0933e80af92ddc84e956f59d0a8ad3bee3ef836291f575"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -4126,6 +4126,11 @@
       "sha256": "c759cd82e7992730b82131bfbd6fb9a4501d0da4e2e414f6116b9b7027b7c74f"
     },
     {
+      "path": "pilot-site/tests/protocol-receipt.test.mjs",
+      "bytes": 15244,
+      "sha256": "66e551e5d6e2ef6f86153402665062a346c59396ca4fb9a6652c7d9b4d31f2e6"
+    },
+    {
       "path": "pilot-site/tests/public-copy.test.mjs",
       "bytes": 4054,
       "sha256": "19d8654a9d1c46febeba04ce4424a6d43dc95b4ebc699b7591c87e3883a9299c"
@@ -4232,8 +4237,8 @@
     },
     {
       "path": "pilot-site/worker/billing.mjs",
-      "bytes": 14212,
-      "sha256": "2e6feb8d968525ead619312ca73799dc469ef341d3373bde42476e5bc5b52e57"
+      "bytes": 16200,
+      "sha256": "a2242fc80b06135f2c91f39c06b86f643216158b629738b08dc39bacb133d870"
     },
     {
       "path": "pilot-site/worker/crypto-market.mjs",
@@ -4263,7 +4268,7 @@
     {
       "path": "pilot-site/worker/index.ts",
       "bytes": 31584,
-      "sha256": "fdb461a2279d7039b945e88e5b5e357e1b63d4a78d346a3215c6299aeac8a5a0"
+      "sha256": "d265cb4580ba9622ec0d0be43e507e02723683d9d11079d9f7985edb0e27b986"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",
@@ -4324,6 +4329,11 @@
       "path": "pilot-site/worker/portfolio-studies.mjs",
       "bytes": 5972,
       "sha256": "5a80d5164847b80aab80f72e20414df55ea9a5760fbf11cd70d94fae73b31073"
+    },
+    {
+      "path": "pilot-site/worker/protocol-receipt.mjs",
+      "bytes": 10504,
+      "sha256": "42573878a9e92de678f3289008522601bb6f4fd8bc372a18d34b77d4b87b5699"
     },
     {
       "path": "pilot-site/worker/publication.mjs",
