@@ -16,6 +16,7 @@ import OraktContour from "./OraktContour";
 import SiteFooter from "./SiteFooter";
 import usePublishedMetrics from './usePublishedMetrics';
 import HeroOutlineWord from './HeroOutlineWord';
+import OraktAISection from './OraktAISection';
 
 type Language = "zh" | "en";
 
@@ -481,6 +482,7 @@ export default function OraktLanding({ metrics:initialMetrics, page="home" }: { 
         </div>
       </section>
 
+      <OraktAISection language={language}/>
       <section id="proof" className={styles.proof}>
         <div className={styles.sectionRule} data-orakt-reveal><span>WHY ORAKT</span><i /></div>
         <div className={styles.proofGrid} data-orakt-reveal>

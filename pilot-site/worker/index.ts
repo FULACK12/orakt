@@ -1,4 +1,8 @@
 import {workspaceAccess,visibleAlpha,visibleChains} from './research-tiers.mjs';
+import {researchPublicationResponse} from './research-publication-api.mjs';
+import {trialResponse} from './member-trial.mjs';
+import {adminWalletResponse} from './admin-wallet.mjs';
+import {localResearchResponse,researchBridgeResponse} from './local-research-queue.mjs';
 import {mapChains} from './map-chains.mjs';
 import appleNetworkSnapshot from '../snapshot/apple-network-v132.json';
 import {appleResearch} from './apple-research.mjs';
@@ -58,6 +62,7 @@ const researchReportIds = new Set(
 );
 
 interface Env {
+  ORAKT_RESEARCH_BRIDGE_TOKEN?: string;
   ORAKT_SOLANA_PAYMENTS_ENABLED?: string;
   ORAKT_SOLANA_RPC_URL?: string;
   ORAKT_ADMIN_ACCOUNT_ID?: string;
@@ -94,9 +99,10 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+    if(url.pathname==='/api/research-bridge')return await researchBridgeResponse(request,env);
 
     if (url.pathname === "/api/app-version" && request.method === "GET") {
-      return publicApiResponse(jsonResponse({version: "138"}));
+      return publicApiResponse(jsonResponse({version: "140"}));
     }
     if(url.pathname==='/api/public-stats'){
       if(request.method!=='GET')return publicApiResponse(jsonResponse({error:'method_not_allowed'},405));
@@ -138,6 +144,8 @@ const worker = {
     try { member=await memberFor(env,identity,!url.pathname.startsWith("/api/account/")&&!url.pathname.startsWith("/api/admin/")); }
     catch { return protectedResponse(jsonResponse({error:"membership_service_unavailable"},503)); }
     if(url.pathname.startsWith("/snapshot/"))return protectedResponse(jsonResponse({error:"not_found"},404));
+    if(url.pathname==='/api/admin/wallet-status')return protectedResponse(await adminWalletResponse(request,env,member));
+    if(url.pathname==='/api/account/trial')return protectedResponse(await trialResponse(request,env,member));
     if(url.pathname.startsWith("/api/admin/"))return protectedResponse(await memberAdminResponse(request,env,member));
     if(url.pathname.startsWith("/admin/")&&!member.access.permissions.manageUsers)return protectedResponse(new Response("Administrator access required. Return to /account to find your account reference.",{status:403}));
     if (url.pathname === "/api/account/overview" && request.method === "GET") {
@@ -161,6 +169,8 @@ const worker = {
     }
 
     if(member.access.status!=="active")return protectedResponse(jsonResponse({error:"account_suspended"},403));
+    if(url.pathname==='/api/research-publications')return protectedResponse(await researchPublicationResponse(request,env,member));
+    if(url.pathname==='/api/local-research')return protectedResponse(await localResearchResponse(request,env,member));
     if(url.pathname.startsWith('/api/billing/'))return protectedResponse(await billingResponse(request,env,member));
     if(url.pathname==='/api/account/watchlist')return protectedResponse(await watchlistResponse(request,env,member,equityReportCatalog.companies));
     if(url.pathname==='/api/crypto-market')return protectedResponse(await cryptoMarketResponse(request));

@@ -1556,6 +1556,11 @@
       "sha256": "df4e3538755d4904d138a6453ee75aefeff883dfc687389a598972fab4c247b4"
     },
     {
+      "path": "backend/app/site_research_worker.py",
+      "bytes": 8464,
+      "sha256": "2d2508bf30c3a09d1539a583c836ec9c62be27b071a1a14854c008f1de2f4e58"
+    },
+    {
       "path": "backend/app/solana_provenance.py",
       "bytes": 7056,
       "sha256": "de4307191030f58c734e94435c89d28c4fa054fb83b92db74599559b02dbd749"
@@ -2467,8 +2472,8 @@
     },
     {
       "path": "pilot-site/app/AaplOnchain.tsx",
-      "bytes": 11545,
-      "sha256": "e85d1350ef318e8a447e8b18b891184a2b8db1f8c3f4d864582a08f9f872fbfb"
+      "bytes": 11830,
+      "sha256": "f08f41d2152385a8a48544d521df0f2213f69148aaa6274edef38c7b69b3303b"
     },
     {
       "path": "pilot-site/app/aaplx-research.css",
@@ -2477,8 +2482,8 @@
     },
     {
       "path": "pilot-site/app/access/access-navigation.mjs",
-      "bytes": 1160,
-      "sha256": "dd832368749401d24c743f0e73c3e8e401a674340c0f6c04ea6f59f2bb966db2"
+      "bytes": 1185,
+      "sha256": "cf019c54cd7f1110cd1a56b6d79b7a0eb0877b1cbfbd1a6be94563ecc0a05ad4"
     },
     {
       "path": "pilot-site/app/access/access.module.css",
@@ -2561,19 +2566,29 @@
       "sha256": "30d90ccf19b96086b3d49f9b69d25d89308a5b40ee44aef54fef2547acbcf776"
     },
     {
+      "path": "pilot-site/app/account/account-upgrades.module.css",
+      "bytes": 2948,
+      "sha256": "89e6439c0b2c0a494906c9688fc83d3ee4991d5facae345baa373f1465b4ce14"
+    },
+    {
       "path": "pilot-site/app/account/account.module.css",
       "bytes": 8546,
       "sha256": "2cec859375755c59b5bfb326b1008073a297f87553f2dca3d8c3e65b158e2836"
     },
     {
       "path": "pilot-site/app/account/AccountCenter.tsx",
-      "bytes": 15593,
-      "sha256": "7c8f0110c798401b430d019498f44d9c0ede3010e71e38142f054fc30ac19fd2"
+      "bytes": 16427,
+      "sha256": "b0f8b804a15a8278beb6752db85eb23a3d5c30ad2d74f7c49fd1504ad8ea6957"
+    },
+    {
+      "path": "pilot-site/app/account/AdminWalletPanel.tsx",
+      "bytes": 3522,
+      "sha256": "0c3d34d8d459897793076417da40dba573699cbbb165f17168e7f36f64824390"
     },
     {
       "path": "pilot-site/app/account/billing/page.tsx",
-      "bytes": 20325,
-      "sha256": "11dbce27e941502161b56afae73dbd5164b336c10e621b8c8a4543ed2781681c"
+      "bytes": 20673,
+      "sha256": "1547b17cf42cd91c05ec65e49d348f85f37eed2027b4393cd99f74009d42c521"
     },
     {
       "path": "pilot-site/app/account/billing/payments.css",
@@ -2584,6 +2599,11 @@
       "path": "pilot-site/app/account/page.tsx",
       "bytes": 311,
       "sha256": "c934a0ab3d564757a2cf22231255ddc46ff61f3ae8da271cf3bff6106074f741"
+    },
+    {
+      "path": "pilot-site/app/account/ResearchTrial.tsx",
+      "bytes": 3686,
+      "sha256": "dccf7b9a7804353207448f1997c2e88dad883af5c44d39b70d2479a54d08c47c"
     },
     {
       "path": "pilot-site/app/admin/users/AdminUsers.tsx",
@@ -2732,8 +2752,8 @@
     },
     {
       "path": "pilot-site/app/EvidenceChains.tsx",
-      "bytes": 9676,
-      "sha256": "0f63411ac93c6f88a1adc31bc72b7ff2bc027bf65938f49588e1dc65c55ac415"
+      "bytes": 10086,
+      "sha256": "dadbae4859ceb55bfe9e99aaf884d0e1a2e7996030d5af24fc5566e7e4887329"
     },
     {
       "path": "pilot-site/app/factor-study.css",
@@ -2832,8 +2852,8 @@
     },
     {
       "path": "pilot-site/app/layout.tsx",
-      "bytes": 1030,
-      "sha256": "a83e0316b692fbcd44a0cd123bd7add9cb9c9a1c7bdd360ad5e8a6a173dba001"
+      "bytes": 1067,
+      "sha256": "316a7898dff21ac944ecc3e87c1fdf640206e9ed9f699257b7ef1afabf292c2f"
     },
     {
       "path": "pilot-site/app/legal/legal.module.css",
@@ -2842,13 +2862,13 @@
     },
     {
       "path": "pilot-site/app/legal/LegalDocument.tsx",
-      "bytes": 9538,
-      "sha256": "041d5c72a96e00a0f9a8596e2088b8f549aab756f73c1fc759d26168995732d0"
+      "bytes": 12862,
+      "sha256": "3cb40ec3cca18e65d7a6797a1fc0b8c0c2b0b576170f4e57302ec8969eed16fa"
     },
     {
       "path": "pilot-site/app/MacroEventReports.tsx",
-      "bytes": 4362,
-      "sha256": "2ebf5458b4c8210bfb029790a3486f991a51628eb442fca46f7391ee52fa4928"
+      "bytes": 4544,
+      "sha256": "6f32abbeda460a5d341fdc5728fe0ff76316c2fcce8590c20cc22abd7d00e580"
     },
     {
       "path": "pilot-site/app/map-path-geometry.mjs",
@@ -2926,6 +2946,16 @@
       "sha256": "0776429e7bef528fc8c22d0a673cc19d0f2d32d6a536a82df4de8f0680812f36"
     },
     {
+      "path": "pilot-site/app/OraktAISection.module.css",
+      "bytes": 2916,
+      "sha256": "89a4da2147928235a6af8949636cfb8c4ddeb96bfaceee37db1bdf361ed8a130"
+    },
+    {
+      "path": "pilot-site/app/OraktAISection.tsx",
+      "bytes": 2885,
+      "sha256": "0216be739b29cf5c1aca840f3f1ad00480a86ac884c7620af2bd67218c221838"
+    },
+    {
       "path": "pilot-site/app/OraktArrow.tsx",
       "bytes": 344,
       "sha256": "4670e6c6c956e16cdd65c40b85d509968840d0d67f2b406506d3260ac9fb8e47"
@@ -2957,8 +2987,8 @@
     },
     {
       "path": "pilot-site/app/OraktLanding.tsx",
-      "bytes": 34609,
-      "sha256": "6969e09bd68af3d1c4095b5595d19b24d97443b056c2c417efb896216fdb6270"
+      "bytes": 34700,
+      "sha256": "b01642e7a060b1b1141c07c5dea070a4788618f08b9773d92ca4facddbd5b98d"
     },
     {
       "path": "pilot-site/app/OraktMatrix.module.css",
@@ -3012,8 +3042,8 @@
     },
     {
       "path": "pilot-site/app/PersonalResearch.tsx",
-      "bytes": 9996,
-      "sha256": "764d11a22f478e6422a75c1168634231b8d5c4c42102bf91874f0adbf829ecca"
+      "bytes": 13150,
+      "sha256": "f7f0f38ffcca6a28b1e3789e1ad53275914faa690844f052bd6f7e867ed2fe5c"
     },
     {
       "path": "pilot-site/app/PilotDashboard.tsx",
@@ -3057,8 +3087,8 @@
     },
     {
       "path": "pilot-site/app/platform/intelligence/IntelligenceMarket.tsx",
-      "bytes": 15744,
-      "sha256": "4b7e2bdafee6194769da68f11322a3f9d8a2d64e5c288c2e018167ae20f49d23"
+      "bytes": 15907,
+      "sha256": "2e45930cb502573437e109e40aad6498b867dbd395cbffbf771db06c28244099"
     },
     {
       "path": "pilot-site/app/platform/intelligence/IntelligenceSolana.tsx",
@@ -3101,6 +3131,16 @@
       "sha256": "2fefc416f98fcc5743ddfa7b45743dd0636edf72f2dd163134f28a8612c6292f"
     },
     {
+      "path": "pilot-site/app/platform/publications/page.tsx",
+      "bytes": 97,
+      "sha256": "4ff20bbe42f42faa565242e70fab29c8ad42261216379166499c0a83af05c814"
+    },
+    {
+      "path": "pilot-site/app/platform/publications/view.tsx",
+      "bytes": 671,
+      "sha256": "ee12d6457e2048de35d0ffdba0cfd3b262c0fa4beda6cd8277fb00b591813f10"
+    },
+    {
       "path": "pilot-site/app/platform/publish/page.tsx",
       "bytes": 181,
       "sha256": "c8bd0443a31da6fe987cdcb0b2bb151ee06bb3d88c96ee43ebe3c904a9a67d64"
@@ -3141,6 +3181,11 @@
       "sha256": "6e4023695c432e3019127528f9a4af574cdcc1be667902452389e02e23bf194d"
     },
     {
+      "path": "pilot-site/app/provenance-wallet.ts",
+      "bytes": 1494,
+      "sha256": "7247e133d2763baed971eb59ea42c6a9c38b2c8f73e2d280fc5a615f3a90fce8"
+    },
+    {
       "path": "pilot-site/app/ReadingReferences.tsx",
       "bytes": 2012,
       "sha256": "d92a6baa082e9d0c235ae09f5984d486bdcfe4f40dc1468e4fb109e988c4211d"
@@ -3148,7 +3193,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "e29843b017458004a440ffd2feb5c1c43790dde8ee2661596ca4a170549d4f84"
+      "sha256": "9d0d2f541e8674f97242b4fcabb6c5eef18013290f1804a76c4677fe44601a5a"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -3196,6 +3241,11 @@
       "sha256": "0a2d3bd8ac6a4b406900517cc75dfcb4ed19fd8bb22ed53507f397fe50ff0f5e"
     },
     {
+      "path": "pilot-site/app/research-publication.css",
+      "bytes": 2091,
+      "sha256": "dde4e4b78e273c7b4a36f7e65b326b634abcb413f1db29b358702b4c6f751871"
+    },
+    {
       "path": "pilot-site/app/research-workspace.css",
       "bytes": 29641,
       "sha256": "f809f5d5bcca56aa49d90ee5beb77b907adf84fc3b5d5fc85cd93f641f82fa72"
@@ -3209,6 +3259,11 @@
       "path": "pilot-site/app/ResearchOperations.tsx",
       "bytes": 7121,
       "sha256": "591b4a22252cf25aee3369484ddda787d786eb39e803b1f8525b2b478b89cb12"
+    },
+    {
+      "path": "pilot-site/app/ResearchPublication.tsx",
+      "bytes": 6561,
+      "sha256": "c3859501cbff9cda1bd7d7a9697eda237920b9e5371527807a10f44992de2b9c"
     },
     {
       "path": "pilot-site/app/roadmap/page.tsx",
@@ -3322,8 +3377,8 @@
     },
     {
       "path": "pilot-site/db/schema.ts",
-      "bytes": 9032,
-      "sha256": "d3f527f5f6dc5f5b1605072acf6dccb374aa19ead2f55fbf05429703cb7754cb"
+      "bytes": 10206,
+      "sha256": "a67d60958ba0acbff48cd6963ce51fe7195d6c072127f493f88fafa29e490653"
     },
     {
       "path": "pilot-site/drizzle/0000_solid_silver_fox.sql",
@@ -3396,6 +3451,101 @@
       "sha256": "f0de4d8cc277d7e46ee1bcd88dbce61fc38261c81f0469cff164387e42896233"
     },
     {
+      "path": "pilot-site/drizzle/0014_old_gambit.sql",
+      "bytes": 989,
+      "sha256": "2852cce4108af37722c783bb4febfe486cec350923f8330efaa95507c9719642"
+    },
+    {
+      "path": "pilot-site/drizzle/0015_same_nebula.sql",
+      "bytes": 147,
+      "sha256": "aac34ad18e7e1939deb18a71c942d2af46e789749229d33a2b4a12afd574a9df"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0000_snapshot.json",
+      "bytes": 2969,
+      "sha256": "f415100f98c81173df7efaaf153b7be7918e10ba117819fad650af13571931b4"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0001_snapshot.json",
+      "bytes": 3408,
+      "sha256": "ca02f761364ca2ae3b236ab8afb8cd87474dae32cc08a78859fe371958be5c8b"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0002_snapshot.json",
+      "bytes": 6074,
+      "sha256": "56cee345ffe79ebc5a1d14628fa89751333cf172aee5da094b0cc1e799b30877"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0003_snapshot.json",
+      "bytes": 6862,
+      "sha256": "954328d696a6aee9f20a6d7d2e637f011bc36c5cc655309ea0650b81817c834d"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0004_snapshot.json",
+      "bytes": 7252,
+      "sha256": "afa7e9a5e39ed77a351ffc5fae9ca682c0a5974b306de09adcc74bdc7390272f"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0005_snapshot.json",
+      "bytes": 10274,
+      "sha256": "b452608837f0efa7227d84fe0ffef0d7ffb5dabc271ae1dae6ce645ed2f8823c"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0006_snapshot.json",
+      "bytes": 16159,
+      "sha256": "7508b1e4d52da831aba8e811a892c5aa0b698e70f984fb97153c4e5457aac800"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0007_snapshot.json",
+      "bytes": 21353,
+      "sha256": "dd57d56771eea9bcb02450eab10d98e7d851a70faa679f91aed5f2a054668e4b"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0008_snapshot.json",
+      "bytes": 21572,
+      "sha256": "0754b1d64e80c1c4ed4fd40405c7033006156451b03f0513422d7b68ad4339ac"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0009_snapshot.json",
+      "bytes": 23100,
+      "sha256": "254c6b4905eee82e1c54c540667dcf8e932e2e6d3ef7f47151a0b6fad4434d41"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0010_snapshot.json",
+      "bytes": 26321,
+      "sha256": "d39a86005bf48c3aa098bc3fb09acaaa03f5f6281b4a3f79af2d1976900e2e61"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0011_snapshot.json",
+      "bytes": 32273,
+      "sha256": "d49d09b5ab889b01e5195e3824ef50843ee5d408eb77db5038939930173dcce1"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0012_snapshot.json",
+      "bytes": 33507,
+      "sha256": "b1b4d99ead98a2954ff3d948dda5e082d608826733e7bbe6dad68e4166bb7eb8"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0013_snapshot.json",
+      "bytes": 38427,
+      "sha256": "b39494c4ce514e3be1bad2b6f3304c133e783f8425c1fd90a5116e08ff6354f9"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0014_snapshot.json",
+      "bytes": 43692,
+      "sha256": "8642f66daffc2bfb09863a2c260b5c47cd2ff73c2c87f167a8d5cfc20b30da9b"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/0015_snapshot.json",
+      "bytes": 44092,
+      "sha256": "bf0b7e5b96dd6705149412383e00b5f2a7b3fab37bd672941a0f0a3242830c75"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/_journal.json",
+      "bytes": 2350,
+      "sha256": "971a78f2970979c0332cae3138558ea7326e16f6b2bc3453270c605ef10f13c8"
+    },
+    {
       "path": "pilot-site/drizzle.config.ts",
       "bytes": 148,
       "sha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b"
@@ -3439,6 +3589,11 @@
       "path": "pilot-site/public/brand/orakt-line.svg",
       "bytes": 442,
       "sha256": "80712ffb609f776cf70a67fb4e2040563db6b0c156cd297368254b7e1d70912a"
+    },
+    {
+      "path": "pilot-site/scripts/account-copy-v140.mjs",
+      "bytes": 3346,
+      "sha256": "48f0882e8c119a4eb2006b128b7c8b8eddb0f6596253f20f0497e67e178d5c5b"
     },
     {
       "path": "pilot-site/scripts/build-factor-study.mjs",
@@ -3536,9 +3691,24 @@
       "sha256": "4ebe78da01f875442b882a53bcd80f04f2e6b9e678fa84e44f12b43be097f04b"
     },
     {
+      "path": "pilot-site/scripts/research-copy-v139.mjs",
+      "bytes": 3329,
+      "sha256": "f92cb98a934f4b3b5474c0cc1b6c76014ebe708053593b4f4755eb0753adfa72"
+    },
+    {
+      "path": "pilot-site/scripts/research-final-copy-v139.mjs",
+      "bytes": 1272,
+      "sha256": "bb79fce1a8dbf93e00b34a13776befe70c248384f1d2e13d290a61e100c72f2a"
+    },
+    {
       "path": "pilot-site/scripts/reviewed-dossier.mjs",
       "bytes": 5168,
       "sha256": "4a2c448911888ef98055e92ce4ecae73c41341d9d2f20ff6faafb9037ba11c6d"
+    },
+    {
+      "path": "pilot-site/scripts/upgrade-research-ui-v139.mjs",
+      "bytes": 5368,
+      "sha256": "dc5536491ca7cc4f33e15973431e74e2b0510147e500e8251115c8115c168195"
     },
     {
       "path": "pilot-site/tests/aaplx-v135.test.mjs",
@@ -3562,13 +3732,18 @@
     },
     {
       "path": "pilot-site/tests/account-chat-v137.test.mjs",
-      "bytes": 2063,
-      "sha256": "4db5eff63edf06149b666e01e817bded41349372d27f5076213a85c5c4fe2ab9"
+      "bytes": 2230,
+      "sha256": "8a79fd597ce6b11e36796dac07f3c05d13374bb87ee56fd87302861463299448"
     },
     {
       "path": "pilot-site/tests/account-state.test.mjs",
       "bytes": 4712,
       "sha256": "17694f4ba48f4e8b10e425cc1c99620024be8e0652507bc397b4d59e2910ab36"
+    },
+    {
+      "path": "pilot-site/tests/account-trial-v140.test.mjs",
+      "bytes": 7155,
+      "sha256": "7dc7735f09d38ac76a98ada66931beb3b158689545c505a568ce33d329260892"
     },
     {
       "path": "pilot-site/tests/adbe-v112.test.mjs",
@@ -3757,8 +3932,8 @@
     },
     {
       "path": "pilot-site/tests/landing-v90.test.mjs",
-      "bytes": 3833,
-      "sha256": "f51d6d7d25e10d18f81a2a3c6e341d1727806cd6ae67b5cb82f40c81c25ad740"
+      "bytes": 3885,
+      "sha256": "67250d757dae6086f881ac7be5ceec94bdf02cdbf53f913c50e33e70f33799a8"
     },
     {
       "path": "pilot-site/tests/layout-v106.test.mjs",
@@ -3809,6 +3984,11 @@
       "path": "pilot-site/tests/local-preview-v100.mjs",
       "bytes": 2375,
       "sha256": "2761c5ae6d64d27b57e9b23205a5c69d189b41e8a2c0c1897298a81c9194f013"
+    },
+    {
+      "path": "pilot-site/tests/local-preview-v140.mjs",
+      "bytes": 2421,
+      "sha256": "22a4ba9d4347df4cf7a0d8836a67e8bc230a6d9dfbe83315690eff3c6667d3d5"
     },
     {
       "path": "pilot-site/tests/lulu-v109.test.mjs",
@@ -3886,6 +4066,11 @@
       "sha256": "a3820d051a9dc5ca0d24ec7bda767c5ac22d9e979b26f4d71a3fc2628960ed3d"
     },
     {
+      "path": "pilot-site/tests/research-live-v139.test.mjs",
+      "bytes": 7109,
+      "sha256": "713e7d372a82d8dc38b4abc54ef27c84a21590ef5329cf45ccea1189772aaf88"
+    },
+    {
       "path": "pilot-site/tests/research-operations.test.mjs",
       "bytes": 2160,
       "sha256": "0e3d7bce65125836b4fae27f3dbf5a2f58fc617c4418a4fda7b148b6ca0a3e11"
@@ -3936,6 +4121,11 @@
       "sha256": "af2ff1a0f8db0675d92ece51bd1c0b7bfceba743a066436a4777e7667d725445"
     },
     {
+      "path": "pilot-site/worker/admin-wallet.mjs",
+      "bytes": 1007,
+      "sha256": "c3d3eb9aaaae96ba2d0d3c51ff33938777729c2521b246abdd323aaab48e568e"
+    },
+    {
       "path": "pilot-site/worker/apple-network.mjs",
       "bytes": 2472,
       "sha256": "cc5d4d4ac7f473deb8979dba92ac874e40ab141f62296af3474521a138c9adf7"
@@ -3982,8 +4172,8 @@
     },
     {
       "path": "pilot-site/worker/index.ts",
-      "bytes": 30695,
-      "sha256": "2d993a4fdf2f90280042bc96c0ac381643197321f24b60312362676314a7bcd4"
+      "bytes": 31584,
+      "sha256": "634130df859dc22816d6d5624ae845de19c1d554e068b0ffb9c3aeab395ad0f3"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",
@@ -4011,14 +4201,24 @@
       "sha256": "1a8daaa77163bf8fee3b624624e9288bca53e864efa70072456b18bc77d1ec6d"
     },
     {
+      "path": "pilot-site/worker/local-research-queue.mjs",
+      "bytes": 7479,
+      "sha256": "b582c943a76ed19ce481c879a501e02654f0c93a09701995fd1d991eddf56649"
+    },
+    {
       "path": "pilot-site/worker/map-chains.mjs",
       "bytes": 2499,
       "sha256": "7e3518e785a25aee7c49c4b667e0d3864d10797bf3a78a3dd8e1178deced67bb"
     },
     {
+      "path": "pilot-site/worker/member-trial.mjs",
+      "bytes": 2348,
+      "sha256": "2141570811ccaab03c6906a48082dd00b1c200444b33d568dd058628c76b7226"
+    },
+    {
       "path": "pilot-site/worker/membership.mjs",
-      "bytes": 10564,
-      "sha256": "9f6ba06d7c90b742719ec62fca64d5b04e136d604c9a998bf172718678ffecb3"
+      "bytes": 11433,
+      "sha256": "9741a41a038de9ce8054aeb141355ce96c91c4022b08d0f085767dc7e6e0d931"
     },
     {
       "path": "pilot-site/worker/news-publication.mjs",
@@ -4046,6 +4246,16 @@
       "sha256": "23372abeaede14cc17b4544ab76c1ba2ff86a089abbad0beaac8d3e13d5c5585"
     },
     {
+      "path": "pilot-site/worker/research-publication-api.mjs",
+      "bytes": 5834,
+      "sha256": "ad5264635c774c292bf3daba5c93939ccbfd78c44f56279021676cfedebfafc5"
+    },
+    {
+      "path": "pilot-site/worker/research-publications.mjs",
+      "bytes": 24201,
+      "sha256": "9f05dc8f0bc5c35f61412fdfe7cfa81c5a01970aff31f3792f042ddc0a938d55"
+    },
+    {
       "path": "pilot-site/worker/research-tiers.mjs",
       "bytes": 1331,
       "sha256": "3b6e17a0fc0e112d29b2069de762e63150e87009fea88f7a825da18120662916"
@@ -4071,9 +4281,6 @@
       "sha256": "64c2bc0cb8193147d398eef21647e466eeda22b493ae7a7988043de7bcbfb847"
     }
   ],
-  "automatedScanOnly": true,
-  "sourceExportVersion": 138,
-  "synchronizedAt": "2026-10-09",
-  "siteSourceCommit": "31c7fb219b0e0fe631419c894c1a26a416cac4ff",
-  "scope": "Source-only review export; excludes production secrets, account records, datasets and generated/private report archives"
+  "notUploaded": true,
+  "automatedScanOnly": true
 }

@@ -6,7 +6,7 @@ ORAKT connects company disclosures, event evidence, research reports and verifia
 
 ORAKT existed before this repository export. This is **not a claim that the complete application was written during a hackathon**. Competition name and eligible dates are awaiting the project owner's confirmation. No prior commit dates have been rewritten. A dated, reviewable change list must be supplied before submission to Colosseum.
 
-This source-only export was synchronized on October 9, 2026, through the deployed ORAKT v138 application (Sites source commit `31c7fb219b0e0fe631419c894c1a26a416cac4ff`). It includes the existing application and subsequent changes; this synchronization date is not a claim about when every file was originally written. Earlier rejected report attempts remain rejected unless separately reviewed; updating this repository does not approve research results.
+This source-only export was synchronized on October 11, 2026, through the deployed ORAKT v140 application (Sites source commit `bb4df10d665993f17274d21cf640dfa0ffbc3c8c`). It includes the existing application and subsequent changes; this synchronization date is not a claim about when every file was originally written. Earlier rejected report attempts remain rejected unless separately reviewed; updating this repository does not approve research results.
 
 ## Latest synchronized features
 
@@ -14,9 +14,11 @@ This source-only export was synchronized on October 9, 2026, through the deploye
 - Apple supply-atlas implementation, AAPLx on-chain asset research, and a sourced Hormuz–helium–semiconductor study with conditional investment hypotheses, three map branches, source inspection and user-controlled mechanism playback. Candidate routes are not real-time cargo tracking or confirmed procurement relationships.
 - Alpha-factor study and research UI, with explicit benchmark, methodology and validation limits. Research examples are not guaranteed returns or approved investment signals.
 - Intelligence-market Solana interactions, account administration and tier gates, and monthly USDT/USDC payment implementation with server-side settlement checks. Billing availability requires operator configuration; this source export does not activate payments or contain merchant signing keys.
-- Redesigned account/billing screens and Ask ORAKT, a browser-local chat demo with local history. It does not call a live model, queue research work or charge an account.
+- Account-linked Ask ORAKT research jobs, processed by a separately operated local `orakt-14b` worker. Research allows five jobs daily and one active job; the worker must be online. Outputs are unreviewed drafts, not investment approval. Model weights, bridge credentials and private evidence packs are not included.
+- A once-per-account, explicitly claimed 24-hour Research trial, server-enforced and separate from paid grants; no payment or automatic renewal. Admin-only Phantom connection reads the public address and finalized SOL balance without automatic signing, transfers or login-identity linking.
+- Administrator-controlled Solana mainnet Memo provenance preparation and finalized-receipt verification for reports, separate from the original Devnet submission workflow. This implementation is not a custom deployed ORAKT smart contract; hashes prove version integrity, not truth.
 
-The v138 production-source build passed locally. The focused Hormuz/Apple regression suite passed 9/9; the full application suite reported 319/324 passing, with five existing landing-page/educational-copy assertion failures. Those results require the provisioned production inputs described below; they are not a claim that this deliberately data-excluded export can run the entire suite unmodified.
+The v140 production-source build and 38 rendered-page tests passed locally. The focused account/research suite passed 25/25; the full application suite reported 335/340 passing, with five existing landing-page/educational-copy assertion failures. Those results require the provisioned production inputs described below; they are not a claim that this deliberately data-excluded export can run the entire suite unmodified.
 
 ## Architecture
 

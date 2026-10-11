@@ -15,6 +15,7 @@ import './aaplx-research.css';
 import './intelligence-solana.css';
 import './ask-orakt.css';
 import './hormuz-study.css';
+import './research-publication.css';
 import WalletSessionGuard from "./WalletSessionGuard";
 
 export const metadata: Metadata = {

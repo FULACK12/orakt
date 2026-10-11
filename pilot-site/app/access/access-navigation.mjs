@@ -1,4 +1,4 @@
-const returnPaths = new Set(["/platform/assets","/account/billing","/platform/markets","/platform/alpha","/platform/personal","/platform/intelligence","/account", "/platform", "/platform/chains", "/platform/research", "/platform/data", "/platform/filings", "/platform/publish", "/platform/news", "/platform/portfolio", "/admin/users"]);
+const returnPaths = new Set(["/platform/publications","/platform/assets","/account/billing","/platform/markets","/platform/alpha","/platform/personal","/platform/intelligence","/account", "/platform", "/platform/chains", "/platform/research", "/platform/data", "/platform/filings", "/platform/publish", "/platform/news", "/platform/portfolio", "/admin/users"]);
 export const accessMethods = ["chatgpt", "google", "phantom", "login", "register", "recover"];
 export const accessPagePaths = new Set(["/access", ...accessMethods.map(method => `/access/${method}`)]);
 

@@ -1,5 +1,5 @@
 import {randomUUID,createHash} from 'node:crypto';
-const select="SELECT id, provider, subject, display_name, legacy_ref, created_at, first_seen_at, last_seen_at, status, plan, grant_kind, expires_at, revision FROM member_accounts";
+const select="SELECT id, provider, subject, display_name, legacy_ref, created_at, first_seen_at, last_seen_at, status, plan, grant_kind, expires_at, revision, trial_claimed_at, trial_expires_at FROM member_accounts";
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
 const admin=(row,env)=>Boolean((env.ORAKT_ADMIN_ACCOUNT_ID&&row.id===env.ORAKT_ADMIN_ACCOUNT_ID)||(!env.ORAKT_ADMIN_ACCOUNT_ID&&env.ORAKT_ADMIN_REFERENCE&&`${row.provider}:${row.legacy_ref}`===env.ORAKT_ADMIN_REFERENCE));
 
@@ -14,10 +14,14 @@ export async function memberFor(env,identity,active=false){
  return {row,access:accessFor(row,env,now)};
 }
 export function accessFor(row,env,now=Date.now()){
- const isAdmin=admin(row,env),active=row.status==='active',paidPlan=['signal','research'].includes(row.plan),expired=paidPlan&&(!Number.isSafeInteger(row.expires_at)||row.expires_at<=now||!['manual_paid','complimentary','onchain_paid'].includes(row.grant_kind));
- const effectivePlan=active&&paidPlan&&!expired?row.plan:'explorer';
- return {role:isAdmin?'admin':'member',status:row.status,plan:row.plan,effectivePlan,grantKind:row.grant_kind,expiresAt:row.expires_at?new Date(row.expires_at).toISOString():null,expired,
- permissions:{map:active,reports:active&&(isAdmin||effectivePlan!=='explorer'),research:active&&(isAdmin||effectivePlan==='research'),manageUsers:active&&isAdmin,generateAI:false},billing:'monthly_non_recurring'};
+ const isAdmin=admin(row,env),active=row.status==='active',paidPlan=['signal','research'].includes(row.plan),paidExpired=paidPlan&&(!Number.isSafeInteger(row.expires_at)||row.expires_at<=now||!['manual_paid','complimentary','onchain_paid'].includes(row.grant_kind));
+ const basePlan=active&&paidPlan&&!paidExpired?row.plan:'explorer';
+ const trialActive=active&&Number.isSafeInteger(row.trial_claimed_at)&&row.trial_claimed_at<=now&&Number.isSafeInteger(row.trial_expires_at)&&row.trial_expires_at>now&&row.trial_expires_at-row.trial_claimed_at===86400000;
+ const trialDominant=trialActive&&basePlan!=='research',effectivePlan=trialActive?'research':basePlan,expired=paidExpired&&!trialActive;
+ const end=trialDominant?row.trial_expires_at:row.expires_at;
+ return {role:isAdmin?'admin':'member',status:row.status,plan:row.plan,effectivePlan,grantKind:trialDominant?'trial':row.grant_kind,expiresAt:end?new Date(end).toISOString():null,expired,
+ trial:{claimedAt:row.trial_claimed_at??null,expiresAt:row.trial_expires_at??null,active:trialActive,eligible:active&&!isAdmin&&row.trial_claimed_at==null&&basePlan!=='research'},
+ permissions:{map:active,reports:active&&(isAdmin||effectivePlan!=='explorer'),research:active&&(isAdmin||effectivePlan==='research'),manageUsers:active&&isAdmin,generateAI:active&&(isAdmin||effectivePlan==='research')&&typeof env.ORAKT_RESEARCH_BRIDGE_TOKEN==='string'&&env.ORAKT_RESEARCH_BRIDGE_TOKEN.length>=32},billing:'monthly_non_recurring'};
 }
 export function publicMember(member,identity){return {provider:member.row.provider,displayName:member.row.display_name,accountId:member.row.id,previousAccountId:member.row.legacy_ref,expiresAt:identity.expiresAt,createdAt:new Date(member.row.created_at).toISOString(),membership:member.access};}
 
@@ -27,7 +31,7 @@ async function importExistingLocalAccounts(env){
  if(pending.results.length)await env.DB.batch(pending.results.map(a=>env.DB.prepare("INSERT INTO member_accounts (id, provider, subject, display_name, legacy_ref, created_at, first_seen_at) VALUES (?, 'local', ?, ?, ?, ?, ?) ON CONFLICT(provider, subject) DO NOTHING").bind(randomUUID(),a.id,a.username,a.id.slice(0,16),a.created_at,Date.now())));
  const left=await env.DB.prepare("SELECT COUNT(*) AS n FROM local_auth_accounts a WHERE NOT EXISTS (SELECT 1 FROM member_accounts m WHERE m.provider = 'local' AND m.subject = a.id)").bind().first();return left.n;
 }
-function safeRow(row,env){const access=accessFor(row,env);return {id:row.id,provider:row.provider,displayName:row.display_name,createdAt:new Date(row.created_at).toISOString(),firstSeenAt:new Date(row.first_seen_at).toISOString(),lastSeenAt:row.last_seen_at?new Date(row.last_seen_at).toISOString():null,revision:row.revision,...access};}
+function safeRow(row,env){const access=accessFor(row,env);return {id:row.id,provider:row.provider,displayName:row.display_name,createdAt:new Date(row.created_at).toISOString(),firstSeenAt:new Date(row.first_seen_at).toISOString(),lastSeenAt:row.last_seen_at?new Date(row.last_seen_at).toISOString():null,revision:row.revision,...access,grantKind:row.grant_kind,expiresAt:row.expires_at?new Date(row.expires_at).toISOString():null};}
 async function smallBody(request){
  if(!request.headers.get('Content-Type')?.startsWith('application/json'))throw Error();
  const reader=request.body?.getReader();if(!reader)throw Error();let text='',size=0;const d=new TextDecoder();

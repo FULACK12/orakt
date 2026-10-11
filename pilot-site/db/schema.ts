@@ -29,6 +29,7 @@ export const publicationRequests=sqliteTable("publication_requests",{
 export const memberAccounts=sqliteTable("member_accounts",{
  id:text("id").primaryKey(),provider:text("provider").notNull(),subject:text("subject").notNull(),displayName:text("display_name").notNull(),legacyRef:text("legacy_ref").notNull(),
  createdAt:integer("created_at").notNull(),firstSeenAt:integer("first_seen_at").notNull(),lastSeenAt:integer("last_seen_at"),
+ trialClaimedAt:integer("trial_claimed_at"),trialExpiresAt:integer("trial_expires_at"),
  status:text("status").notNull().default("active"),plan:text("plan").notNull().default("explorer"),grantKind:text("grant_kind").notNull().default("free"),expiresAt:integer("expires_at"),revision:integer("revision").notNull().default(0),lastChangeId:text("last_change_id").notNull().default(""),
 },t=>[uniqueIndex("idx_member_provider_subject").on(t.provider,t.subject),index("idx_member_last_seen").on(t.lastSeenAt),index("idx_member_created").on(t.createdAt)]);
 export const memberAudit=sqliteTable("member_audit",{
@@ -77,6 +78,14 @@ export const walletAuthSessions = sqliteTable("wallet_auth_sessions", {
   browser: text("browser").notNull().default(""),
   expiresAt: integer("expires_at").notNull(),
 }, table => [index("idx_wallet_session_expiry").on(table.expiresAt), index("idx_wallet_session_browser").on(table.browser)]);
+
+export const reportProvenance=sqliteTable('report_provenance',{
+ id:text('id').primaryKey(),reportId:text('report_id').notNull(),network:text('network').notNull(),wallet:text('wallet').notNull(),actorId:text('actor_id').notNull(),signature:text('signature'),createdAt:integer('created_at').notNull(),confirmedAt:integer('confirmed_at'),
+});
+export const researchJobs=sqliteTable('research_jobs',{
+ id:text('id').primaryKey(),actorId:text('actor_id').notNull(),prompt:text('prompt').notNull(),language:text('language').notNull(),evidence:text('evidence').notNull(),state:text('state').notNull(),result:text('result'),error:text('error'),leaseToken:text('lease_token'),leaseUntil:integer('lease_until'),createdAt:integer('created_at').notNull(),updatedAt:integer('updated_at').notNull(),
+},t=>[index('idx_research_jobs_actor_created').on(t.actorId,t.createdAt),index('idx_research_jobs_state').on(t.state,t.createdAt)]);
+export const researchWorker=sqliteTable('research_worker',{id:integer('id').primaryKey(),status:text('status').notNull(),updatedAt:integer('updated_at').notNull()});
 
 export const evidenceReports = sqliteTable(
   "evidence_reports",
