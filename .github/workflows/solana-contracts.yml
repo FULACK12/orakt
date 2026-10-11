@@ -20,7 +20,7 @@ jobs:
         working-directory: contracts/solana
         run: cargo build --workspace --release
       - name: Attempt SBF and IDL build using the official pinned Anchor image
-        run: docker run --rm -v "$PWD/contracts/solana:/work" -w /work solanafoundation/anchor:0.31.1 anchor build
+        run: docker run --rm -v "$PWD/contracts/solana:/work" -w /work solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 anchor build
       - name: Retain build evidence, never signing keypairs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
