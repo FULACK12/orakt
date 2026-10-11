@@ -22,11 +22,21 @@ jobs:
       - name: Attempt SBF and IDL build using the official pinned Anchor image
         run: |
           docker run --rm -v "$PWD/contracts/solana:/work" -w /work solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 bash -ec '
-            rustup toolchain install 1.89.0 --profile minimal
-            rustup default 1.89.0
-            cargo build-sbf --manifest-path programs/orakt-protocol/Cargo.toml --tools-version v1.56 -- --locked
+            rustup toolchain install 1.95.0 --profile minimal
+            rustup default 1.95.0
+            cargo install cargo-build-sbf --version 4.4.0 --locked --force
+            /root/.cargo/bin/cargo-build-sbf --manifest-path programs/orakt-protocol/Cargo.toml --tools-version v1.57 --arch v0 -- --locked
             anchor idl build
           '
+      - name: Install locked JavaScript test client (no package lifecycle scripts)
+        run: npm ci --ignore-scripts --prefix pilot-site
+      - name: Execute local-validator provenance and permission tests (no public chain)
+        run: |
+          docker run -d --name orakt-validator -p 127.0.0.1:8899:8899 -p 127.0.0.1:8900:8900 -v "$PWD/contracts/solana:/work" solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 solana-test-validator --bpf-program BaAX5nB9yxMh5K1tdEserFDq7MMcisVGVNshrVNLqDyn /work/target/deploy/orakt_protocol.so --bind-address 0.0.0.0 --ledger /tmp/orakt-test-ledger --quiet
+          node contracts/solana/tests/runtime.mjs
+      - name: Stop disposable validator
+        if: always()
+        run: docker stop orakt-validator || true
       - name: Retain build evidence, never signing keypairs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

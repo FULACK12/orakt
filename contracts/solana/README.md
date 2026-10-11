@@ -31,7 +31,9 @@ The deployed website still uses its existing Memo provenance, payment verificati
 
 ## Build and test
 
-Pinned framework: Anchor 0.31.1. Install Rust, Solana CLI and Anchor using the official documentation; Windows normally uses WSL. The authoring machine currently has no such toolchain. The included CI executes **host compilation and unit tests**, not SBF/validator integration or a security audit.
+Pinned framework: Anchor 0.31.1, with a checked-in Cargo.lock. Install Rust, Solana CLI and Anchor using the official documentation; Windows normally uses WSL. The authoring machine currently has no such toolchain. Host compilation and 13 unit tests passed in GitHub Actions. CI also attempts an SBF/IDL build and a disposable local-validator suite; inspect the actual workflow conclusion, not just this configuration, before treating them as passed. No test is an independent security audit.
+
+The CI build pins Rust 1.95.0, cargo-build-sbf 4.4.0 and platform-tools v1.57. Its SBPFv0 output is for the pinned legacy local validator only; it is **not a production deployment artifact**. A current-cluster-compatible SBPFv3 migration/build and runtime tests are an additional release gate before public-chain deployment.
 
 ```sh
 cd contracts/solana

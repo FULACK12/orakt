@@ -17,6 +17,7 @@ import SiteFooter from "./SiteFooter";
 import usePublishedMetrics from './usePublishedMetrics';
 import HeroOutlineWord from './HeroOutlineWord';
 import OraktAISection from './OraktAISection';
+import ProtocolSection from './ProtocolSection';
 
 type Language = "zh" | "en";
 
@@ -506,8 +507,9 @@ export default function OraktLanding({ metrics:initialMetrics, page="home" }: { 
         <p>{language==='zh'?'从原始新闻、可核验的主张到事件与资产暴露，把研究连接至 Solana 与代币化资产生态。内容哈希与审核历史可以被查验；链上记录不替代事实核查。':'Connect original news, verifiable claims and events to asset exposure across Solana and tokenized-asset ecosystems. Content hashes and review histories are inspectable; an on-chain record does not replace fact checking.'}</p>
         <div><span>SOURCE</span><i>→</i><span>CLAIM</span><i>→</i><span>EVENT</span><i>→</i><span>ASSET</span></div>
         <a href={accessHref('/platform/assets')}>{language==='zh'?'探索新闻与链上资产':'Explore news & on-chain assets'} ↗</a>
-        <small>{language==='zh'?'当前存证使用 Solana Devnet；主网交易未开放。资产关联是研究线索，不是买卖建议。':'Current provenance uses Solana Devnet. Mainnet trading is not enabled. Asset links are research leads, not trading advice.'}</small>
+        <small>{language==='zh'?'已有 Devnet 存证；管理员可通过 Phantom 手动签名发布主网 Memo。具体记录以交易网络和签名核验为准。自定义协议合约尚未部署；不提供自动资产交易。':'Devnet provenance exists; administrators can manually sign mainnet Memo publications with Phantom. Verify each record by its network and signature. Custom protocol contracts are not deployed; no automatic asset trading is provided.'}</small>
       </section>
+      <ProtocolSection language={language}/>
 
       <section className={styles.modules}>
         <ProductModule id="world" copy={t.modules.world} href={accessHref("/platform")} visual={<OraktWorldScene language={language} />} />

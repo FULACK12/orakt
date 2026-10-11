@@ -1,0 +1,66 @@
+// Local validator ONLY. Disposable keys stay in memory; no public-chain endpoint.
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+const require=createRequire(new URL('../../../pilot-site/package.json',import.meta.url));
+const {Connection,Keypair,PublicKey,SystemProgram,Transaction,TransactionInstruction,sendAndConfirmTransaction}=require('@solana/web3.js');
+const rpc=new Connection('http://127.0.0.1:8899','confirmed');
+const program=new PublicKey('BaAX5nB9yxMh5K1tdEserFDq7MMcisVGVNshrVNLqDyn');
+const authority=Keypair.generate(),author=Keypair.generate(),reviewer=Keypair.generate(),stranger=Keypair.generate();
+const hash=s=>createHash('sha256').update(s).digest();
+const u32=n=>{const b=Buffer.alloc(4);b.writeUInt32LE(n);return b;};
+const key=x=>x.publicKey??x;
+const pda=(...seeds)=>PublicKey.findProgramAddressSync(seeds.map(s=>typeof s==='string'?Buffer.from(s):s instanceof PublicKey?s.toBuffer():s),program)[0];
+const meta=(x,signer=false,writable=false)=>({pubkey:key(x),isSigner:signer,isWritable:writable});
+const config=pda('config',authority.publicKey),permit=x=>pda('permit',config,key(x));
+const sys=meta(SystemProgram.programId),zero=Buffer.alloc(32);
+const ix=(name,keys,...args)=>new TransactionInstruction({programId:program,keys,data:Buffer.concat([hash('global:'+name).subarray(0,8),...args])});
+const send=async(instruction,signers)=>sendAndConfirmTransaction(rpc,new Transaction().add(instruction),signers,{commitment:'confirmed'});
+let checks=0;
+async function reject(instruction,signers,label){await assert.rejects(()=>send(instruction,signers),undefined,label);checks++;console.log('PASS rejected: '+label);}
+async function ok(instruction,signers,label){await send(instruction,signers);checks++;console.log('PASS accepted: '+label);}
+for(let i=0;i<60;i++){try{await rpc.getSlot();break;}catch{if(i===59)throw Error('local validator did not start');await new Promise(r=>setTimeout(r,1000));}}
+assert.ok((await rpc.getAccountInfo(program))?.executable,'program must be loaded in local validator');
+for(const pair of [authority,author,reviewer,stranger]){
+ const signature=await rpc.requestAirdrop(pair.publicKey,2_000_000_000);
+ await rpc.confirmTransaction(signature,'confirmed');
+}
+await ok(ix('initialize',[meta(authority,true,true),meta(config,false,true),sys]),[authority],'initialize intended instance');
+const roles=(who,n,signer=authority)=>ix('set_roles',[meta(signer,true,true),meta(config),meta(who),meta(permit(who),false,true),sys],Buffer.from([n]));
+await reject(roles(stranger,3,stranger),[stranger],'stranger cannot grant roles');
+await reject(roles(author,4),[authority],'undefined role bits');
+await ok(roles(author,3),[authority],'author publish/review role');
+await ok(roles(reviewer,2),[authority],'independent reviewer role');
+const item=hash('local-only-report'),series=pda('series',config,author.publicKey,item);
+await ok(ix('open_series',[meta(author,true,true),meta(config),meta(permit(author)),meta(series,false,true),sys],item,Buffer.from([0])),[author],'open report series');
+const content=hash('version one'),evidence=hash('evidence bytes');
+const record=pda('record',series,u32(1));
+const publish=(version,parent=zero,h=content)=>ix('publish_version',[meta(author,true,true),meta(config),meta(permit(author)),meta(series,false,true),meta(pda('record',series,u32(version)),false,true),sys],u32(version),h,evidence,parent);
+await reject(publish(1,hash('wrong parent')),[author],'wrong parent hash');
+await reject(publish(1,zero,zero),[author],'empty content commitment');
+await ok(publish(1),[author],'publish first immutable version');
+const original=(await rpc.getAccountInfo(record)).data;
+await reject(publish(1),[author],'duplicate version cannot overwrite');
+await reject(publish(3,content),[author],'cannot skip version');
+const attest=who=>ix('attest',[meta(who,true,true),meta(config),meta(permit(who)),meta(record),meta(pda('review',record,key(who)),false,true),sys],Buffer.from([1]),hash('local review'));
+await reject(attest(author),[author],'self-review');
+await ok(attest(reviewer),[reviewer],'independent attributed review');
+await reject(attest(reviewer),[reviewer],'duplicate review');
+await ok(roles(author,0),[authority],'revoke future publishing');
+await reject(publish(2,content),[author],'revoked publisher');
+await ok(roles(author,1),[authority],'restore publishing');
+await ok(ix('set_paused',[meta(authority,true),meta(config,false,true)],Buffer.from([1])),[authority],'pause writes');
+await reject(publish(2,content),[author],'publishing during pause');
+await ok(ix('retract',[meta(author,true,true),meta(record),meta(pda('retraction',record),false,true),sys],hash('correction notice')),[author],'retraction remains possible during pause');
+assert.deepEqual((await rpc.getAccountInfo(record)).data,original,'original bytes preserved after review/retraction');checks++;
+await ok(ix('set_paused',[meta(authority,true),meta(config,false,true)],Buffer.from([0])),[authority],'resume writes');
+await ok(publish(2,content,hash('corrected version')),[author],'correction appends new version');
+const subject=hash('salted disposable account'),trial=pda('trial',config,subject);
+const claim=(admin=authority)=>ix('issue_trial',[meta(admin,true,true),meta(stranger,true),meta(config),meta(trial,false,true),sys],subject);
+await reject(claim(stranger),[stranger],'wallet cannot self-attest eligibility');
+await reject(claim(),[authority],'trial requires recipient consent');
+await ok(claim(),[authority,stranger],'operator and recipient trial signatures');
+await reject(claim(),[authority,stranger],'same account trial replay');
+const trialData=(await rpc.getAccountInfo(trial)).data;
+assert.equal(trialData.readBigInt64LE(112)-trialData.readBigInt64LE(104),86400n);checks++;
+console.log(`PASS ${checks} local-validator checks. Payments, integration and independent security review remain separate release gates.`);

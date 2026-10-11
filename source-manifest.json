@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 1360,
-      "sha256": "ccd9b9abb4d5008c9df029eb7a3b9062faa552c54e695238030cfc797db6fcf1"
+      "bytes": 2612,
+      "sha256": "be5980c79bddab7454d33b26e1d5824fdc7ad2a6612c1e40555c6a0965da5eff"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2476,9 +2476,19 @@
       "sha256": "691b2d12735d5d2e4b8e7ab50d62030d09d78f007722df78c2dd54272d4eeb6c"
     },
     {
+      "path": "contracts/solana/.gitignore",
+      "bytes": 43,
+      "sha256": "e98e231232d6abc8c17763395a80ef379d7c221c7a8a380735aef07ebbfdd4ba"
+    },
+    {
       "path": "contracts/solana/Anchor.toml",
       "bytes": 437,
       "sha256": "963b0062a12c037cc574f3f7d2c2c5593ba70cebd1ccbe9572f75e519971a3da"
+    },
+    {
+      "path": "contracts/solana/Cargo.lock",
+      "bytes": 59987,
+      "sha256": "cbede51deae211a5fce00aa99244a596c1f30c565f2b9eae4d7cfda5f2087746"
     },
     {
       "path": "contracts/solana/Cargo.toml",
@@ -2502,8 +2512,13 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 6673,
-      "sha256": "6cce2beb9841e5f9f4633703d8f832cb5d4753e8cbd85f1d5f31505c104ea617"
+      "bytes": 7194,
+      "sha256": "319cc067bd56227fcf1370a0c1b61a9b126b49a82e74de7f51223d981f4330c8"
+    },
+    {
+      "path": "contracts/solana/tests/runtime.mjs",
+      "bytes": 5967,
+      "sha256": "f1344c08c27393ecd51e693c363cc53933d8bf87dce3d634f682e77ef4f44c4a"
     },
     {
       "path": "pilot-site/app/AaplOnchain.tsx",
@@ -3022,8 +3037,8 @@
     },
     {
       "path": "pilot-site/app/OraktLanding.tsx",
-      "bytes": 34700,
-      "sha256": "b01642e7a060b1b1141c07c5dea070a4788618f08b9773d92ca4facddbd5b98d"
+      "bytes": 34992,
+      "sha256": "2b79ccd9c2f6aefff60269b3c21c5a86bb70c0eb28f7c81c958af8485cb2c18b"
     },
     {
       "path": "pilot-site/app/OraktMatrix.module.css",
@@ -3216,6 +3231,16 @@
       "sha256": "6e4023695c432e3019127528f9a4af574cdcc1be667902452389e02e23bf194d"
     },
     {
+      "path": "pilot-site/app/ProtocolSection.module.css",
+      "bytes": 3161,
+      "sha256": "7fcbaf4d795283927f3d02a8e06371cc40d535d5ee5dd1502982f03ec8d5f877"
+    },
+    {
+      "path": "pilot-site/app/ProtocolSection.tsx",
+      "bytes": 5930,
+      "sha256": "7f04facbca293dded44df63d95eb1321991d7cb17d2ab550d70bf7fc76940107"
+    },
+    {
       "path": "pilot-site/app/provenance-wallet.ts",
       "bytes": 1494,
       "sha256": "7247e133d2763baed971eb59ea42c6a9c38b2c8f73e2d280fc5a615f3a90fce8"
@@ -3228,7 +3253,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "9d0d2f541e8674f97242b4fcabb6c5eef18013290f1804a76c4677fe44601a5a"
+      "sha256": "20776bcc6e171fc803d684bdca8d1f708232d7443a8557f244ef78ac9c5f3989"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -3322,8 +3347,8 @@
     },
     {
       "path": "pilot-site/app/SiteFooter.tsx",
-      "bytes": 4194,
-      "sha256": "301ab09dd2092a197caa357a8e086a4d3fbb3593227b2cda9fdd943e76b2d65a"
+      "bytes": 4374,
+      "sha256": "68ad69134a94f063b580c016a51c74f04dc6fa6d7cbb38f3db49610c9ee6690e"
     },
     {
       "path": "pilot-site/app/StudyCurve.tsx",
@@ -4076,6 +4101,11 @@
       "sha256": "a1082fe6e97b162b6f0bf30bb660a349d2a26f8285e3d560dd6ea91c927b44ce"
     },
     {
+      "path": "pilot-site/tests/protocol-disclosure.test.mjs",
+      "bytes": 1221,
+      "sha256": "c759cd82e7992730b82131bfbd6fb9a4501d0da4e2e414f6116b9b7027b7c74f"
+    },
+    {
       "path": "pilot-site/tests/public-copy.test.mjs",
       "bytes": 4054,
       "sha256": "19d8654a9d1c46febeba04ce4424a6d43dc95b4ebc699b7591c87e3883a9299c"
@@ -4213,7 +4243,7 @@
     {
       "path": "pilot-site/worker/index.ts",
       "bytes": 31584,
-      "sha256": "634130df859dc22816d6d5624ae845de19c1d554e068b0ffb9c3aeab395ad0f3"
+      "sha256": "fdb461a2279d7039b945e88e5b5e357e1b63d4a78d346a3215c6299aeac8a5a0"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",

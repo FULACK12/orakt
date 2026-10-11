@@ -23,6 +23,7 @@ export const footerGroups=[
   {href:"/company#principles",zh:"研究原则",en:"Research principles"},
   {href:"/research",zh:"研究方法",en:"Methodology"},
   {href:"/roadmap",zh:"未来方向",en:"Product direction"},
+  {href:"/#protocol",zh:"Solana 合约与源码",en:"Solana contracts & source"},
   {href:"/plans",zh:"套餐方案预览",en:"Plan preview"},
  ]},
  {zh:"账号与帮助",en:"Account & help",links:[
@@ -42,7 +43,7 @@ export default function SiteFooter({language,snapshotAt,page}:{language:"zh"|"en
  return <footer className={styles.footer} data-site-footer>
    <div className={styles.top}><a className={styles.brand} href="/" aria-label={zh?"ORAKT 官网首页":"ORAKT home"}><OraktBrandIcon/><span><strong>ORAKT</strong><small>BY INSOLVE TECH</small></span></a><p>{zh?"从看见事件，到理解证据。\n为每一个“为什么”，保留继续追问的入口。":"From seeing an event to understanding its evidence.\nKeep a way to question every “why”."}</p><a className={styles.start} href="/research#read-report">{zh?"从阅读指南开始":"Start with the reading guide"}<span aria-hidden="true">↗</span></a></div>
    <nav className={styles.directory} aria-label={zh?"网站底部导航":"Site footer navigation"}>{footerGroups.map(group=><section key={group.en}><h2>{group[language]}</h2><ul>{group.links.map(link=><li key={link.href}><a href={link.href} aria-current={link.href===`/${page}`?"page":undefined}>{link[language]}</a></li>)}</ul></section>)}</nav>
-   <div className={styles.notes}><p>{zh?"研究工具，非投资建议。网站提供已发布数据，不是实时交易终端。在线 AI 生成、自动交易与自动扣费尚未开放。":"Research tool, not investment advice. Published data, not a live trading terminal. Online AI generation, automated trading and automatic billing are not enabled."}</p><div><a href="/research#risk-notice">{zh?"研究风险说明":"Research risk notice"}</a><a href="/membership#account-safety">{zh?"账号安全说明":"Account safety"}</a><a href="/roadmap#status-language">{zh?"功能状态说明":"Feature availability"}</a></div></div>
+   <div className={styles.notes}><p>{zh?"研究工具，非投资建议。已发布数据不等于实时交易终端。RESEARCH 的 AI 草稿生成依赖本地工作机在线；自定义合约未部署，无自动交易或自动扣费。":"Research tool, not investment advice. Published data is not a live trading terminal. RESEARCH AI drafts require the local worker online. Custom contracts are not deployed; no automated trading or automatic billing."}</p><div><a href="/research#risk-notice">{zh?"研究风险说明":"Research risk notice"}</a><a href="/membership#account-safety">{zh?"账号安全说明":"Account safety"}</a><a href="/roadmap#status-language">{zh?"功能状态说明":"Feature availability"}</a></div></div>
    <div className={styles.bottom}><span>© 2026 ORAKT · INSOLVE TECH</span><span>{zh?"数据版本日期":"Data version date"} · {new Date(snapshotAt).toISOString().slice(0,10)}</span><ReleaseStatus language={language}/><a href={page==="home"?"#top":"#main-content"}>{zh?"返回顶部 ↑":"Back to top ↑"}</a></div>
  </footer>;
 }
