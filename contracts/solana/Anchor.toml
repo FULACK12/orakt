@@ -1,0 +1,18 @@
+[toolchain]
+anchor_version = "0.31.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+# BUILD FIXTURE ONLY. Generate an operator-owned program keypair and run keys sync
+# before any deployment. This address is NOT a deployed ORAKT program.
+[programs.localnet]
+orakt_protocol = "BaAX5nB9yxMh5K1tdEserFDq7MMcisVGVNshrVNLqDyn"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test --workspace"

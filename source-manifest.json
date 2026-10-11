@@ -1,6 +1,11 @@
 {
   "files": [
     {
+      "path": ".github/workflows/solana-contracts.yml",
+      "bytes": 1360,
+      "sha256": "ccd9b9abb4d5008c9df029eb7a3b9062faa552c54e695238030cfc797db6fcf1"
+    },
+    {
       "path": "backend/alembic/env.py",
       "bytes": 2101,
       "sha256": "260ebf062b2aaa474b459568f694e1ca9badbac14844c8bf9dae1e1fcc1b87cd"
@@ -2471,6 +2476,36 @@
       "sha256": "691b2d12735d5d2e4b8e7ab50d62030d09d78f007722df78c2dd54272d4eeb6c"
     },
     {
+      "path": "contracts/solana/Anchor.toml",
+      "bytes": 437,
+      "sha256": "963b0062a12c037cc574f3f7d2c2c5593ba70cebd1ccbe9572f75e519971a3da"
+    },
+    {
+      "path": "contracts/solana/Cargo.toml",
+      "bytes": 223,
+      "sha256": "e0c07bcd1a9fece57dcdc2b837838f9703440913beea3c8d063b5eb5039dd510"
+    },
+    {
+      "path": "contracts/solana/programs/orakt-protocol/Cargo.toml",
+      "bytes": 560,
+      "sha256": "2414551c88caefd3a43be8d9fc5cb7562b1c981907284df0c519c81b9e301a30"
+    },
+    {
+      "path": "contracts/solana/programs/orakt-protocol/src/calendar.rs",
+      "bytes": 2367,
+      "sha256": "54e944116729c06a7e092d04d345263237c449b295e8efde619043c43ebd3fbf"
+    },
+    {
+      "path": "contracts/solana/programs/orakt-protocol/src/lib.rs",
+      "bytes": 15573,
+      "sha256": "8b5200d57f889552ae72224f358dd0caba8c4f9552bd546cc688c3958f00d98f"
+    },
+    {
+      "path": "contracts/solana/README.md",
+      "bytes": 6673,
+      "sha256": "6cce2beb9841e5f9f4633703d8f832cb5d4753e8cbd85f1d5f31505c104ea617"
+    },
+    {
       "path": "pilot-site/app/AaplOnchain.tsx",
       "bytes": 11830,
       "sha256": "f08f41d2152385a8a48544d521df0f2213f69148aaa6274edef38c7b69b3303b"
@@ -3589,6 +3624,11 @@
       "path": "pilot-site/public/brand/orakt-line.svg",
       "bytes": 442,
       "sha256": "80712ffb609f776cf70a67fb4e2040563db6b0c156cd297368254b7e1d70912a"
+    },
+    {
+      "path": "pilot-site/public/brand/README.md",
+      "bytes": 986,
+      "sha256": "df620b7ab0baad9a4c284642611110581c13c94a8fc1c17ab129e5a91ffd40d0"
     },
     {
       "path": "pilot-site/scripts/account-copy-v140.mjs",

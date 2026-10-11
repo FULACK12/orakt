@@ -22,6 +22,10 @@ The v140 production-source build and 38 rendered-page tests passed locally. The 
 
 ## Architecture
 
+### Experimental custom contracts (not deployed)
+
+`contracts/solana` contains a new Anchor program candidate for versioned report/news/chain/factor/portfolio/AI-draft commitments, attributed reviews and retractions, SPL-stablecoin membership receipts, and optional operator-attested account trial receipts. The website still uses the existing live services; these candidate contracts are not a claim of deployed or audited infrastructure. See the contract README and CI for exact release gates. No live signing key or deployment authorization is included, and AI/factual review stays off-chain.
+
 - `backend/app`: Python / FastAPI research, ingestion, source retention and local-model orchestration.
 - `backend/app/sec_bulk_import.py`: bounded, resumable ingestion of retained official SEC ZIP archives, SHA-256 checks and raw member CRC validation. Quarter and YTD variants are preserved on cold storage, not merged under a legacy unique key.
 - `backend/app/sec_cold_facts.py`: filing/date-filtered retrieval for new report evidence packets.
