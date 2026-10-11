@@ -17,7 +17,7 @@ const sys=meta(SystemProgram.programId),zero=Buffer.alloc(32);
 const ix=(name,keys,...args)=>new TransactionInstruction({programId:program,keys,data:Buffer.concat([hash('global:'+name).subarray(0,8),...args])});
 const send=async(instruction,signers)=>sendAndConfirmTransaction(rpc,new Transaction().add(instruction),signers,{commitment:'confirmed'});
 let checks=0;
-async function reject(instruction,signers,label){await assert.rejects(()=>send(instruction,signers),undefined,label);checks++;console.log('PASS rejected: '+label);}
+async function reject(instruction,signers,label){await assert.rejects(()=>send(instruction,signers),error=>/custom program error|Signature verification failed|signature verification failure|unknown signer/i.test(String(error)),label);checks++;console.log('PASS rejected: '+label);}
 async function ok(instruction,signers,label){await send(instruction,signers);checks++;console.log('PASS accepted: '+label);}
 for(let i=0;i<60;i++){try{await rpc.getSlot();break;}catch{if(i===59)throw Error('local validator did not start');await new Promise(r=>setTimeout(r,1000));}}
 assert.ok((await rpc.getAccountInfo(program))?.executable,'program must be loaded in local validator');

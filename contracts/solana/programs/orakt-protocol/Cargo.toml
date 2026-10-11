@@ -15,7 +15,9 @@ cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+# Anchor 0.31.1's IDL module references token_interface unconditionally.
+# This feature is IDL-only: runtime still accepts Program<Token>, never Token-2022.
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build", "anchor-spl/token_2022"]
 
 [dependencies]
 anchor-lang = { version = "=0.31.1", features = ["init-if-needed"] }

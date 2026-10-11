@@ -6,7 +6,7 @@ ORAKT connects company disclosures, event evidence, research reports and verifia
 
 ORAKT existed before this repository export. This is **not a claim that the complete application was written during a hackathon**. Competition name and eligible dates are awaiting the project owner's confirmation. No prior commit dates have been rewritten. A dated, reviewable change list must be supplied before submission to Colosseum.
 
-This source-only export was synchronized on October 11, 2026, through the deployed ORAKT v140 application (Sites source commit `bb4df10d665993f17274d21cf640dfa0ffbc3c8c`). It includes the existing application and subsequent changes; this synchronization date is not a claim about when every file was originally written. Earlier rejected report attempts remain rejected unless separately reviewed; updating this repository does not approve research results.
+This source-only export was synchronized on October 11, 2026. The v140 application was synchronized first (`dbdef7b`); the subsequent v141 website source (`4b3bbd8b720c25b184c47cd11d978bdab4c8761b` in Sites) adds a bilingual experimental-contract disclosure. It includes the existing application and subsequent changes; this synchronization date is not a claim about when every file was originally written. Earlier rejected report attempts remain rejected unless separately reviewed; updating this repository does not approve research results.
 
 ## Latest synchronized features
 
@@ -19,6 +19,8 @@ This source-only export was synchronized on October 11, 2026, through the deploy
 - Administrator-controlled Solana mainnet Memo provenance preparation and finalized-receipt verification for reports, separate from the original Devnet submission workflow. This implementation is not a custom deployed ORAKT smart contract; hashes prove version integrity, not truth.
 
 The v140 production-source build and 38 rendered-page tests passed locally. The focused account/research suite passed 25/25; the full application suite reported 335/340 passing, with five existing landing-page/educational-copy assertion failures. Those results require the provisioned production inputs described below; they are not a claim that this deliberately data-excluded export can run the entire suite unmodified.
+
+For v141, the production-source build and 40 focused disclosure/rendered-page tests passed. Contract host compilation and 13 Rust unit tests passed in Actions; SBF/IDL and local-validator checks have separate outcomes visible in the workflow. A configured test is not a passed test, and no custom contract has been deployed or independently audited. The website links the source, current checks and unsatisfied release gates at https://orakt.com/#protocol.
 
 ## Architecture
 

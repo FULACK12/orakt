@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 2612,
-      "sha256": "be5980c79bddab7454d33b26e1d5824fdc7ad2a6612c1e40555c6a0965da5eff"
+      "bytes": 2786,
+      "sha256": "0eaa85db51414cc68828310390c3be49af6fab64a773509134b02af13d635658"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2497,8 +2497,8 @@
     },
     {
       "path": "contracts/solana/programs/orakt-protocol/Cargo.toml",
-      "bytes": 560,
-      "sha256": "2414551c88caefd3a43be8d9fc5cb7562b1c981907284df0c519c81b9e301a30"
+      "bytes": 742,
+      "sha256": "e6d824baed0cac2b7d2c564d19aea15ca9fa2f625e12998ea91c3695b3c11af3"
     },
     {
       "path": "contracts/solana/programs/orakt-protocol/src/calendar.rs",
@@ -2517,8 +2517,8 @@
     },
     {
       "path": "contracts/solana/tests/runtime.mjs",
-      "bytes": 5967,
-      "sha256": "f1344c08c27393ecd51e693c363cc53933d8bf87dce3d634f682e77ef4f44c4a"
+      "bytes": 6084,
+      "sha256": "17ee4f74e7e9e6ce1e731b15a703db62cc4f12894d89c86b4de228f2adbfd1ca"
     },
     {
       "path": "pilot-site/app/AaplOnchain.tsx",

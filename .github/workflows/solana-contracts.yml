@@ -1,9 +1,9 @@
 name: Solana contract source checks
 on:
   push:
-    paths: ['contracts/solana/**', '.github/workflows/solana-contracts.yml']
+    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', '.github/workflows/solana-contracts.yml']
   pull_request:
-    paths: ['contracts/solana/**', '.github/workflows/solana-contracts.yml']
+    paths: ['contracts/solana/programs/**', 'contracts/solana/tests/**', 'contracts/solana/Cargo.*', 'contracts/solana/Anchor.toml', '.github/workflows/solana-contracts.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -13,6 +13,17 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            contracts/solana/.ci-cache
+          key: orakt-solana-tools-1.95-4.4-1.57-v1-${{ hashFiles('contracts/solana/Cargo.lock') }}
+          restore-keys: orakt-solana-tools-1.95-4.4-1.57-v1-
+      - name: Resolve newly enabled IDL-only dependencies (lock retained as artifact)
+        working-directory: contracts/solana
+        run: cargo update -p orakt-protocol
       - name: Compile program and run host unit tests (NOT validator tests)
         working-directory: contracts/solana
         run: cargo test --workspace --locked
@@ -21,11 +32,12 @@ jobs:
         run: cargo build --workspace --release --locked
       - name: Attempt SBF and IDL build using the official pinned Anchor image
         run: |
-          docker run --rm -v "$PWD/contracts/solana:/work" -w /work solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 bash -ec '
+          mkdir -p contracts/solana/.ci-cache
+          docker run --rm -v "$PWD/contracts/solana:/work" -v "$PWD/contracts/solana/.ci-cache:/cache" -w /work solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326 bash -ec '
             rustup toolchain install 1.95.0 --profile minimal
             rustup default 1.95.0
-            cargo install cargo-build-sbf --version 4.4.0 --locked --force
-            /root/.cargo/bin/cargo-build-sbf --manifest-path programs/orakt-protocol/Cargo.toml --tools-version v1.57 --arch v0 -- --locked
+            if [ ! -x /cache/bin/cargo-build-sbf ]; then cargo install cargo-build-sbf --version 4.4.0 --locked --root /cache; fi
+            /cache/bin/cargo-build-sbf --manifest-path programs/orakt-protocol/Cargo.toml --tools-version v1.57 --arch v0 -- --locked
             anchor idl build
           '
       - name: Install locked JavaScript test client (no package lifecycle scripts)
