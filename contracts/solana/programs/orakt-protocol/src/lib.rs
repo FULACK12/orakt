@@ -32,10 +32,28 @@ pub mod orakt_protocol {
         require!(evidence_root(&leaf_hash,&proof)==Some(ctx.accounts.record.evidence_root),ProtocolError::InvalidEvidenceProof);
         emit!(EvidenceVerified{record:ctx.accounts.record.key(),leaf_hash,evidence_root:ctx.accounts.record.evidence_root});Ok(())
     }
-    pub fn initialize(ctx:Context<Initialize>)->Result<()> {
+    pub fn initialize(ctx:Context<Initialize>,guardian:Pubkey)->Result<()> {
+        require!(guardian!=Pubkey::default()&&guardian!=ctx.accounts.authority.key(),ProtocolError::InvalidInput);
         ctx.accounts.config.set_inner(Config{authority:ctx.accounts.authority.key(),paused:false,bump:ctx.bumps.config});
+        ctx.accounts.governance.set_inner(Governance{config:ctx.accounts.config.key(),authority:ctx.accounts.authority.key(),guardian,pending:Pubkey::default(),payments_enabled:false,bump:ctx.bumps.governance});
         Ok(())
     }
+    pub fn set_payments_enabled(ctx:Context<Admin>,enabled:bool)->Result<()> {
+        require!(ctx.accounts.governance.pending==Pubkey::default(),ProtocolError::RecoveryPending);
+        ctx.accounts.governance.payments_enabled=enabled;Ok(())
+    }
+    /// Backup guardian is a privileged recovery authority, NOT a trustless oracle.
+    /// Production must use independently controlled multisig governance.
+    pub fn propose_authority(ctx:Context<ProposeAuthority>,next:Pubkey)->Result<()> {
+        require!(next!=Pubkey::default()&&next!=ctx.accounts.governance.authority&&next!=ctx.accounts.governance.guardian,ProtocolError::InvalidInput);
+        ctx.accounts.governance.pending=next;ctx.accounts.governance.payments_enabled=false;
+        emit!(AuthorityProposed{config:ctx.accounts.config.key(),proposer:ctx.accounts.proposer.key(),next});Ok(())
+    }
+    pub fn accept_authority(ctx:Context<AcceptAuthority>)->Result<()> {
+        ctx.accounts.governance.authority=ctx.accounts.successor.key();ctx.accounts.governance.pending=Pubkey::default();ctx.accounts.governance.payments_enabled=false;
+        emit!(AuthorityAccepted{config:ctx.accounts.config.key(),authority:ctx.accounts.successor.key()});Ok(())
+    }
+    pub fn cancel_authority(ctx:Context<Admin>)->Result<()> {ctx.accounts.governance.pending=Pubkey::default();ctx.accounts.governance.payments_enabled=false;Ok(())}
     pub fn set_paused(ctx:Context<Admin>,paused:bool)->Result<()> {ctx.accounts.config.paused=paused;Ok(())}
     /// Bit 1: publish; bit 2: attest. Zero revokes future writes, never past records.
     pub fn set_roles(ctx:Context<SetRoles>,roles:u8)->Result<()> {
@@ -101,17 +119,32 @@ pub struct VerifyEvidence<'info>{
 pub struct Initialize<'info>{
     #[account(mut)] pub authority:Signer<'info>,
     #[account(init,payer=authority,space=8+Config::INIT_SPACE,seeds=[b"config",authority.key().as_ref()],bump)] pub config:Account<'info,Config>,
+    #[account(init,payer=authority,space=8+Governance::INIT_SPACE,seeds=[b"governance",config.key().as_ref()],bump)]pub governance:Account<'info,Governance>,
     pub system_program:Program<'info,System>,
 }
 #[derive(Accounts)]
 pub struct Admin<'info>{
     pub authority:Signer<'info>,
-    #[account(mut,has_one=authority,seeds=[b"config",authority.key().as_ref()],bump=config.bump)]pub config:Account<'info,Config>,
+    #[account(mut,seeds=[b"config",config.authority.as_ref()],bump=config.bump)]pub config:Account<'info,Config>,
+    #[account(mut,has_one=config,has_one=authority,seeds=[b"governance",config.key().as_ref()],bump=governance.bump)]pub governance:Account<'info,Governance>,
+}
+#[derive(Accounts)]
+pub struct ProposeAuthority<'info>{
+    pub proposer:Signer<'info>,
+    #[account(seeds=[b"config",config.authority.as_ref()],bump=config.bump)]pub config:Account<'info,Config>,
+    #[account(mut,has_one=config,seeds=[b"governance",config.key().as_ref()],bump=governance.bump,constraint=proposer.key()==governance.authority||proposer.key()==governance.guardian @ ProtocolError::Unauthorized)]pub governance:Account<'info,Governance>,
+}
+#[derive(Accounts)]
+pub struct AcceptAuthority<'info>{
+    pub successor:Signer<'info>,
+    #[account(seeds=[b"config",config.authority.as_ref()],bump=config.bump)]pub config:Account<'info,Config>,
+    #[account(mut,has_one=config,seeds=[b"governance",config.key().as_ref()],bump=governance.bump,constraint=governance.pending==successor.key() @ ProtocolError::Unauthorized)]pub governance:Account<'info,Governance>,
 }
 #[derive(Accounts)]
 pub struct SetRoles<'info>{
     #[account(mut)]pub authority:Signer<'info>,
-    #[account(has_one=authority,seeds=[b"config",authority.key().as_ref()],bump=config.bump)]pub config:Account<'info,Config>,
+    #[account(seeds=[b"config",config.authority.as_ref()],bump=config.bump)]pub config:Account<'info,Config>,
+    #[account(has_one=config,has_one=authority,seeds=[b"governance",config.key().as_ref()],bump=governance.bump)]pub governance:Account<'info,Governance>,
     /// CHECK: Public key identifying the permit recipient; no account data is read.
     pub wallet:UncheckedAccount<'info>,
     #[account(init_if_needed,payer=authority,space=8+Permit::INIT_SPACE,seeds=[b"permit",config.key().as_ref(),wallet.key().as_ref()],bump)]pub permit:Account<'info,Permit>,
@@ -165,18 +198,21 @@ pub struct Purchase<'info>{
     #[account(init,payer=buyer,space=8+Receipt::INIT_SPACE,seeds=[b"receipt",config.key().as_ref(),buyer.key().as_ref(),invoice.as_ref()],bump)]pub receipt:Account<'info,Receipt>,
     pub token_program:Program<'info,Token>,
     pub system_program:Program<'info,System>,
+    #[account(has_one=config,seeds=[b"governance",config.key().as_ref()],bump=governance.bump,constraint=governance.payments_enabled && governance.pending==Pubkey::default() @ ProtocolError::PaymentsDisabled)]pub governance:Account<'info,Governance>,
 }
 #[derive(Accounts)]
 #[instruction(subject:[u8;32])]
 pub struct IssueTrial<'info>{
     #[account(mut)]pub authority:Signer<'info>,
     pub wallet:Signer<'info>,
-    #[account(has_one=authority,seeds=[b"config",authority.key().as_ref()],bump=config.bump,constraint=!config.paused @ ProtocolError::Paused)]pub config:Account<'info,Config>,
+    #[account(seeds=[b"config",config.authority.as_ref()],bump=config.bump,constraint=!config.paused @ ProtocolError::Paused)]pub config:Account<'info,Config>,
+    #[account(has_one=config,has_one=authority,seeds=[b"governance",config.key().as_ref()],bump=governance.bump)]pub governance:Account<'info,Governance>,
     #[account(init,payer=authority,space=8+Trial::INIT_SPACE,seeds=[b"trial",config.key().as_ref(),subject.as_ref()],bump)]pub trial:Account<'info,Trial>,
     pub system_program:Program<'info,System>,
 }
 
 #[account]#[derive(InitSpace)]pub struct Config{pub authority:Pubkey,pub paused:bool,pub bump:u8}
+#[account]#[derive(InitSpace)]pub struct Governance{pub config:Pubkey,pub authority:Pubkey,pub guardian:Pubkey,pub pending:Pubkey,pub payments_enabled:bool,pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Permit{pub config:Pubkey,pub wallet:Pubkey,pub roles:u8,pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Series{pub config:Pubkey,pub author:Pubkey,pub item:[u8;32],pub kind:u8,pub next_version:u32,pub last_hash:[u8;32],pub bump:u8}
 #[account]#[derive(InitSpace)]pub struct Record{pub config:Pubkey,pub series:Pubkey,pub author:Pubkey,pub version:u32,pub kind:u8,pub content_hash:[u8;32],pub evidence_root:[u8;32],pub parent_hash:[u8;32],pub recorded_at:i64,pub bump:u8}
@@ -187,6 +223,8 @@ pub struct IssueTrial<'info>{
 #[account]#[derive(InitSpace)]pub struct Trial{pub config:Pubkey,pub subject:[u8;32],pub wallet:Pubkey,pub claimed_at:i64,pub expires_at:i64,pub bump:u8}
 #[event]pub struct EvidenceVerified{pub record:Pubkey,pub leaf_hash:[u8;32],pub evidence_root:[u8;32]}
 #[event]pub struct RoleChanged{pub config:Pubkey,pub wallet:Pubkey,pub roles:u8}
+#[event]pub struct AuthorityProposed{pub config:Pubkey,pub proposer:Pubkey,pub next:Pubkey}
+#[event]pub struct AuthorityAccepted{pub config:Pubkey, pub authority:Pubkey}
 #[event]pub struct VersionPublished{pub record:Pubkey,pub author:Pubkey,pub content_hash:[u8;32],pub version:u32,pub recorded_at:i64}
 #[event]pub struct SubscriptionPurchased{pub buyer:Pubkey,pub receipt:Pubkey,pub plan:u8,pub amount:u64,pub expires_at:i64}
 #[error_code]pub enum ProtocolError{
@@ -200,6 +238,8 @@ pub struct IssueTrial<'info>{
     #[msg("Quote expired or too far in future")]ExpiredQuote,
     #[msg("Amount differs from fixed plan price")]PriceMismatch,
     #[msg("Evidence inclusion proof does not match committed root")]InvalidEvidenceProof,
+    #[msg("Payments disabled independently from publication")]PaymentsDisabled,
+    #[msg("Authority recovery pending")]RecoveryPending,
 }
 #[cfg(test)]mod tests{
     use super::*;

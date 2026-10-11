@@ -9,9 +9,13 @@ const require=createRequire(new URL('../../../pilot-site/package.json',import.me
 const {Keypair}=require('@solana/web3.js');
 const source=fileURLToPath(new URL('../',import.meta.url));
 function copy(from,to){for(const entry of readdirSync(from,{withFileTypes:true})){const src=join(from,entry.name),dst=join(to,entry.name);if(entry.isDirectory()){mkdirSync(dst,{recursive:true});copy(src,dst);}else if(entry.isFile())writeFileSync(dst,readFileSync(src));}}
-const root=resolve(source,'../../.tmp/orakt-devnet-v144');
+const root=resolve(source,'../../.tmp/orakt-devnet-v145');
 mkdirSync(root,{recursive:true});
-const pairs={};for(const name of ['program','operator','test-usdc','test-usdt','buyer']){const file=join(root,name+'-keypair.json');if(!existsSync(file))writeFileSync(file,JSON.stringify([...Keypair.generate().secretKey]),{mode:0o600,flag:'wx'});pairs[name]=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(file,'utf8')))).publicKey.toBase58();}
+// Reuse only the isolated Devnet fee payer, never a production/Phantom secret.
+const operatorFile=join(root,'operator-keypair.json');
+const priorOperator=resolve(source,'../../.tmp/orakt-devnet-v144/operator-keypair.json');
+if(!existsSync(operatorFile)&&existsSync(priorOperator))writeFileSync(operatorFile,readFileSync(priorOperator),{mode:0o600,flag:'wx'});
+const pairs={};for(const name of ['program','operator','test-usdc','test-usdt','buyer','guardian','successor']){const file=join(root,name+'-keypair.json');if(!existsSync(file))writeFileSync(file,JSON.stringify([...Keypair.generate().secretKey]),{mode:0o600,flag:'wx'});pairs[name]=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(file,'utf8')))).publicKey.toBase58();}
 const build=join(root,'source');mkdirSync(build,{recursive:true});
 for(const f of ['Cargo.toml','Cargo.lock','Anchor.toml'])writeFileSync(join(build,f),readFileSync(join(source,f)));
 mkdirSync(join(build,'programs'),{recursive:true});copy(join(source,'programs'),join(build,'programs'));

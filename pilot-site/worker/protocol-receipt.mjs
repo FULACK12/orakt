@@ -16,13 +16,19 @@ const pda=(program,...seeds)=>PublicKey.findProgramAddressSync(seeds.map(s=>type
 const pub=(bytes,offset)=>key(bytes.subarray(offset,offset+32)).toBase58();
 export function protocolPolicy(env={}){
  if(env.ORAKT_PROTOCOL_PREVIEW_ENABLED!=='true')throw fail('protocol_preview_disabled',503);
- const programId=env.ORAKT_PROTOCOL_PROGRAM_ID,authority=env.ORAKT_PROTOCOL_AUTHORITY,upgradeAuthority=env.ORAKT_PROTOCOL_UPGRADE_AUTHORITY;
+ const programId=env.ORAKT_PROTOCOL_PROGRAM_ID,authority=env.ORAKT_PROTOCOL_AUTHORITY,upgradeAuthority=env.ORAKT_PROTOCOL_UPGRADE_AUTHORITY,governor=env.ORAKT_PROTOCOL_GOVERNOR;
  const slot=env.ORAKT_PROTOCOL_DEPLOY_SLOT;
- if(!address(programId)||programId===FIXTURE||!address(authority)||!(upgradeAuthority==='none'||address(upgradeAuthority))||!/^\d{1,16}$/.test(slot||'')||!Number.isSafeInteger(Number(slot))||Number(slot)<=0)throw fail('protocol_deployment_not_pinned',503);
- return {programId,authority,upgradeAuthority,deploySlot:Number(slot),config:pda(programId,'config',key(authority))[0].toBase58(),genesis:GENESIS};
+ if(!address(programId)||programId===FIXTURE||!address(authority)||!address(governor)||!(upgradeAuthority==='none'||address(upgradeAuthority))||!/^\d{1,16}$/.test(slot||'')||!Number.isSafeInteger(Number(slot))||Number(slot)<=0)throw fail('protocol_deployment_not_pinned',503);
+ const config=pda(programId,'config',key(authority))[0].toBase58();
+ return {programId,authority,governor,upgradeAuthority,deploySlot:Number(slot),config,governance:pda(programId,'governance',key(config))[0].toBase58(),genesis:GENESIS};
 }
 export function protocolCheckoutPolicy(env={}){
  if(env.ORAKT_PROTOCOL_CHECKOUT_ENABLED!=='true')throw fail('protocol_checkout_disabled',503);
+ return protocolPolicy({...env,ORAKT_PROTOCOL_PREVIEW_ENABLED:'true'});
+}
+// Receipt reconciliation is independently authorized; it never prepares a payment.
+export function protocolReconcilePolicy(env={}){
+ if(env.ORAKT_PROTOCOL_RECONCILE_ENABLED!=='true'&&env.ORAKT_PROTOCOL_CHECKOUT_ENABLED!=='true')throw fail('protocol_reconciliation_disabled',503);
  return protocolPolicy({...env,ORAKT_PROTOCOL_PREVIEW_ENABLED:'true'});
 }
 export function protocolCheckoutStatus(env={}){try{const p=protocolCheckoutPolicy(env);return {enabled:true,programId:p.programId,config:p.config,network:'solana:mainnet-beta',mode:'custom_contract'};}catch(e){return {enabled:false,mode:'custom_contract',reason:e.message};}}
@@ -44,6 +50,14 @@ function bytes(account,owner,length,tag,executable=false){
  return data;
 }
 const alphabet='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+async function verifyGovernance(rpc,policy,slot,forPayment){
+ const snap=await rpc('getAccountInfo',[policy.governance,{encoding:'base64',commitment:'finalized',minContextSlot:slot}]);
+ requireThat(Number.isSafeInteger(snap?.context?.slot)&&snap.context.slot>=slot,'stale_governance_snapshot');
+ const g=bytes(snap.value,policy.programId,138,'Governance');
+ requireThat(pub(g,8)===policy.config&&g[137]===pda(policy.programId,'governance',key(policy.config))[1],'governance_mismatch');
+ if(forPayment)requireThat(pub(g,40)===policy.governor&&g[136]===1&&g.subarray(104,136).equals(Buffer.alloc(32)),'payments_disabled_or_governance_changed');
+ return g;
+}
 export async function verifyProtocolDeployment(rpc,policy,snapshot){
  requireThat(await rpc('getGenesisHash')===policy.genesis,'wrong_rpc_network');
  const a=receiptAddresses(policy,{plan:'signal',payer:policy.authority,id:'deployment',member_id:'deployment',reference:policy.authority});
@@ -58,6 +72,7 @@ export async function verifyProtocolDeployment(rpc,policy,snapshot){
  requireThat((policy.upgradeAuthority==='none'&&pd[12]===0)||(pd[12]===1&&pub(pd,13)===policy.upgradeAuthority),'upgrade_authority_mismatch');
  const config=bytes(snap.value[1],policy.programId,42,'Config');
  requireThat(pub(config,8)===policy.authority&&config[40]===0&&config[41]===pda(policy.programId,'config',key(policy.authority))[1],'config_paused_or_mismatched');
+ await verifyGovernance(rpc,policy,metadata.context.slot,true);
  return {slot:metadata.context.slot};
 }
 export function decodeBase58(value,max=128){
@@ -91,7 +106,7 @@ export async function verifyProtocolReceipt({rpc,policy,order,member,signature,n
  const call=calls[0],data=decodeBase58(call.data);
  requireThat(data.length===58&&data.subarray(0,8).equals(hash('global:purchase').subarray(0,8))&&data[8]===a.plan&&data.subarray(9,41).equals(a.invoice)&&data[41]===1&&data.readBigUInt64LE(42)===BigInt(order.amount_units),'purchase_arguments_mismatch');
  const k=call.accounts;
- requireThat(Array.isArray(k)&&k.length===9&&k[0]===order.payer&&k[1]===policy.config&&k[2]===order.mint&&address(k[3])&&address(k[4])&&k[3]!==k[4]&&k[5]===a.subscription&&k[6]===a.receipt&&k[7]===TOKEN&&k[8]==='11111111111111111111111111111111','purchase_accounts_mismatch');
+ requireThat(Array.isArray(k)&&k.length===10&&k[0]===order.payer&&k[1]===policy.config&&k[2]===order.mint&&address(k[3])&&address(k[4])&&k[3]!==k[4]&&k[5]===a.subscription&&k[6]===a.receipt&&k[7]===TOKEN&&k[8]==='11111111111111111111111111111111'&&k[9]===policy.governance,'purchase_accounts_mismatch');
  const snapshot=await rpc('getMultipleAccounts',[[policy.programId,policy.config,a.receipt,a.subscription],{encoding:'base64',commitment:'finalized',minContextSlot:status.slot}]);
  requireThat(Number.isSafeInteger(snapshot?.context?.slot)&&snapshot.context.slot>=status.slot&&snapshot.value?.length===4,'stale_account_snapshot');
  const [programAccount,configAccount,receiptAccount,subAccount]=snapshot.value;
@@ -103,7 +118,10 @@ export async function verifyProtocolReceipt({rpc,policy,order,member,signature,n
  requireThat(pd.readUInt32LE(0)===3&&pd.readBigUInt64LE(4)===BigInt(policy.deploySlot),'program_upgrade_requires_review');
  requireThat((policy.upgradeAuthority==='none'&&pd[12]===0)||(pd[12]===1&&pub(pd,13)===policy.upgradeAuthority),'upgrade_authority_mismatch');
  const config=bytes(configAccount,policy.programId,42,'Config');
- requireThat(pub(config,8)===policy.authority&&config[40]===0&&config[41]===pda(policy.programId,'config',key(policy.authority))[1],'config_paused_or_mismatched');
+ // Historical finalized payments remain recoverable while new writes/payments
+ // are paused or the operational governor rotates; code/upgrade pins still hold.
+ requireThat(pub(config,8)===policy.authority&&config[40]<=1&&config[41]===pda(policy.programId,'config',key(policy.authority))[1],'config_paused_or_mismatched');
+ await verifyGovernance(rpc,policy,metadata.context.slot,false);
  const r=bytes(receiptAccount,policy.programId,163,'Receipt'),s=bytes(subAccount,policy.programId,82,'Subscription');
  requireThat(pub(r,8)===policy.config&&pub(r,40)===order.payer&&r.subarray(72,104).equals(a.invoice)&&pub(r,104)===order.mint&&r.readBigUInt64LE(136)===BigInt(order.amount_units)&&r[144]===a.plan&&r[145]===1&&r[162]===a.receiptBump,'receipt_order_mismatch');
  const paidAt=r.readBigInt64LE(146),expiresAt=r.readBigInt64LE(154),deadline=data.readBigInt64LE(50),nowSec=BigInt(Math.floor(now/1000));

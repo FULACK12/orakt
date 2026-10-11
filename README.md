@@ -1,6 +1,14 @@
 # ORAKT — Evidence-linked intelligence
 
-## v144: contract orders and evidence inclusion
+## v145: safer renewal, independent payment gate and authority recovery
+
+The new [Solana Devnet program](https://explorer.solana.com/address/2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4?cluster=devnet) is finalized and byte-matched to the SBPFv3 build. [Public evidence](contracts/solana/devnet-deployment-v145.json) records 24 Devnet checks, synthetic-token payments and unexpired-term renewal, duplicate rejection, guardian recovery and a final payment-OFF state. v144 remains preserved separately.
+
+New charging defaults OFF on-chain independently of publication. The server blocks overlapping legacy/member terms before payment preparation; authorized receipt reconciliation is separate from new checkout. Governance recovery requires nomination and successor acceptance, and revokes the old authority's administration without changing historical namespaces. The guardian remains privileged, not a timelock or multisig. No mainnet deployment or new production charging was enabled. Independent audit, production governance, legacy-term migration and operational reconciliation remain release gates; see the [contract boundaries](contracts/solana/README.md).
+
+Observed local validation: 14 Rust unit tests, 45 permission/provenance/recovery runtime checks, 27 payment runtime checks, 3 fixture tests, 173 focused website/rendered-page checks and a successful site build. These counts are not a claim of independent audit or that a subsequent GitHub Actions run has finished.
+
+## Historical v144: contract orders and evidence inclusion
 
 This update adds signed-wallet-bound contract orders, pinned-program transaction preparation and atomic replay-safe membership settlement. A unique finalized receipt/signature can be credited only once; retries do not add another month. Legacy SPL payments are isolated. Production contract checkout remains disabled pending reviewed deployment and real-network validation. The new Rust `verify_evidence` instruction checks a bounded Merkle inclusion proof, not truth or investment quality. SBPFv3 builds and separate Devnet-only preparation scripts are included. Preparing a program address is not deployment; generated test keys, test state and private member records are excluded from this repository. No mainnet deployment or expense is authorized by these source changes.
 

@@ -1,0 +1,238 @@
+{
+  "schema": "orakt-devnet-acceptance-v2",
+  "network": "solana:devnet",
+  "status": "deployed_and_smoke_tested",
+  "testOnly": true,
+  "productionEntitlements": false,
+  "independentSecurityAudit": false,
+  "programId": "2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4",
+  "programData": "Fs1eyJMkSkqjm4bxCqHGhnThivSBoy73trfqfVFey44W",
+  "config": "GVVAqqUP3haB8zCK8sQUJKSEn48kG7LPAUZYX2vb7nDQ",
+  "governance": "ctPJSWCaRhHx7hKDYqd38pfi8ZcGotET6Rchg1ZCyUA",
+  "guardian": "VbzMf4fsD3oMYgpYYA6ue9mnrRxB1PEhPJWPLBryN4m",
+  "paymentsEnabled": false,
+  "deploySlot": 509986463,
+  "upgradeAuthority": "BX8s5PSD7kyc3LiBc3nV9KEjfHCa8VHnpTPbrxCPx5ab",
+  "authorityNotice": "Disposable isolated test operator, not Phantom or production governance. All test actors are controlled by the same test operator; different-wallet review is not independent assurance.",
+  "sourceSha256": "a113fd23e6cb8e52916a83a40355a051e5069e6e6e3b9163f1ce7268dd656153",
+  "binarySha256": "e862879365cec6d55abe8774b99063b9cbab5e7c36ccc1ccbbe8f901b8fc90ef",
+  "binaryBytes": 408456,
+  "mints": {
+    "TEST_USDC": "HCZauD7RBKnpnShn8C4MYhoeX94r9vvquN33kWBaUzBf",
+    "TEST_USDT": "9ggmSh5eMB9sQVAc4mB1VpFZMKCVW3vpLf9kiRUB8c5S"
+  },
+  "tokenNotice": "TEST_USDC and TEST_USDT are synthetic Devnet mints, NOT issuer USDC/USDT, not redeemable, and not accepted for production memberships.",
+  "programExplorer": "https://explorer.solana.com/address/2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4?cluster=devnet",
+  "deployment": {
+    "programId": "2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4",
+    "signature": "3tYojetpsRbNxaow28A4pbmTm4PpWcX7G3Uf6Yf675pMzgsBDadtT2uRwEXmgTm92jnULxdFxVG2pjG4LKzfU1fw"
+  },
+  "verifiedAt": "2026-10-11T18:03:58.995Z",
+  "smokeCompletedAt": "2026-10-11T18:06:07.361Z",
+  "checks": [
+    "payments default off",
+    "report version and inclusion proof",
+    "intelligence version and inclusion proof",
+    "evidence-chain version and inclusion proof",
+    "factor version and inclusion proof",
+    "portfolio version and inclusion proof",
+    "ai-draft version and inclusion proof",
+    "six content kinds publish while payments disabled",
+    "direct purchase rejected while payment switch off",
+    "test-usdc exact transfer",
+    "test-usdc receipt and duplicate rejection (simulation)",
+    "test-usdt exact transfer",
+    "test-usdt receipt and duplicate rejection (simulation)",
+    "Research renewal adds one calendar month to unexpired term; old receipt immutable",
+    "separate-wallet review, same test operator custody",
+    "retraction preserves original record",
+    "two-signature 24-hour trial proof, no web entitlement",
+    "operator pause and resume",
+    "stranger cannot propose recovery (simulation)",
+    "recovery disables payments",
+    "wrong successor rejected (simulation)",
+    "cannot enable payments during recovery (simulation)",
+    "old operator cannot administer (simulation)",
+    "guardian recovery and rotation completed; payments remain off"
+  ],
+  "evidence": {
+    "utf8": "ORAKT Devnet acceptance v145. SYNTHETIC evidence; not a company report, news item or investment claim.",
+    "leafHash": "f9e089a55babc3fb0a546f80d0b0bf3311e3d15b792e2a4b3cd5a205a5905fc8",
+    "root": "b10d630595480ea73ebda43e6e2fb9da4ccd65cfc78085cfb5885ee019d67690",
+    "proof": []
+  },
+  "records": {
+    "record_report": "6Yda7gKd5M6R3z3inLxnhm2GQep6um6uVjtksTMEsptW",
+    "record_intelligence": "4upUSRKC1SmVy86A16S6Sn3twL6bvp3B2cbNWnMekPPZ",
+    "record_evidence-chain": "GzZgW1k2gu4vGQHhdJUH2wRcaZHkXfhztpW5hdJiDCtL",
+    "record_factor": "BAmxtPXETD5MiP4u7owE6jh8hQYCK8ctAxqDAN45Pfd3",
+    "record_portfolio": "CgdiPkM5zFmcM8cCb3gHAgdawHDJT3uGBPV9BLmYNFKt",
+    "record_ai-draft": "HR31UiH4bkvFDk4SPRfX28TeGtxyArbcXNMJTzVwdJkc",
+    "receipt_test-usdc": "D5TKx4bYtGpJs2Uq2u1K3FPZPkdHNqB41DEDbBui9snj",
+    "subscription_test-usdc": "HfYWSwtVthC52o12ZuY4Evsm8pv8y8R6dRS93v78Gi4Q",
+    "receipt_test-usdt": "AUVz3DbarKukaTrk6dFbEJucY18t9zcHiJtdKWxVPRJt",
+    "subscription_test-usdt": "72dd5s4UrwACiXt6RNreBKZxURd6o1NhzFYWwfMDrncx",
+    "receipt_renewal": "4WgkPbbzxH2GHorGxTdfXNYcgGZpkJQ2kJhyY1AYmBm7",
+    "review": "3jKXRFB5fuWwrgtyB7oyvF97vPvmqKwguTcnR7ijo2gc",
+    "retraction": "EUUdjvdpdxAfRjGZNt1vVpSphTDMbWHq15q516jfpe65",
+    "trial": "33UNWNV64vDG6X89KwqGBWo8UQwUz8exnwWKkHjpzYBR"
+  },
+  "transactions": [
+    {
+      "label": "initialize",
+      "signature": "4qHxaCmeTxmawBaGch1oUkhL5U5EY5e62p9GDTN89E6p9eVMcSQNJoVz5boAPuNT2XaVQYoXvecXeWVFjMVqS5mW",
+      "explorer": "https://explorer.solana.com/tx/4qHxaCmeTxmawBaGch1oUkhL5U5EY5e62p9GDTN89E6p9eVMcSQNJoVz5boAPuNT2XaVQYoXvecXeWVFjMVqS5mW?cluster=devnet"
+    },
+    {
+      "label": "publisher-role",
+      "signature": "5nPVpaBEnUrXrLhqzW1ieteyfLdDzUYsx7RgXQ3QBnG5F2yWQn5CjgpZM59C6VAc45tpUrShGMdN31GtE7d4zu1b",
+      "explorer": "https://explorer.solana.com/tx/5nPVpaBEnUrXrLhqzW1ieteyfLdDzUYsx7RgXQ3QBnG5F2yWQn5CjgpZM59C6VAc45tpUrShGMdN31GtE7d4zu1b?cluster=devnet"
+    },
+    {
+      "label": "fund-test-buyer",
+      "signature": "49MksAAQKVWvX7hequM9jcSDhKMULLyUkSUS4UmG6E9L71MqrpawchkR6H4CEAea22RKMRJoSyaHABQQoysfws9V",
+      "explorer": "https://explorer.solana.com/tx/49MksAAQKVWvX7hequM9jcSDhKMULLyUkSUS4UmG6E9L71MqrpawchkR6H4CEAea22RKMRJoSyaHABQQoysfws9V?cluster=devnet"
+    },
+    {
+      "label": "registry-report",
+      "signature": "3DjgzmjtdPoJJR9fC4Zj181GoKVgrTwnnFpaNYsARKnCMat7hecnEm4XFHRyVtnRF9eJYwTeKgtumdTuxsP6ZcTa",
+      "explorer": "https://explorer.solana.com/tx/3DjgzmjtdPoJJR9fC4Zj181GoKVgrTwnnFpaNYsARKnCMat7hecnEm4XFHRyVtnRF9eJYwTeKgtumdTuxsP6ZcTa?cluster=devnet"
+    },
+    {
+      "label": "registry-intelligence",
+      "signature": "5y5YX7kErBE9ubBT5293iRegEase9hJ8YreJzoJ378J957bkyek8frwFGh4G95AbAqrnWSgoXeXTkHDdpMyubKZw",
+      "explorer": "https://explorer.solana.com/tx/5y5YX7kErBE9ubBT5293iRegEase9hJ8YreJzoJ378J957bkyek8frwFGh4G95AbAqrnWSgoXeXTkHDdpMyubKZw?cluster=devnet"
+    },
+    {
+      "label": "registry-evidence-chain",
+      "signature": "5GcboUEMwup8dcVcvsrN3RPFCQVsAJFCLTsuKAsGF9fe5qAxsa36xvtGy4mrfbGAQAjoQ7JkSnYhqCjqfeRszPxm",
+      "explorer": "https://explorer.solana.com/tx/5GcboUEMwup8dcVcvsrN3RPFCQVsAJFCLTsuKAsGF9fe5qAxsa36xvtGy4mrfbGAQAjoQ7JkSnYhqCjqfeRszPxm?cluster=devnet"
+    },
+    {
+      "label": "registry-factor",
+      "signature": "4woUSpbAPKvp87WatbS92pJUA9Ha8MsfskibUo8F4nwQxFaxMxoUtcyskFUjCHYeAMyL2A3mtdW1BYLwsRujLqd",
+      "explorer": "https://explorer.solana.com/tx/4woUSpbAPKvp87WatbS92pJUA9Ha8MsfskibUo8F4nwQxFaxMxoUtcyskFUjCHYeAMyL2A3mtdW1BYLwsRujLqd?cluster=devnet"
+    },
+    {
+      "label": "registry-portfolio",
+      "signature": "3M1Kt5gDNbbjx8Gd5pTceUhgvzPpYwWJ2aGwD7vLfQJ5kRSMKAiUdVko7UJpZPsGx2TRWBAdx7eHt8fiuzwSnXUS",
+      "explorer": "https://explorer.solana.com/tx/3M1Kt5gDNbbjx8Gd5pTceUhgvzPpYwWJ2aGwD7vLfQJ5kRSMKAiUdVko7UJpZPsGx2TRWBAdx7eHt8fiuzwSnXUS?cluster=devnet"
+    },
+    {
+      "label": "registry-ai-draft",
+      "signature": "5bfyVEF9e8mvRrFoXjhM73z8c4MdK1TiHXGqPvG2GSmwBpXELEucBacXEERpk3YXwy8dhZMn7Yw32TzmEQuvVJKR",
+      "explorer": "https://explorer.solana.com/tx/5bfyVEF9e8mvRrFoXjhM73z8c4MdK1TiHXGqPvG2GSmwBpXELEucBacXEERpk3YXwy8dhZMn7Yw32TzmEQuvVJKR?cluster=devnet"
+    },
+    {
+      "label": "mint-test-usdc",
+      "signature": "3mcxYESiAGJRCh4VKPJVEaNoJiA5GZRf1GtmY4dmZZ9DbCTxSw2w9XuLtdEorEod7LvaXLdXK72a1ZtPt4QHzRmp",
+      "explorer": "https://explorer.solana.com/tx/3mcxYESiAGJRCh4VKPJVEaNoJiA5GZRf1GtmY4dmZZ9DbCTxSw2w9XuLtdEorEod7LvaXLdXK72a1ZtPt4QHzRmp?cluster=devnet"
+    },
+    {
+      "label": "accounts-test-usdc",
+      "signature": "Ybyx6JjM8TQtQanooJhnfA8ARuphr3tXyv9KivZdY3BNPdXgywHrh4YhQDPcHfg3KL96QpdRqmBj3tUwu3ks6Vw",
+      "explorer": "https://explorer.solana.com/tx/Ybyx6JjM8TQtQanooJhnfA8ARuphr3tXyv9KivZdY3BNPdXgywHrh4YhQDPcHfg3KL96QpdRqmBj3tUwu3ks6Vw?cluster=devnet"
+    },
+    {
+      "label": "faucet-test-usdc",
+      "signature": "4QZLM4GC2DsHBtJJDHSd9MkNGZbY2CmtVfY7FPeuG9WChim7NgiUrvQmvxeVjKHwEGNfoyenSWYjzZYLtg7jC4UX",
+      "explorer": "https://explorer.solana.com/tx/4QZLM4GC2DsHBtJJDHSd9MkNGZbY2CmtVfY7FPeuG9WChim7NgiUrvQmvxeVjKHwEGNfoyenSWYjzZYLtg7jC4UX?cluster=devnet"
+    },
+    {
+      "label": "enable-test-payments",
+      "signature": "48xxAwkWGL5GKQpEfHw3pv3NaEMi3VVb6MAMg4UDBKmUiDVjnKpizCyLiT8Rcf1nc4BVmiSsDHUg5MSE9NCwbLxW",
+      "explorer": "https://explorer.solana.com/tx/48xxAwkWGL5GKQpEfHw3pv3NaEMi3VVb6MAMg4UDBKmUiDVjnKpizCyLiT8Rcf1nc4BVmiSsDHUg5MSE9NCwbLxW?cluster=devnet"
+    },
+    {
+      "label": "purchase-test-usdc",
+      "signature": "3kdpVWt1TvhE3zwdQoodNdfd6K3WkuGtRnCEfY5aZPN79cBXYq4dKYZtnTMWv2WmrKLPbWBWs8guQke9NUthiUUU",
+      "explorer": "https://explorer.solana.com/tx/3kdpVWt1TvhE3zwdQoodNdfd6K3WkuGtRnCEfY5aZPN79cBXYq4dKYZtnTMWv2WmrKLPbWBWs8guQke9NUthiUUU?cluster=devnet"
+    },
+    {
+      "label": "mint-test-usdt",
+      "signature": "DgWmEQfxaQGFoqPMCWaKZ1uPbHgD9mT8V8fHUer9iHkGR8dp1NZfFmTxPf9WKrjN5JdSA1WPRWRU4Gndwc2cFKQ",
+      "explorer": "https://explorer.solana.com/tx/DgWmEQfxaQGFoqPMCWaKZ1uPbHgD9mT8V8fHUer9iHkGR8dp1NZfFmTxPf9WKrjN5JdSA1WPRWRU4Gndwc2cFKQ?cluster=devnet"
+    },
+    {
+      "label": "accounts-test-usdt",
+      "signature": "4xy79ZBevEuwhB3UQ2Ph7VANziDckfQVPgc3j4EvyAgoyyYpRXCkDxetqHjrqVtZWBja8cJQ6v5i3qBnY27GBT7C",
+      "explorer": "https://explorer.solana.com/tx/4xy79ZBevEuwhB3UQ2Ph7VANziDckfQVPgc3j4EvyAgoyyYpRXCkDxetqHjrqVtZWBja8cJQ6v5i3qBnY27GBT7C?cluster=devnet"
+    },
+    {
+      "label": "faucet-test-usdt",
+      "signature": "3w2YZeyeuSrNix6RqZQHhj1V89gFWeaMQcCRVwxPxbgCKR6GwTz2e6NipbJQvUfxkSEP4si77cXPtpiTtfXBzTEa",
+      "explorer": "https://explorer.solana.com/tx/3w2YZeyeuSrNix6RqZQHhj1V89gFWeaMQcCRVwxPxbgCKR6GwTz2e6NipbJQvUfxkSEP4si77cXPtpiTtfXBzTEa?cluster=devnet"
+    },
+    {
+      "label": "purchase-test-usdt",
+      "signature": "PNuzUsu6jXgTtZ8oG3TW2sFqsCBZEn1PzAP7yLxJNquZxWxoWRyCwamjJsoABf7Yr5H2BCpGCrLC8ierxicAF3d",
+      "explorer": "https://explorer.solana.com/tx/PNuzUsu6jXgTtZ8oG3TW2sFqsCBZEn1PzAP7yLxJNquZxWxoWRyCwamjJsoABf7Yr5H2BCpGCrLC8ierxicAF3d?cluster=devnet"
+    },
+    {
+      "label": "renew-research",
+      "signature": "5VJBndJYThdCJqHPHPy47PiFHkzU3TzXbJhwrVteXiTf5o2ambBtARwdfjfmE4xLCsGA9Ffw1j2RFE2nHGxMAz6V",
+      "explorer": "https://explorer.solana.com/tx/5VJBndJYThdCJqHPHPy47PiFHkzU3TzXbJhwrVteXiTf5o2ambBtARwdfjfmE4xLCsGA9Ffw1j2RFE2nHGxMAz6V?cluster=devnet"
+    },
+    {
+      "label": "reviewer-role",
+      "signature": "2qjCyc4GBaNoUjqiW98PckSto7XmVm6HEcUQUivgwr1Hc1zarjRiRfZVcpo63GDUJTD7a9U2jhXSgAU98QH3C7Jx",
+      "explorer": "https://explorer.solana.com/tx/2qjCyc4GBaNoUjqiW98PckSto7XmVm6HEcUQUivgwr1Hc1zarjRiRfZVcpo63GDUJTD7a9U2jhXSgAU98QH3C7Jx?cluster=devnet"
+    },
+    {
+      "label": "attributed-review",
+      "signature": "5D2iJZ3ue4F6U2YbKzFPFAuUwg21QYkyrs6V4JHB83ma1uFiL18uqx8YudfDHMFLdwMjDZBAXc8BxLuKrzFzAfQ4",
+      "explorer": "https://explorer.solana.com/tx/5D2iJZ3ue4F6U2YbKzFPFAuUwg21QYkyrs6V4JHB83ma1uFiL18uqx8YudfDHMFLdwMjDZBAXc8BxLuKrzFzAfQ4?cluster=devnet"
+    },
+    {
+      "label": "retract-draft",
+      "signature": "4oAftJchAKu2RFgrAcwhNrhvJ7Fo9txVyXLpVx8JaUy8E4J5ubqZ4EoyuMeJHVGAv2qFAicnsTqn8P4umjUefBgb",
+      "explorer": "https://explorer.solana.com/tx/4oAftJchAKu2RFgrAcwhNrhvJ7Fo9txVyXLpVx8JaUy8E4J5ubqZ4EoyuMeJHVGAv2qFAicnsTqn8P4umjUefBgb?cluster=devnet"
+    },
+    {
+      "label": "consented-trial",
+      "signature": "4vcRUMZnqLDeMWD4Ud2Yqam2ZWJ7dTmnXNMguCB7xn8eHLgVnvZJxF27wCKahoA2uZBDM3yovbwyrXtXigrZbniv",
+      "explorer": "https://explorer.solana.com/tx/4vcRUMZnqLDeMWD4Ud2Yqam2ZWJ7dTmnXNMguCB7xn8eHLgVnvZJxF27wCKahoA2uZBDM3yovbwyrXtXigrZbniv?cluster=devnet"
+    },
+    {
+      "label": "pause",
+      "signature": "LCHZHAnthu8HjW8zXrhUiZFKutfx2WcC1JifBpN93u1YcfeoE2irUVarx6sAibX4BASd7e3TBXu3HwMFSeVCLC2",
+      "explorer": "https://explorer.solana.com/tx/LCHZHAnthu8HjW8zXrhUiZFKutfx2WcC1JifBpN93u1YcfeoE2irUVarx6sAibX4BASd7e3TBXu3HwMFSeVCLC2?cluster=devnet"
+    },
+    {
+      "label": "resume",
+      "signature": "2ifcUYjbeuSK76NpJBnUHsB5sSVPpsi1f2Bp3w1KrVQuUtCMVxKVAh8RTDq5bKMF8xMD3UxPt2Ct61SAW8KA5NsQ",
+      "explorer": "https://explorer.solana.com/tx/2ifcUYjbeuSK76NpJBnUHsB5sSVPpsi1f2Bp3w1KrVQuUtCMVxKVAh8RTDq5bKMF8xMD3UxPt2Ct61SAW8KA5NsQ?cluster=devnet"
+    },
+    {
+      "label": "guardian-proposal",
+      "signature": "3b4vQCKpyMQUX1r49VvEHLYa82JBk2uCD8rSon3rVgRpWyfC6vvqtnnTWHYkim1TQch15U6toS1TSqyzjozNNR56",
+      "explorer": "https://explorer.solana.com/tx/3b4vQCKpyMQUX1r49VvEHLYa82JBk2uCD8rSon3rVgRpWyfC6vvqtnnTWHYkim1TQch15U6toS1TSqyzjozNNR56?cluster=devnet"
+    },
+    {
+      "label": "successor-accepts",
+      "signature": "5m9a1351uEkFcC76Trx2boETgSayXH7paV5UAJqcNN9nZDMVHKbHk2Q9cAXnf621acGc4eBQsqfzuTKTUwi65yjS",
+      "explorer": "https://explorer.solana.com/tx/5m9a1351uEkFcC76Trx2boETgSayXH7paV5UAJqcNN9nZDMVHKbHk2Q9cAXnf621acGc4eBQsqfzuTKTUwi65yjS?cluster=devnet"
+    },
+    {
+      "label": "successor-admin",
+      "signature": "UZ9TWWTvXwxuUAKr1cB6LRevcjVdRQCxj5Ri5MLKik5qthekxvgbu2if2rfxNi9YPiqVKJ6j4dnufJkbKkRSZtx",
+      "explorer": "https://explorer.solana.com/tx/UZ9TWWTvXwxuUAKr1cB6LRevcjVdRQCxj5Ri5MLKik5qthekxvgbu2if2rfxNi9YPiqVKJ6j4dnufJkbKkRSZtx?cluster=devnet"
+    },
+    {
+      "label": "rotate-back-proposal",
+      "signature": "2ZEzk2gLnjv4mNserxZKT5fLfmjFG9Fw6KDXR87THRuxjz8jzpsm4Xny7hpPQH8NSca5Z5zdRHCmKNgjZ5Pi2wqW",
+      "explorer": "https://explorer.solana.com/tx/2ZEzk2gLnjv4mNserxZKT5fLfmjFG9Fw6KDXR87THRuxjz8jzpsm4Xny7hpPQH8NSca5Z5zdRHCmKNgjZ5Pi2wqW?cluster=devnet"
+    },
+    {
+      "label": "rotate-back-accept",
+      "signature": "RNPCa57U1n2GGi6Mv1c8XGVBdkoZXjbezsWsGhrJUahrEGYiLZjXZTj4BeR6oe614Wzm8rt6BjqfHus3HNer2DN",
+      "explorer": "https://explorer.solana.com/tx/RNPCa57U1n2GGi6Mv1c8XGVBdkoZXjbezsWsGhrJUahrEGYiLZjXZTj4BeR6oe614Wzm8rt6BjqfHus3HNer2DN?cluster=devnet"
+    }
+  ],
+  "remainingGates": [
+    "Independent security review",
+    "Mainnet deployment budget and owner signatures",
+    "Production governance and deployment pins",
+    "Production feature activation after separate acceptance"
+  ]
+}

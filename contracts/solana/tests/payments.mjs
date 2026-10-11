@@ -6,6 +6,7 @@ const rpc = new Connection('http://127.0.0.1:8899', 'confirmed');
 const pda = (...seeds) => PublicKey.findProgramAddressSync(seeds.map(s => typeof s === 'string' ? Buffer.from(s) : s instanceof PublicKey ? s.toBuffer() : s), program)[0];
 const meta = (pubkey, isSigner = false, isWritable = false) => ({pubkey: pubkey.publicKey ?? pubkey, isSigner, isWritable});
 const config = pda('config', authority.publicKey);
+const governance = pda('governance', config);
 const sub = plan => pda('subscription', config, buyer.publicKey, Buffer.from([plan]));
 const receipt = invoice => pda('receipt', config, buyer.publicKey, invoice);
 const integer = n => {const b = Buffer.alloc(8); b.writeBigInt64LE(BigInt(n)); return b;};
@@ -23,7 +24,7 @@ function purchase(o = {}) {
   return {plan, invoice, instruction: ix('purchase', [meta(buyer, true, true), meta(config), meta(o.mint ?? usdc),
     meta(o.source ?? accounts.source.address, false, true), meta(o.treasury ?? accounts.treasury.address, false, true),
     meta(o.subscription ?? sub(plan), false, true), meta(o.receipt ?? receipt(invoice), false, true),
-    meta(o.tokenProgram ?? token), meta(SystemProgram.programId)], Buffer.from([plan]), invoice, Buffer.from([o.months ?? 1]),
+    meta(o.tokenProgram ?? token), meta(SystemProgram.programId),meta(governance)], Buffer.from([plan]), invoice, Buffer.from([o.months ?? 1]),
     integer(o.amount ?? 79_000_000n), integer(o.deadline))};
 }
 async function state(p) {
@@ -90,7 +91,9 @@ for (const a of Object.values(accounts)) {
 for (const pair of [buyer, authority]) {
   const signature = await rpc.requestAirdrop(pair.publicKey, 2_000_000_000); await rpc.confirmTransaction(signature, 'confirmed');
 }
-await send(ix('initialize', [meta(authority, true, true), meta(config, false, true), meta(SystemProgram.programId)]), [authority]);
+await send(ix('initialize', [meta(authority, true, true), meta(config, false, true), meta(governance,false,true), meta(SystemProgram.programId)],buyer.publicKey.toBuffer()), [authority]);
+await rejected('payments default off', {}, {code:6010});
+await send(ix('set_payments_enabled',[meta(authority,true),meta(config,false,true),meta(governance,false,true)],Buffer.from([1])),[authority]);
 await rejected('underpayment', {amount: 78_000_000n}, {code: 6008});
 await rejected('overpayment quote mismatch', {amount: 80_000_000n}, {code: 6008});
 await rejected('expired quote', {deadline: await chainTime() - 1n}, {code: 6007});
@@ -116,6 +119,9 @@ const research = await read(sub(2));
 await accepted('USDT Signal purchase', {plan: 1, mint: usdt, source: accounts.sourceUsdt.address, treasury: accounts.treasuryUsdt.address, amount: 19_000_000n});
 assert.deepEqual(await read(sub(2)), research); check('lower plan cannot erase Research entitlement');
 await accepted('USDT Research 12-month renewal', {mint: usdt, source: accounts.sourceUsdt.address, treasury: accounts.treasuryUsdt.address, months: 12, amount: 948_000_000n});
-await send(ix('set_paused', [meta(authority, true), meta(config, false, true)], Buffer.from([1])), [authority]);
+await send(ix('set_payments_enabled',[meta(authority,true),meta(config,false,true),meta(governance,false,true)],Buffer.from([0])),[authority]);
+await rejected('payments independently disabled', {}, {code:6010});
+await send(ix('set_payments_enabled',[meta(authority,true),meta(config,false,true),meta(governance,false,true)],Buffer.from([1])),[authority]);
+await send(ix('set_paused', [meta(authority, true), meta(config, false, true),meta(governance,false,true)], Buffer.from([1])), [authority]);
 await rejected('paused configuration cannot charge', {}, {code: 6002});
 console.log(`PASS ${count} payment checks on synthetic local genesis. No public-chain deployment or real stablecoin transfers.`);

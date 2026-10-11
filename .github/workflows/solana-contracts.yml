@@ -34,6 +34,10 @@ jobs:
             bash tests/build-v3.sh
           '
       - name: Install locked JavaScript test client (no package lifecycle scripts)
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.0'
+      - name: Install JavaScript dependencies
         run: npm ci --ignore-scripts --prefix pilot-site
       - name: Execute local-validator provenance and permission tests (no public chain)
         run: |
@@ -42,6 +46,8 @@ jobs:
           node contracts/solana/tests/runtime.mjs
       - name: Execute stablecoin payment and rollback tests (synthetic local balances only)
         run: node contracts/solana/tests/payments.mjs
+      - name: Verify checkout, recovery and wallet binding (no public chain)
+        run: node --test pilot-site/tests/protocol-checkout.test.mjs pilot-site/tests/protocol-receipt.test.mjs pilot-site/tests/protocol-security-v145.test.mjs pilot-site/tests/account-wallet.test.mjs
       - name: Stop disposable validator
         if: always()
         run: docker stop orakt-validator || true

@@ -2,8 +2,8 @@
   "files": [
     {
       "path": ".github/workflows/solana-contracts.yml",
-      "bytes": 2833,
-      "sha256": "8e09fc09695c5936bc2187f1e94ffacdf285ddaf7a40376d518920a5c9f5fcc7"
+      "bytes": 3280,
+      "sha256": "1f6c1a262f44d8e6525415d274dff4ce5eac4a4719293153b31a567b96bdae52"
     },
     {
       "path": "backend/alembic/env.py",
@@ -2496,6 +2496,11 @@
       "sha256": "e0c07bcd1a9fece57dcdc2b837838f9703440913beea3c8d063b5eb5039dd510"
     },
     {
+      "path": "contracts/solana/devnet-deployment-v145.json",
+      "bytes": 13957,
+      "sha256": "e5ad3700fbdd73d799483d9a26b96e8ccafe68f2b4cf4579342735dd6efa1849"
+    },
+    {
       "path": "contracts/solana/devnet-deployment.json",
       "bytes": 10977,
       "sha256": "97dd7b40e3af1cdfbb55f1c7a9600de47303b3ddcac662bf81a38af693ba04a9"
@@ -2512,13 +2517,13 @@
     },
     {
       "path": "contracts/solana/programs/orakt-protocol/src/lib.rs",
-      "bytes": 17244,
-      "sha256": "982a71b41a9ea0024951dff4829a279bde76ccbedba22f11f0ae95419be36ebc"
+      "bytes": 21151,
+      "sha256": "12c438c30c57767d1d7dc5a548ee4b2c21cff065bc54474493eb2bb3ba12a6e6"
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 21272,
-      "sha256": "23bcd01db352fc977ad86c406bb06db4a20e3d8e5ca8cfc6dfcce8137e20c5b5"
+      "bytes": 24212,
+      "sha256": "cc72302f4dade89384132689b028b6f7209f0c1bc2e97ab415eb9aef67e95827"
     },
     {
       "path": "contracts/solana/tests/build-v3.sh",
@@ -2527,18 +2532,18 @@
     },
     {
       "path": "contracts/solana/tests/deploy-devnet.mjs",
-      "bytes": 4826,
-      "sha256": "3e231e22a63d989ea27bb1e144a91a29726de873e6e8b1063edbc93fcff70303"
+      "bytes": 5087,
+      "sha256": "d97f870dd75e255c249a23ce02786daab60a1ab549890b6fbe1c9476a7f53dd3"
     },
     {
       "path": "contracts/solana/tests/devnet-smoke.mjs",
-      "bytes": 11493,
-      "sha256": "6e6435e64cf913d98b916f1fc7ad32307311b9722e096249dfc3963fdd7b12b4"
+      "bytes": 16715,
+      "sha256": "ddea0aa69c3349e6b8ca9f713744121599507ca7451b67bee23288ceee4428ba"
     },
     {
       "path": "contracts/solana/tests/export-devnet-audit.mjs",
-      "bytes": 2673,
-      "sha256": "1a35f2006cd75f1266bc92911d18a4a147fbe8f528744f288ff1e99fdba07dfa"
+      "bytes": 2856,
+      "sha256": "d12b1dc33c16314e4d4c4a6f748fb049bfd8b1d62b18019446eb0ef2ee5d0698"
     },
     {
       "path": "contracts/solana/tests/payment-fixtures.mjs",
@@ -2552,23 +2557,28 @@
     },
     {
       "path": "contracts/solana/tests/payments.mjs",
-      "bytes": 9190,
-      "sha256": "f52980117f3ffd1e28dc91e99edb29a683cd4f0f871e306fd8df75db2415290f"
+      "bytes": 9894,
+      "sha256": "7f60022151964a208c4fe44977f58dbf44aa7b02c2aff832261dc308fdf18af1"
+    },
+    {
+      "path": "contracts/solana/tests/prepare-devnet-buffer.mjs",
+      "bytes": 4193,
+      "sha256": "657f9ea2ae88a85ee748b40280d73c7756eb86b2be9c843dd6154c950f0f29d1"
     },
     {
       "path": "contracts/solana/tests/prepare-devnet.mjs",
-      "bytes": 3197,
-      "sha256": "e973111a59abd7d61eba1fecfa0b7a05828ce1c5c50fb5cdf5035792ca075def"
+      "bytes": 3581,
+      "sha256": "71a36d07f6b297a9da9ea0f8ccae359977942fb181438cbfd035238d352a5ecd"
     },
     {
       "path": "contracts/solana/tests/resume-devnet-buffer.mjs",
-      "bytes": 4190,
-      "sha256": "d7b04ef9822f874d2c55b280d90ef924c9ec34c03d0d6c633ba9d53c50d6858c"
+      "bytes": 4278,
+      "sha256": "be4f7241e754290beaeef940d8468e8552e22716259320a8e3f7b4673ea8bc68"
     },
     {
       "path": "contracts/solana/tests/runtime.mjs",
-      "bytes": 6727,
-      "sha256": "2f356a3505d49c226a0105be0f6f6187e540617f677b7aa1262a8b345269ba6d"
+      "bytes": 8257,
+      "sha256": "81536a4ff301a0bc1398b6d218807e2b087210c9889d9c4157fa2fa8e3099ae8"
     },
     {
       "path": "contracts/solana/tests/start-validator.mjs",
@@ -2692,8 +2702,8 @@
     },
     {
       "path": "pilot-site/app/account/billing/page.tsx",
-      "bytes": 24136,
-      "sha256": "7381ee3d0c38b3ac9d7eef341c78dfb86ba29c9026479bfd5da0e302dcb58b8c"
+      "bytes": 24649,
+      "sha256": "03df9ff135e54513720bcdadfc430413dc5ff03e76964c7c5ea745e38b3e9f42"
     },
     {
       "path": "pilot-site/app/account/billing/payments.css",
@@ -3307,8 +3317,8 @@
     },
     {
       "path": "pilot-site/app/ProtocolSection.tsx",
-      "bytes": 7609,
-      "sha256": "20c82e81af84b9c937bc4bdbb8eaa2b2df2bfa24bf3fd70ab3685bac0ba4bf6a"
+      "bytes": 8092,
+      "sha256": "df97970c0a7dce525b91eb360f78340448cd2021273b483cf8347a8e81384c81"
     },
     {
       "path": "pilot-site/app/provenance-wallet.ts",
@@ -3323,7 +3333,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "52ae1501ecf7d3b47dacc29be9366a897f37ae36aac2d1bc6137b29215002257"
+      "sha256": "d795cf804486f34d739320d8882e765fc0f75796249264c000b35b635a908e45"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -4197,23 +4207,28 @@
     },
     {
       "path": "pilot-site/tests/protocol-checkout.test.mjs",
-      "bytes": 11248,
-      "sha256": "0523d89a0010a076963aa4befd8bed5544934d3106ba3b9df71f2c79fc84377c"
+      "bytes": 12191,
+      "sha256": "1c8c1b19fac5962c81cc7f16b4008351b072b2756118425f1b3e69fd66c8ccae"
     },
     {
       "path": "pilot-site/tests/protocol-disclosure.test.mjs",
-      "bytes": 1450,
-      "sha256": "a89a580d49fbb738c235e391123a31017dc1b9030b68eae4acd34be1a1df780b"
+      "bytes": 1520,
+      "sha256": "dd877fdf2f5cdeb559114cf220efb5857a5c692398af718cd21fc54b78a6f45f"
     },
     {
       "path": "pilot-site/tests/protocol-fixture.mjs",
-      "bytes": 4817,
-      "sha256": "5031138520e419f3eca8abf405cecc8cdfe85896172d9049a45a6e548e4d0a50"
+      "bytes": 5473,
+      "sha256": "cdbe6d751fbd377aa434533f3336ad564e331e510c4af82fe7e873cffb417cf6"
     },
     {
       "path": "pilot-site/tests/protocol-receipt.test.mjs",
-      "bytes": 12474,
-      "sha256": "85841647c8733185fbc4815788ca828af4814155021b253db3e146564d1e0382"
+      "bytes": 12480,
+      "sha256": "25f7b8ae264fee9d011f935a0100536c025f13408770b763c1575bdbc542ed07"
+    },
+    {
+      "path": "pilot-site/tests/protocol-security-v145.test.mjs",
+      "bytes": 3519,
+      "sha256": "2127f9d359e30491153f2942da3df58f2f6074df080c926702ff27232a8c7298"
     },
     {
       "path": "pilot-site/tests/public-copy.test.mjs",
@@ -4358,7 +4373,7 @@
     {
       "path": "pilot-site/worker/index.ts",
       "bytes": 31872,
-      "sha256": "d7ffcd8c71e46d90b85751288dfa673b2f3aab2b572748d0841b480368a08b58"
+      "sha256": "63783a5ca2f49e2ae78dcbb116f0c2e2b8cd38b82a35b1d044bcef7245db3dc9"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",
@@ -4422,13 +4437,13 @@
     },
     {
       "path": "pilot-site/worker/protocol-checkout.mjs",
-      "bytes": 14696,
-      "sha256": "5e5b94fd12571fa11a613ba35487bfd50831e53458e8880036b1b1423a30ce2c"
+      "bytes": 16481,
+      "sha256": "f74343b8e8187e7332ca90fe3f53bad81e0d05eab63fbb176827d4176307022d"
     },
     {
       "path": "pilot-site/worker/protocol-receipt.mjs",
-      "bytes": 12802,
-      "sha256": "2812fb3233bfa93f045bbf0ec49b8c0227ab41b503033dab222099493cca0afe"
+      "bytes": 14275,
+      "sha256": "d16357bf907c2ea71baeb60f3dbb082069cb7f27c2de5e4ea522228b503aa020"
     },
     {
       "path": "pilot-site/worker/publication.mjs",

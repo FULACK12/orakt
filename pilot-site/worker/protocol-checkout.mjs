@@ -4,7 +4,7 @@ import {randomUUID,createHash} from 'node:crypto';
 import {Buffer} from 'node:buffer';
 import {PublicKey,Transaction,TransactionInstruction,Keypair,SystemProgram} from '@solana/web3.js';
 import {MERCHANT,MINTS,PRICES} from './payment-policy.mjs';
-import {protocolCheckoutPolicy,receiptAddresses,verifyProtocolDeployment,verifyProtocolReceipt} from './protocol-receipt.mjs';
+import {protocolCheckoutPolicy,protocolReconcilePolicy,receiptAddresses,verifyProtocolDeployment,verifyProtocolReceipt} from './protocol-receipt.mjs';
 import {walletBinding} from './account-wallet.mjs';
 import {getAssociatedTokenAddressSync,TOKEN_PROGRAM_ID} from './solana-payment-instructions.mjs';
 const fail=(message,status=409)=>Object.assign(Error(message),{status});
@@ -13,6 +13,20 @@ const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const active=m=>m.status==='active'&&['signal','research'].includes(m.plan)&&['onchain_paid','manual_paid','complimentary'].includes(m.grant_kind);
 const hash=s=>createHash('sha256').update(s).digest();
 function requirePlan(m,plan,now){check(!(active(m)&&m.expires_at>now&&m.plan!==plan),'active_plan_changed_contact_support');}
+// Never charge to overwrite a longer legacy/manual/complimentary term. Migration
+// is explicit; this gate never fabricates chain credit or changes account grants.
+export async function requireRenewalCoverage(member,order,policy,rpc,now){
+ const a=receiptAddresses(policy,order);
+ const snap=await rpc('getAccountInfo',[a.subscription,{encoding:'base64',commitment:'finalized',minContextSlot:policy.deploySlot}]);
+ check(Number.isSafeInteger(snap?.context?.slot)&&snap.context.slot>=policy.deploySlot,'stale_subscription_snapshot');
+ let until=0;
+ if(snap.value){const account=snap.value;check(account.owner===policy.programId&&Array.isArray(account.data)&&account.data[1]==='base64','subscription_mismatch');
+  const s=Buffer.from(account.data[0],'base64');check(s.length===82&&s.subarray(0,8).equals(hash('account:Subscription').subarray(0,8))&&new PublicKey(s.subarray(8,40)).toBase58()===policy.config&&new PublicKey(s.subarray(40,72)).toBase58()===order.payer&&s[72]===a.plan&&s[81]===a.subscriptionBump,'subscription_mismatch');
+  const end=s.readBigInt64LE(73);check(end>=0n&&end<13569465600n,'subscription_mismatch');until=Number(end)*1000;
+ }
+ check(!(active(member)&&member.expires_at>now&&member.expires_at>until),'existing_term_requires_migration');
+ return Math.max(now,until);
+}
 function bindingGuard(binding){return binding.kind==='explicit_signature'
  ?{sql:'EXISTS (SELECT 1 FROM account_wallet_links WHERE address=? AND member_id=? AND active_member_key=? AND revoked_at IS NULL AND change_id=?)',args:[binding.address,binding.memberId,binding.memberId,binding.changeId]}
  :{sql:"EXISTS (SELECT 1 FROM member_accounts WHERE id=? AND provider='phantom' AND subject=?) AND NOT EXISTS (SELECT 1 FROM account_wallet_links WHERE address=?)",args:[binding.memberId,binding.address,binding.address]};}
@@ -20,7 +34,7 @@ export function purchaseInstruction(policy,order){
  const a=receiptAddresses(policy,order),payer=new PublicKey(order.payer),mint=new PublicKey(order.mint);
  const source=getAssociatedTokenAddressSync(mint,payer),treasury=getAssociatedTokenAddressSync(mint,new PublicKey(MERCHANT));
  const data=Buffer.alloc(58);hash('global:purchase').copy(data,0,0,8);data[8]=a.plan;a.invoice.copy(data,9);data[41]=1;data.writeBigUInt64LE(BigInt(order.amount_units),42);data.writeBigInt64LE(BigInt(Math.floor(order.expires_at/1000)),50);
- const keys=[{pubkey:payer,isSigner:true,isWritable:true},...[policy.config,order.mint,source.toBase58(),treasury.toBase58(),a.subscription,a.receipt,TOKEN_PROGRAM_ID.toBase58(),SystemProgram.programId.toBase58()].map((p,i)=>({pubkey:new PublicKey(p),isSigner:false,isWritable:[2,3,4,5].includes(i)}))];
+ const keys=[{pubkey:payer,isSigner:true,isWritable:true},...[policy.config,order.mint,source.toBase58(),treasury.toBase58(),a.subscription,a.receipt,TOKEN_PROGRAM_ID.toBase58(),SystemProgram.programId.toBase58(),policy.governance].map((p,i)=>({pubkey:new PublicKey(p),isSigner:false,isWritable:[2,3,4,5].includes(i)}))];
  return new TransactionInstruction({programId:new PublicKey(policy.programId),keys,data});
 }
 export async function prepareProtocolPayment(order,policy,rpc,now=Date.now()){
@@ -56,6 +70,7 @@ export async function createProtocolOrder(DB,policy,member,body,rpc,now){
  await verifyProtocolDeployment(rpc,policy);
  const order={id:randomUUID(),member_id:member.id,plan:body.plan,currency:body.currency,network:'solana:mainnet-beta',mint:MINTS[body.currency],recipient:MERCHANT,payer:body.payer,reference:Keypair.generate().publicKey.toBase58(),amount_units:String(BigInt(PRICES[body.plan])*1000000n),created_at:Math.floor(now/1000)*1000,expires_at:Math.floor(now/1000)*1000+600000,payment_method:'protocol',status:'pending'};
  const a=receiptAddresses(policy,order),guard=bindingGuard(binding);
+ await requireRenewalCoverage(current,order,policy,rpc,now);
  try{await DB.batch([
   DB.prepare(`INSERT INTO billing_orders (id,member_id,plan,currency,network,mint,recipient,payer,reference,amount_units,created_at,expires_at,active_member_key,payment_method) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,'protocol' WHERE EXISTS (SELECT 1 FROM member_accounts WHERE id=? AND revision=? AND status='active') AND ${guard.sql}`).bind(order.id,member.id,order.plan,order.currency,order.network,order.mint,order.recipient,order.payer,order.reference,order.amount_units,order.created_at,order.expires_at,member.id,member.id,current.revision,...guard.args),
   DB.prepare('INSERT INTO protocol_orders (order_id,policy_json,binding_json,invoice,receipt,subscription,created_at) SELECT ?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM billing_orders WHERE id=?)').bind(order.id,JSON.stringify(policy),JSON.stringify(binding),a.invoice.toString('hex'),a.receipt,a.subscription,now,order.id),
@@ -79,7 +94,7 @@ export async function settleProtocolOrder(DB,order,protocol,member,proof,now){
  return DB.prepare('SELECT * FROM billing_orders WHERE id=? AND member_id=?').bind(order.id,member.id).first();
 }
 export async function protocolCheckoutAction(path,body,env,member,rpc,now){
- const policy=protocolCheckoutPolicy(env);
+ const policy=path==='/api/billing/protocol/verify'?protocolReconcilePolicy(env):protocolCheckoutPolicy(env);
  if(path==='/api/billing/protocol/orders')return {order:await createProtocolOrder(env.DB,policy,member.row,body,rpc,now)};
  check(['/api/billing/protocol/prepare','/api/billing/protocol/verify'].includes(path),'method_not_allowed');
  check(typeof body.orderId==='string'&&body.orderId.length<=80&&Object.keys(body).every(k=>['orderId',...(path.endsWith('/verify')?['signature']:[])].includes(k)),'invalid_request');
@@ -88,7 +103,7 @@ export async function protocolCheckoutAction(path,body,env,member,rpc,now){
  const protocol=await env.DB.prepare('SELECT * FROM protocol_orders WHERE order_id=?').bind(order.id).first();check(protocol&&protocol.policy_json===JSON.stringify(policy),'protocol_order_configuration_changed');
  const current=await env.DB.prepare('SELECT * FROM member_accounts WHERE id=?').bind(member.row.id).first();check(current?.status==='active','account_suspended');
  const binding=await walletBinding(env.DB,current,order.payer);check(binding&&same(binding,JSON.parse(protocol.binding_json)),'wallet_binding_changed_retry');
- if(path.endsWith('/prepare')){requirePlan(current,order.plan,now);return prepareProtocolPayment(order,policy,rpc,now);}
+ if(path.endsWith('/prepare')){requirePlan(current,order.plan,now);await requireRenewalCoverage(current,order,policy,rpc,now);const prepared=await prepareProtocolPayment(order,policy,rpc,now);const fresh=await env.DB.prepare('SELECT * FROM member_accounts WHERE id=?').bind(current.id).first();check(fresh?.revision===current.revision&&fresh.status==='active'&&fresh.expires_at===current.expires_at,'account_changed_retry');return prepared;}
  if(body.signature!==undefined)check(typeof body.signature==='string'&&/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(body.signature),'invalid_signature');
  const candidates=body.signature?[body.signature]:(await rpc('getSignaturesForAddress',[protocol.receipt,{limit:5,commitment:'finalized'}])).filter(x=>!x.err).map(x=>x.signature);
  for(const signature of candidates){let proof;try{proof=await verifyProtocolReceipt({rpc,policy,order,member:current,signature,now,binding});}catch(e){if(e.message==='not_finalized_or_failed')continue;if(body.signature)throw e;continue;}

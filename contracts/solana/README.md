@@ -1,5 +1,18 @@
 # ORAKT Protocol — experimental Solana contracts
 
+## v145 security changes — Devnet acceptance passed
+
+The new [v145 Devnet program](https://explorer.solana.com/address/2NkTGAB6peUsDzCxZQsyzntpAeuNuoveXe2kEsUKQFa4?cluster=devnet) passed 24 public-chain checks, including real synthetic-token renewal and guardian recovery. [Immutable acceptance evidence](devnet-deployment-v145.json) records finalized signatures, binary/source hashes and the final payment-OFF state. Local verification passed 14 Rust tests, 45 provenance/recovery runtime checks, 27 synthetic payment runtime checks, 3 fixture tests and 173 focused website/rendering checks. Mainnet remains unauthorized; this is not independent assurance.
+
+- Governance is a separate, config-bound PDA. Payment authorization defaults OFF independently of publication and the global pause. A recovery proposal also disables payments.
+- Current authority or a privileged backup guardian may nominate a replacement. Only that replacement can accept; the old authority then loses administration of the existing namespace. Cancellation keeps payments OFF. This is NOT a timelock or multisig: a compromised guardian is a takeover risk, and production requires independently controlled governance and upgrade keys.
+- The server checks finalized subscription expiry before creating or preparing an order. A longer active manual, complimentary or legacy term is rejected with `existing_term_requires_migration`; no overlapping charge or invented on-chain credit is created. Explicit term migration is not implemented. Direct contract purchases cannot inspect off-chain grants; signed server quotes / migration policy remain a production review item.
+- `ORAKT_PROTOCOL_GOVERNOR` pins the current authority for NEW payments. `ORAKT_PROTOCOL_RECONCILE_ENABLED=true` can permit verification of already-paid orders while `ORAKT_PROTOCOL_CHECKOUT_ENABLED` remains false. Both default OFF; reconciliation cannot prepare, sign or broadcast a payment. Existing deployment/code pins, wallet binding, account suspension and once-only settlement remain enforced. Operational pauses and authority rotation do not invalidate a previously finalized receipt; a code upgrade still requires explicit review. Preserve the saved policy when reconciling old orders.
+- There is no always-on settlement indexer, automatic refund or automatic legacy-term migration. A retry or authorized operator reconciliation is still necessary after a service interruption.
+- New acceptance uses a NEW Devnet program; `devnet-deployment.json` preserves v144 evidence. No mainnet deployment or production fee activation is authorized for this change.
+
+For isolated public-chain acceptance dependencies: `npm install --prefix .tmp/orakt-devnet-v145/client --ignore-scripts @solana/spl-token@0.4.14 @solana/web3.js@1.98.4` from the repository root. Local disposable keys stay under ignored `.tmp`; never fund them on mainnet. Deployment scripts have a hardcoded Devnet genesis guard.
+
 **Status: v144 deployed and acceptance-tested on Solana Devnet; mainnet NOT enabled, NOT independently audited.**
 The program ID in `lib.rs` / `Anchor.toml` is a compilation fixture, not a live address. No program keypair, wallet secret, production account identifier, report body or licensed news text is included. Do not send funds to the fixture address.
 

@@ -7,8 +7,8 @@ import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 const workspace=fileURLToPath(new URL('../../../',import.meta.url));
-const root=resolve(workspace,'.tmp/orakt-devnet-v144'),cache=resolve(workspace,'.tmp/orakt-solana-build-cache');
-const require=createRequire(join(root,'client/package.json'));
+const root=resolve(workspace,'.tmp/orakt-devnet-v145'),cache=resolve(workspace,'.tmp/orakt-solana-build-cache');
+const require=createRequire(join(root,existsSync(join(root,'client/package.json'))?'client/package.json':'../orakt-devnet-v144/client/package.json'));
 const {Connection,PublicKey,Keypair}=require('@solana/web3.js');
 const manifest=JSON.parse(readFileSync(join(root,'manifest.json'))),binary=readFileSync(join(cache,'devnet-source/target/deploy/orakt_protocol.so'));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -26,10 +26,12 @@ if(!current){
   if(!existsSync(bufferFile))writeFileSync(bufferFile,JSON.stringify([...Keypair.generate().secretKey]),{flag:'wx',mode:0o600});
   const buffer=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(bufferFile)))).publicKey;
   const rent=await rpc.getMinimumBalanceForRentExemption(binary.length+45),balance=await rpc.getBalance(operator),bufferInfo=await rpc.getAccountInfo(buffer);
-  const needed=rent+(bufferInfo?0:rent)+20_000_000;
+  // Agave DeployWithMaxDataLen drains the buffer back to its payer BEFORE
+  // funding ProgramData (v4.3.0 loader source); do not double-count that rent.
+  const needed=Math.max(0,rent-(bufferInfo?.lamports||0))+20_000_000;
   assert.ok(balance>=needed,'Need rent + resumable buffer + fees in test SOL');
   assert.ok(needed<5_000_000_000,'Test budget cap');
-  const args=['run','--rm','--name','orakt-v144-devnet-deploy','-v',cache+':/cache:ro','-v',root+':/devnet:ro',
+  const args=['run','--rm','--name','orakt-v145-devnet-deploy','-v',cache+':/cache:ro','-v',root+':/devnet:ro',
     'solanafoundation/anchor@sha256:21ab8a16e19df4301a198d7a55ab2988549aa2d996e6b5ad229c1d95b9f2d326',
     '/cache/agave/solana-release/bin/solana','--url',process.env.ORAKT_DEVNET_LOOPBACK_PROXY==='1'?'http://host.docker.internal:4194':'https://api.devnet.solana.com','--keypair','/devnet/operator-keypair.json',
     '--commitment','finalized','program','deploy','/cache/devnet-source/target/deploy/orakt_protocol.so',
