@@ -45,16 +45,16 @@ export function decodeBase58(value,max=128){
  const tail=n?Buffer.from(n.toString(16).padStart(Math.ceil(n.toString(16).length/2)*2,'0'),'hex'):Buffer.alloc(0);
  return Buffer.concat([Buffer.alloc(value.match(/^1*/)[0].length),tail]);
 }
-function validateOrder(order,member,now){
+function validateOrder(order,member,now,binding){
  requireThat(order?.status==='pending'&&order.member_id===member?.id,'order_not_pending_or_owned');
  requireThat(member.status==='active','account_suspended');
- requireThat(member.provider==='phantom'&&member.subject===order.payer,'verified_wallet_binding_required');
+ requireThat(binding===undefined?(member.provider==='phantom'&&member.subject===order.payer):(binding?.memberId===member.id&&binding?.address===order.payer&&['explicit_signature','phantom_login'].includes(binding?.kind)),'verified_wallet_binding_required');
  requireThat(order.network==='solana:mainnet-beta'&&Object.hasOwn(PRICES,order.plan)&&MINTS[order.currency]===order.mint&&order.recipient===MERCHANT&&address(order.payer)&&order.payer!==MERCHANT,'invalid_protocol_order');
  requireThat(order.amount_units===String(BigInt(PRICES[order.plan])*1000000n)&&typeof order.id==='string'&&typeof order.reference==='string'&&address(order.reference),'invalid_protocol_order');
  requireThat(Number.isSafeInteger(now)&&Number.isSafeInteger(order.created_at)&&Number.isSafeInteger(order.expires_at)&&order.expires_at>order.created_at&&order.created_at<=now,'invalid_protocol_order');
 }
-export async function verifyProtocolReceipt({rpc,policy,order,member,signature,now=Date.now()}){
- validateOrder(order,member,now);
+export async function verifyProtocolReceipt({rpc,policy,order,member,signature,now=Date.now(),binding}){
+ validateOrder(order,member,now,binding);
  requireThat(decodeBase58(signature,88).length===64,'invalid_signature');
  requireThat(await rpc('getGenesisHash')===policy.genesis,'wrong_rpc_network');
  const status=(await rpc('getSignatureStatuses',[[signature],{searchTransactionHistory:true}]))?.value?.[0];

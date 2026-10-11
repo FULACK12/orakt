@@ -10,6 +10,7 @@ import {hormuzResearch} from './hormuz-research.mjs';
 import {assetLinks} from './asset-links.mjs';
 import {aaplxProfile,aaplxReport} from './aaplx-research.mjs';
 import {billingResponse} from './billing.mjs';
+import {accountWalletResponse,cancelWalletLink,clearWalletLinkCookie} from './account-wallet.mjs';
 import {hormuzChain} from '../app/chain-catalog';
 import {portfolioCatalog,portfolioStudy} from './portfolio-studies.mjs';
 import packedPortfolioPrices from '../generated/private-portfolio-prices.mjs';
@@ -102,7 +103,7 @@ const worker = {
     if(url.pathname==='/api/research-bridge')return await researchBridgeResponse(request,env);
 
     if (url.pathname === "/api/app-version" && request.method === "GET") {
-      return publicApiResponse(jsonResponse({version: "142"}));
+      return publicApiResponse(jsonResponse({version: "143"}));
     }
     if(url.pathname==='/api/public-stats'){
       if(request.method!=='GET')return publicApiResponse(jsonResponse({error:'method_not_allowed'},405));
@@ -172,6 +173,7 @@ const worker = {
     if(url.pathname==='/api/research-publications')return protectedResponse(await researchPublicationResponse(request,env,member));
     if(url.pathname==='/api/local-research')return protectedResponse(await localResearchResponse(request,env,member));
     if(url.pathname.startsWith('/api/billing/'))return protectedResponse(await billingResponse(request,env,member));
+    if(url.pathname==='/api/account/wallet')return protectedResponse(await accountWalletResponse(request,env,member));
     if(url.pathname==='/api/account/watchlist')return protectedResponse(await watchlistResponse(request,env,member,equityReportCatalog.companies));
     if(url.pathname==='/api/crypto-market')return protectedResponse(await cryptoMarketResponse(request));
     if(url.pathname==='/api/workspace-access'&&request.method==='GET')return protectedResponse(jsonResponse(workspaceAccess(member.access)));
@@ -389,10 +391,11 @@ async function accessSessionResponse(request:Request,env:Env,url:URL):Promise<Re
   }
   if(request.method!=="DELETE")return publicApiResponse(jsonResponse({error:"method_not_allowed"},405));
   if(request.headers.get("Origin")!==url.origin)return publicApiResponse(jsonResponse({error:"cross_origin_request"},403));
-  try{await revokeLocalSession(request,env);await revokeGoogleSession(request,env);await revokeWalletSession(request,env);}
+  try{await cancelWalletLink(request,env);await revokeLocalSession(request,env);await revokeGoogleSession(request,env);await revokeWalletSession(request,env);}
   catch{return publicApiResponse(jsonResponse({error:"logout_unavailable"},503));}
   const headers=new Headers({"Set-Cookie":"orakt_pilot_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax"});
   clearLocalCookies(headers);clearGoogleCookies(headers);clearWalletCookies(headers);
+  clearWalletLinkCookie(headers);
   return publicApiResponse(Response.json({ok:true,signOutHref:request.headers.get("oai-authenticated-user-id")&&request.headers.get("oai-authenticated-user-email")?"/signout-with-chatgpt?return_to=%2Faccess":"/access"},{headers}));
 }
 function sanitizeReturnTo(value:string):string{

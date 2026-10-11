@@ -1,4 +1,14 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+// Wallet ownership proofs are separate from sign-in identities and paid grants.
+export const accountWalletLinks=sqliteTable('account_wallet_links',{
+ address:text('address').primaryKey(),memberId:text('member_id').notNull(),activeMemberKey:text('active_member_key'),verifiedAt:integer('verified_at').notNull(),revokedAt:integer('revoked_at'),changeId:text('change_id').notNull(),
+},t=>[uniqueIndex('idx_wallet_link_active_member').on(t.activeMemberKey)]);
+export const accountWalletChallenges=sqliteTable('account_wallet_challenges',{
+ nonce:text('nonce').primaryKey(),browser:text('browser').notNull(),memberId:text('member_id').notNull(),memberRevision:integer('member_revision').notNull(),address:text('address').notNull(),action:text('action').notNull(),origin:text('origin').notNull(),message:text('message').notNull(),expiresAt:integer('expires_at').notNull(),expectedChangeId:text('expected_change_id').notNull(),
+},t=>[index('idx_account_wallet_challenge_browser').on(t.browser),index('idx_account_wallet_challenge_expiry').on(t.expiresAt)]);
+export const accountWalletAudit=sqliteTable('account_wallet_audit',{
+ id:text('id').primaryKey(),memberId:text('member_id').notNull(),address:text('address').notNull(),action:text('action').notNull(),message:text('message').notNull(),signature:text('signature').notNull(),createdAt:integer('created_at').notNull(),
+},t=>[index('idx_account_wallet_audit_member').on(t.memberId,t.createdAt)]);
 export const billingOrders=sqliteTable('billing_orders',{
  id:text('id').primaryKey(),memberId:text('member_id').notNull().references(()=>memberAccounts.id),
  plan:text('plan').notNull(),currency:text('currency').notNull(),network:text('network').notNull(),mint:text('mint').notNull(),recipient:text('recipient').notNull(),payer:text('payer').notNull(),reference:text('reference').notNull(),amountUnits:text('amount_units').notNull(),

@@ -4,6 +4,7 @@ import {PublicKey,Transaction,Keypair} from '@solana/web3.js';
 import {getAssociatedTokenAddressSync,createAssociatedTokenAccountIdempotentInstruction,createTransferCheckedInstruction,TOKEN_PROGRAM_ID} from './solana-payment-instructions.mjs';
 import {catalogFor,MERCHANT,MINTS,PRICES,addCalendarMonth,verifyStablecoinReceipt} from './payment-policy.mjs';
 import {protocolPolicy,protocolPreviewStatus,verifyProtocolReceipt} from './protocol-receipt.mjs';
+import {walletBinding} from './account-wallet.mjs';
 
 const MAINNET_GENESIS='5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
@@ -85,11 +86,13 @@ export async function billingResponse(request,env,member,dependencies={}){
    await rate(env,member.row.id,'protocol-preview',now,6);
    const order=await env.DB.prepare('SELECT * FROM billing_orders WHERE id = ?').bind(body.orderId).first();if(!order)throw fail('order_not_found',404);
    const target=await env.DB.prepare('SELECT * FROM member_accounts WHERE id = ?').bind(order.member_id).first();if(!target)throw fail('account_not_found',404);
-   const result=await verifyProtocolReceipt({rpc,policy,order,member:target,signature:body.signature,now});
+   const binding=await walletBinding(env.DB,target,order.payer);
+   const result=await verifyProtocolReceipt({rpc,policy,order,member:target,signature:body.signature,now,binding});
    const fresh=await env.DB.prepare('SELECT * FROM member_accounts WHERE id = ?').bind(order.member_id).first();
    if(!fresh||fresh.revision!==target.revision||fresh.status!=='active'||fresh.provider!==target.provider||fresh.subject!==target.subject)throw fail('account_changed_retry',409);
    const freshOrder=await env.DB.prepare('SELECT * FROM billing_orders WHERE id=?').bind(order.id).first();
    if(!freshOrder||JSON.stringify(freshOrder)!==JSON.stringify(order))throw fail('order_changed_retry',409);
+   if(JSON.stringify(await walletBinding(env.DB,fresh,order.payer))!==JSON.stringify(binding))throw fail('wallet_binding_changed_retry',409);
    return json({...result,notice:'preview_only_no_membership_or_payment_state_changed'});
   }
   if(url.pathname==='/api/billing/health'&&request.method==='GET'){

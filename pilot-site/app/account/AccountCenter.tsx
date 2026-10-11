@@ -5,6 +5,7 @@ import OraktBrandIcon from "../OraktBrandIcon";
 import ReleaseStatus from "../ReleaseStatus";
 import WatchlistEditor from '../WatchlistEditor';
 import AdminWalletPanel from './AdminWalletPanel';
+import WalletBindingPanel from './WalletBindingPanel';
 import ResearchTrial from './ResearchTrial';
 import useDisplayLanguage from "../useDisplayLanguage";
 import styles from "./account.module.css";
@@ -76,6 +77,7 @@ export default function AccountCenter(){
           <p className={styles.snapshot}>{zh?"新闻索引时间范围":"News index date range"}: {date(platform!.newsFrom)} — {date(platform!.newsTo)}</p>
         </section>
       </>}
+      {data?.account.membership.status==='active'&&<WalletBindingPanel key={data.account.provider+':'+data.account.accountId} language={language} disabled={loading||busy}/>}
       {data?.account.membership.status==='active'&&<WatchlistEditor language={language}/>}
       <div className={styles.settingsGrid} id="preferences">
         <section className={styles.settings}><h2>{zh?"显示偏好":"Display preferences"}</h2><p>{zh?"仅保存在当前浏览器。报告阅读主题与这里保持一致。":"Saved only in this browser. The report reader uses this theme too."}</p><fieldset><legend>{zh?"界面语言":"Language"}</legend><button aria-pressed={zh} onClick={()=>setLanguage("zh")}>中文</button><button aria-pressed={!zh} onClick={()=>setLanguage("en")}>English</button></fieldset><fieldset><legend>{zh?"阅读主题":"Reading theme"}</legend><button aria-pressed={theme==="light"} onClick={()=>chooseTheme("light")}>{zh?"浅色":"Light"}</button><button aria-pressed={theme==="dark"} onClick={()=>chooseTheme("dark")}>{zh?"深色":"Dark"}</button></fieldset></section>

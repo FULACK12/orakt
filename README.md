@@ -30,7 +30,11 @@ Subsequent [payment validation run 38143268037](https://github.com/FULACK12/orak
 
 ### v142 receipt-verification bridge
 
-The next website release adds an administrator-only, default-off **read-only** custom-contract receipt verifier. It checks pinned mainnet program/config/deployment/upgrade authority, finalized transaction and account snapshots, exact order/mint/payment fields and a proven Phantom login identity. It does not sign transactions, deploy contracts, settle an order or grant access. Existing checkout and trials are unchanged. The 55 new synthetic preview checks and the combined 99-test billing/identity/trial regression suite passed locally. Public-chain deployment, secure cross-provider wallet linking, an indexer and atomic custom-contract entitlement settlement remain outstanding. See `contracts/solana/README.md` for configuration and boundaries.
+The v142 release adds an administrator-only, default-off **read-only** custom-contract receipt verifier. It checks pinned mainnet program/config/deployment/upgrade authority, finalized transaction and account snapshots, exact order/mint/payment fields and proven wallet ownership. It does not sign transactions, deploy contracts, settle an order or grant access. Existing checkout and trials are unchanged. Its original 55 synthetic preview checks and 99-test focused suite passed locally. Public-chain deployment, an indexer and atomic custom-contract entitlement settlement remain outstanding. See `contracts/solana/README.md` for configuration and boundaries.
+
+### v143 explicit wallet ownership
+
+The account center now separates wallet connection, visible message review and explicit signing. Five-minute single-use Ed25519 proofs bind one wallet to an authenticated account, with same-origin/browser/account checks, atomic uniqueness, signed unlinking and private audit history. This is not login-provider merging, payment authorization, an automatic membership grant or an on-chain transaction. Wallets belonging to a separate Phantom account are rejected; lost-wallet recovery is not implemented. The receipt preview can use this durable binding and rejects an observed revocation during verification. All 161 focused/rendered tests passed locally; the 22 new binding tests use temporary keys and synthetic accounts. Chinese/English desktop and mobile layout checks used a read-only local fixture, not a real-wallet signing session. Production migrations add only new tables; existing grants and checkout are preserved.
 
 ### Experimental custom contracts (not deployed)
 

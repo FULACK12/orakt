@@ -2512,8 +2512,8 @@
     },
     {
       "path": "contracts/solana/README.md",
-      "bytes": 13058,
-      "sha256": "22bb0e2e20aacdb01bfa9c7cee1630c3706f21c0cf4d4e94a125dd51b3d0ecf7"
+      "bytes": 15658,
+      "sha256": "c12a6739ae466ae52b758a602b888e8e10009ae7e9f655e075b574ba4d350584"
     },
     {
       "path": "contracts/solana/tests/payment-fixtures.mjs",
@@ -2647,8 +2647,8 @@
     },
     {
       "path": "pilot-site/app/account/AccountCenter.tsx",
-      "bytes": 16427,
-      "sha256": "b0f8b804a15a8278beb6752db85eb23a3d5c30ad2d74f7c49fd1504ad8ea6957"
+      "bytes": 16656,
+      "sha256": "a88a1e8e93a7fb3d0b610c60d8507de9a57fbb7e5d8178e35e7ef03505088330"
     },
     {
       "path": "pilot-site/app/account/AdminWalletPanel.tsx",
@@ -2674,6 +2674,21 @@
       "path": "pilot-site/app/account/ResearchTrial.tsx",
       "bytes": 3686,
       "sha256": "dccf7b9a7804353207448f1997c2e88dad883af5c44d39b70d2479a54d08c47c"
+    },
+    {
+      "path": "pilot-site/app/account/wallet-binding.module.css",
+      "bytes": 2619,
+      "sha256": "547c753dd04595e30e2e0b926567cf49b14a494b49fddae974721433c009adef"
+    },
+    {
+      "path": "pilot-site/app/account/wallet-link-proof.mjs",
+      "bytes": 1358,
+      "sha256": "9ba941f4bea0f10e0c6d33f2345c225689ba649baa3138c3e45ac3d90b016205"
+    },
+    {
+      "path": "pilot-site/app/account/WalletBindingPanel.tsx",
+      "bytes": 9956,
+      "sha256": "1a18c5a6442c5bef895fce18505054e65b63aede6e64594ba88e2c403e37d9d1"
     },
     {
       "path": "pilot-site/app/admin/users/AdminUsers.tsx",
@@ -3273,7 +3288,7 @@
     {
       "path": "pilot-site/app/ReleaseStatus.tsx",
       "bytes": 1235,
-      "sha256": "a4778aaad758d08e2f0933e80af92ddc84e956f59d0a8ad3bee3ef836291f575"
+      "sha256": "f966ed39c7b4b82b1a545b5f639dc6149e840173414d73ba360e54b82977966d"
     },
     {
       "path": "pilot-site/app/report-chart-data.mjs",
@@ -3457,8 +3472,8 @@
     },
     {
       "path": "pilot-site/db/schema.ts",
-      "bytes": 10206,
-      "sha256": "a67d60958ba0acbff48cd6963ce51fe7195d6c072127f493f88fafa29e490653"
+      "bytes": 11650,
+      "sha256": "1aff63402972eade7cb783eece766ca96e392db5de4be02d139782e48c1387ce"
     },
     {
       "path": "pilot-site/drizzle/0000_solid_silver_fox.sql",
@@ -3541,6 +3556,11 @@
       "sha256": "aac34ad18e7e1939deb18a71c942d2af46e789749229d33a2b4a12afd574a9df"
     },
     {
+      "path": "pilot-site/drizzle/0016_dizzy_logan.sql",
+      "bytes": 1340,
+      "sha256": "1f38dd0b9e227c548a80928b830826a61cdc6608c030f514a4b546eda1f5af94"
+    },
+    {
       "path": "pilot-site/drizzle/meta/0000_snapshot.json",
       "bytes": 2969,
       "sha256": "f415100f98c81173df7efaaf153b7be7918e10ba117819fad650af13571931b4"
@@ -3621,9 +3641,14 @@
       "sha256": "bf0b7e5b96dd6705149412383e00b5f2a7b3fab37bd672941a0f0a3242830c75"
     },
     {
+      "path": "pilot-site/drizzle/meta/0016_snapshot.json",
+      "bytes": 49872,
+      "sha256": "2faaf6816695360d5c7be97e15d928c03ae885b1ff719a4263142cfdab71317b"
+    },
+    {
       "path": "pilot-site/drizzle/meta/_journal.json",
-      "bytes": 2350,
-      "sha256": "971a78f2970979c0332cae3138558ea7326e16f6b2bc3453270c605ef10f13c8"
+      "bytes": 2490,
+      "sha256": "82b3f82d8dc10941b8d2534f2645b45f1cf47e3bf17a247d412981c0c171b7c4"
     },
     {
       "path": "pilot-site/drizzle.config.ts",
@@ -3829,6 +3854,11 @@
       "path": "pilot-site/tests/account-trial-v140.test.mjs",
       "bytes": 7155,
       "sha256": "7dc7735f09d38ac76a98ada66931beb3b158689545c505a568ce33d329260892"
+    },
+    {
+      "path": "pilot-site/tests/account-wallet.test.mjs",
+      "bytes": 12070,
+      "sha256": "ca4c33aaa7fbb74461a5134790358685675ec1bd2f23e44f82dd5cd640cac273"
     },
     {
       "path": "pilot-site/tests/adbe-v112.test.mjs",
@@ -4127,8 +4157,8 @@
     },
     {
       "path": "pilot-site/tests/protocol-receipt.test.mjs",
-      "bytes": 15244,
-      "sha256": "66e551e5d6e2ef6f86153402665062a346c59396ca4fb9a6652c7d9b4d31f2e6"
+      "bytes": 16897,
+      "sha256": "5eafba6aa74c48a7bb553410d811784cb35d27c40ae5f7685c18bd4a7f789aa9"
     },
     {
       "path": "pilot-site/tests/public-copy.test.mjs",
@@ -4182,8 +4212,8 @@
     },
     {
       "path": "pilot-site/tests/wallet-auth.test.mjs",
-      "bytes": 9301,
-      "sha256": "55354d4af228df00161923c07e63deb529b71b640156774ba6b732876bdc94f0"
+      "bytes": 9434,
+      "sha256": "382bb1cc6b8f817d8eef2fc0f2ab14d353d29ef480901fde0900a1eefcc64549"
     },
     {
       "path": "pilot-site/tests/workspace-reading-v88.test.mjs",
@@ -4216,6 +4246,11 @@
       "sha256": "af2ff1a0f8db0675d92ece51bd1c0b7bfceba743a066436a4777e7667d725445"
     },
     {
+      "path": "pilot-site/worker/account-wallet.mjs",
+      "bytes": 9947,
+      "sha256": "5e774b73b0e5f4ee9e81380c0bf8c92f999603a7282dfbf162ecd68e70d40c54"
+    },
+    {
       "path": "pilot-site/worker/admin-wallet.mjs",
       "bytes": 1007,
       "sha256": "c3d3eb9aaaae96ba2d0d3c51ff33938777729c2521b246abdd323aaab48e568e"
@@ -4237,8 +4272,8 @@
     },
     {
       "path": "pilot-site/worker/billing.mjs",
-      "bytes": 16200,
-      "sha256": "a2242fc80b06135f2c91f39c06b86f643216158b629738b08dc39bacb133d870"
+      "bytes": 16467,
+      "sha256": "db1dff20802da4f264e1500436589115e0e4cfe49354b510ef9f64decc9be661"
     },
     {
       "path": "pilot-site/worker/crypto-market.mjs",
@@ -4267,8 +4302,8 @@
     },
     {
       "path": "pilot-site/worker/index.ts",
-      "bytes": 31584,
-      "sha256": "d265cb4580ba9622ec0d0be43e507e02723683d9d11079d9f7985edb0e27b986"
+      "bytes": 31872,
+      "sha256": "75e5c530e11c8d1c8ee47eeb6b67ee39a286fb18e1df246474024101049ff7b3"
     },
     {
       "path": "pilot-site/worker/intelligence-market.mjs",
@@ -4332,8 +4367,8 @@
     },
     {
       "path": "pilot-site/worker/protocol-receipt.mjs",
-      "bytes": 10504,
-      "sha256": "42573878a9e92de678f3289008522601bb6f4fd8bc372a18d34b77d4b87b5699"
+      "bytes": 10678,
+      "sha256": "1b0c51e2a16d1a2f9e13e818b0136fa77607eba77347f47c163e99fd2750761d"
     },
     {
       "path": "pilot-site/worker/publication.mjs",

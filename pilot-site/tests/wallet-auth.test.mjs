@@ -119,6 +119,7 @@ test("built worker accepts wallet read access but blocks product writes and revo
   assert.equal((await app.fetch(new Request(`${origin}/api/research-report-index`, {headers}), env, ctx)).status,200);
   for(const path of ["/api/research/generate", "/platform/research"]) assert.equal((await app.fetch(new Request(`${origin}${path}`, {method:"POST", headers}), env, ctx)).status,405);
   const logout = await app.fetch(new Request(`${origin}/api/access/session`, {method:"DELETE", headers:{...headers, Origin:origin}}), env, ctx);
-  assert.equal(logout.status,200); assert.equal(logout.headers.getSetCookie().length,7);
+  assert.equal(logout.status,200); assert.equal(logout.headers.getSetCookie().length,8);
+  assert.ok(logout.headers.getSetCookie().some(value=>value.startsWith('__Host-orakt_wallet_link=;')&&value.includes('Max-Age=0')));
   assert.equal(await readWalletSession(new Request(`${origin}/`, {headers}),secret,env.DB),null);
 });
