@@ -821,6 +821,11 @@
       "sha256": "9d3d4bf7bdf28ff86dba670bc9fba9c5fac2b0ed445a0df8bc63a26a3ab5ad9d"
     },
     {
+      "path": "backend/app/dossier_capital_ratio.py",
+      "bytes": 4231,
+      "sha256": "725d85d4773fa0c80a7b231baf68d36360c1ff74672722f1ee6d91e674b1ad78"
+    },
+    {
       "path": "backend/app/dossier_cash_attachment.py",
       "bytes": 5769,
       "sha256": "3775baeb15e1afeeb63697c5b64ac9c03024946ff910ba9d7ea06e260d6cb16f"
@@ -857,8 +862,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 41264,
-      "sha256": "af4eabc0894faa8128a286190ffff5d19bb29fc7bda0891ee0670fc0596d49ea"
+      "bytes": 41897,
+      "sha256": "dd2f3e2abed3aa5a2c7ce4299089a80ecf2bfbba47374be69bdf5f6a2b3a3ba3"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -1974,6 +1979,11 @@
       "path": "backend/tests/test_dossier_attempt_review.py",
       "bytes": 2093,
       "sha256": "7b0de6c1e24e9671cf06d0830b554204cd20c93ca07520f069bf77c7e940289e"
+    },
+    {
+      "path": "backend/tests/test_dossier_capital_ratio.py",
+      "bytes": 2204,
+      "sha256": "e7537d65a7578f9b5d711d811388a2cb5ab27d1feb0aaaf6e332c1248146a0ca"
     },
     {
       "path": "backend/tests/test_dossier_cash_attachment.py",

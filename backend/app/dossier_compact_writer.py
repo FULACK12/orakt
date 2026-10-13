@@ -126,6 +126,14 @@ def writer_view(packet,key,redact_numbers=True):
                 'componentColumns':['rowLabel','signedChangeDirection'],
                 'components':{k:[[r['label'],direction(r)] for r in rows] for k,rows in cash['components'].items()},
                 'scope':'Signed same-half-year comparisons only; opening/closing are balances, not flows. Increased negative total means less outflow, not economic improvement. Every component reconciles; do not borrow tax/OCI drivers.'}
+    if packet['ticker']=='CVX' and key=='capital':
+        ratios=[p for p in selected if p.get('contextRole')=='capital_ratio_with_formula_and_dates']
+        if ratios:
+            if len(ratios)!=1:raise ValueError('Ambiguous capital ratio context')
+            from app.dossier_capital_ratio import capital_ratio
+            ratio=capital_ratio(packet,ratios[0]['id'])
+            result['capitalRatioDefinition']={k:ratio[k] for k in ('sourceId','formula','cashScope','limitation')}
+            result['capitalRatioDefinition']['comparisonScope']='Reporting-period-end balance versus prior year end, not cumulative cash flows.'
     return result
 
 
