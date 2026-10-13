@@ -20,7 +20,8 @@ REF = re.compile(r'PASSAGE:[a-f0-9]{16}')
 def rules_digest():
     # Code changes invalidate receipts even if a version label was not bumped.
     files = ('report_quality.py', 'financial_period_ledger.py', 'dossier_semantic_guards.py',
-             'dossier_accounting_checks.py', 'company_history_dossier.py', 'report_numeric_guards.py')
+             'dossier_accounting_checks.py', 'company_history_dossier.py', 'report_numeric_guards.py',
+             'dossier_cash_components.py')
     return digest([Path(__file__).with_name(name).read_text(encoding='utf-8') for name in files])
 
 
@@ -60,7 +61,7 @@ def units(documents, packet):
                 # Include fact ledger and raw document: a changed table or original
                 # source invalidates prior acceptance, even if selected quotes match.
                 fingerprint = digest([shared,
-                    doc.get('factBindings'), doc.get('sourceMetadata'), text, source, pointer, lang])
+                    doc.get('factBindings'), doc.get('sourceMetadata'), doc.get('deterministicTables'), text, source, pointer, lang])
                 out.append({'id': location, 'chapter': key, 'pointer': pointer + '/' + lang,
                             'text': text, 'textSha256': digest(text), 'fingerprint': fingerprint,
                             'evidenceSha256': evidence_hash, 'sourceIds': sorted(refs),

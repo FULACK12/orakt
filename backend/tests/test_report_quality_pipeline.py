@@ -189,3 +189,15 @@ def test_evaluation_rejects_development_issuer_leakage():
     manifest={'rulesFrozenBeforeHoldout':True,'rulesetSha256':'locked','cases':[
         case,{'id':'train','split':'development','groupId':'AAPL','usedForTuning':True}]}
     assert 'issuer_leakage_from_development' in evaluate(manifest,[])['failures']
+
+
+def test_changed_derived_cash_table_invalidates_semantic_cache():
+    packet,docs=fixture()
+    docs[0]['deterministicTables']={'cashComponentsSha256':'old'}
+    cached=receipts(worklist(packet,docs))
+    docs[0]['deterministicTables']['cashComponentsSha256']='new'
+    revised=worklist(packet,docs,receipts=cached)
+    affected={docs[0]['chapter'],'valuation','factors','conclusion'}
+    assert all(u['state']=='pending' for u in revised['units'] if u['chapter'] in affected)
+    assert all(u['state']=='review_reused' for u in revised['units'] if u['chapter'] not in affected)
+    assert revised['reuseCount']>0  # Unchanged evidence must not trigger full re-review.

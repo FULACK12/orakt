@@ -108,6 +108,24 @@ def writer_view(packet,key,redact_numbers=True):
             'source':b['source'],'separateFxLineDisclosed':b['separateFxLineDisclosed'],
             'componentSigns':{k:'positive' if Decimal(v['value'])>0 else 'negative' if Decimal(v['value'])<0 else 'zero' for k,v in b['values'].items()},
             'cashBalanceDirection':'increase' if Decimal(b['balanceChange'])>0 else 'decrease' if Decimal(b['balanceChange'])<0 else 'unchanged'}
+    # Explicitly reviewed CVX layout only. Unknown issuers/layouts are not
+    # guessed. Reconciliation failures stop before a model call.
+    if packet['ticker']=='CVX' and key in {'financial','capital','conclusion'}:
+        statements=[p for p in selected if p.get('contextRole')=='complete_cash_statement_with_headers']
+        notes=[p for p in selected if p.get('contextRole')=='complete_cash_note_with_periods']
+        if statements and notes:
+            if len(statements)!=1 or len(notes)!=1:raise ValueError('Ambiguous cash context')
+            from app.dossier_cash_components import reconcile_components
+            cash=reconcile_components(packet,statements[0]['id'],notes[0]['id'])
+            direction=lambda row: 'increase' if Decimal(row['signedChange'])>0 else 'decrease' if Decimal(row['signedChange'])<0 else 'unchanged'
+            result['cashComponentDirections']={
+                'state':cash['state'],'periodType':'six_month_cumulative',
+                'sourceIds':[statements[0]['id'],notes[0]['id']],
+                'cashDefinition':cash['cashDefinition'],
+                'totals':{k:direction(v) for k,v in cash['totals'].items()},
+                'componentColumns':['rowLabel','signedChangeDirection'],
+                'components':{k:[[r['label'],direction(r)] for r in rows] for k,rows in cash['components'].items()},
+                'scope':'Signed same-half-year comparisons only; opening/closing are balances, not flows. Increased negative total means less outflow, not economic improvement. Every component reconciles; do not borrow tax/OCI drivers.'}
     return result
 
 

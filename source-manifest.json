@@ -831,6 +831,11 @@
       "sha256": "c157fe25225b10c1368c84c5eec85cb9cf438d039b653550255614cebbc0aeb4"
     },
     {
+      "path": "backend/app/dossier_cash_components.py",
+      "bytes": 8138,
+      "sha256": "9d1d119c85cd32beff3e553ae98adf00c7fc8275452ce4aa9dc775bf6a6667ff"
+    },
+    {
       "path": "backend/app/dossier_cash_context.py",
       "bytes": 3033,
       "sha256": "e5e6462ad475a3909df001440657ef95314a9c65ecca5166bdc07971410224a1"
@@ -852,8 +857,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 39666,
-      "sha256": "0d6819d86b69ec55497a1d544f387dd2542c39e8a4955075aaa7f7e2f25abfe7"
+      "bytes": 41264,
+      "sha256": "af4eabc0894faa8128a286190ffff5d19bb29fc7bda0891ee0670fc0596d49ea"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -1417,8 +1422,8 @@
     },
     {
       "path": "backend/app/report_quality.py",
-      "bytes": 16527,
-      "sha256": "6a0db929bc6e693adfbfa000339a02c958fdb9844a7566fb70584e45d7c8e5c2"
+      "bytes": 16602,
+      "sha256": "6dcad0d102a51f98a331232feb7b15e4779cf94db1351e151cbbaea460479620"
     },
     {
       "path": "backend/app/report_rejections.py",
@@ -1981,6 +1986,11 @@
       "sha256": "54d5ef4a407ae06dcedb5352ea81b9ffe188a1f472550b4ef588fe2f8e2c1352"
     },
     {
+      "path": "backend/tests/test_dossier_cash_components.py",
+      "bytes": 3894,
+      "sha256": "b77e43fa98af0b24a1e8aff929210eaf38c752af05424fa5fecc9c44ae0ecadb"
+    },
+    {
       "path": "backend/tests/test_dossier_chapter_review.py",
       "bytes": 3209,
       "sha256": "cdceea406d3e522114bd1827b6efe60e2a1a8e0408a2f653f02c578547a2c204"
@@ -2422,8 +2432,8 @@
     },
     {
       "path": "backend/tests/test_report_quality_pipeline.py",
-      "bytes": 10181,
-      "sha256": "85f97e1d8415519ead37eb654999c3b3be121f5e1f383f75ed99a1a9d95d087b"
+      "bytes": 10852,
+      "sha256": "e9a7c44409610f271ee61a224d4516aceb02dc721a29aee4f607339aaf260c23"
     },
     {
       "path": "backend/tests/test_report_quality_trial.py",
