@@ -2476,6 +2476,11 @@
       "sha256": "400a9a20b6ebada57d59b86e4719729a0df31fc68dfb3ecd9b3a48c83fe916e9"
     },
     {
+      "path": "backend/tests/test_report_frozen_holdout_runner.py",
+      "bytes": 4379,
+      "sha256": "c1f3cce7cca52b1c791bbba9fe567d272297e272fd5b928c099ad189f1f4379f"
+    },
+    {
       "path": "backend/tests/test_report_numeric_guards.py",
       "bytes": 3670,
       "sha256": "61e26d6d913c24f486648a5c7c8b0edbd67b98086f6d1ea28fab33aad72afca2"
@@ -4734,6 +4739,11 @@
       "path": "pilot-site/worker/watchlist.mjs",
       "bytes": 2229,
       "sha256": "64c2bc0cb8193147d398eef21647e466eeda22b493ae7a7988043de7bcbfb847"
+    },
+    {
+      "path": "scripts/run_frozen_holdout.py",
+      "bytes": 8917,
+      "sha256": "b6199ad5d3febf8bf91554347eb49c405bb903def1bb44ccf2eb699db280ce18"
     }
   ],
   "notUploaded": true,
