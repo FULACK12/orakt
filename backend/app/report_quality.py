@@ -21,7 +21,7 @@ def rules_digest():
     # Code changes invalidate receipts even if a version label was not bumped.
     files = ('report_quality.py', 'financial_period_ledger.py', 'dossier_semantic_guards.py',
              'dossier_accounting_checks.py', 'company_history_dossier.py', 'report_numeric_guards.py',
-             'dossier_cash_components.py')
+             'dossier_cash_components.py', 'report_metric_guards.py')
     return digest([Path(__file__).with_name(name).read_text(encoding='utf-8') for name in files])
 
 
@@ -185,6 +185,8 @@ def check(packet, documents, *, complete=False):
             add('placeholder', u['id'])
     from app.report_numeric_guards import check as numeric_checks
     findings.extend(numeric_checks(packet, documents))
+    from app.report_metric_guards import check as metric_checks
+    findings.extend(metric_checks(packet, documents))
     return {'version': RULESET, 'findings': findings, 'identicalDuplicateFacts':identical_duplicates,
             'deterministicPassed': not findings,
             'semanticApproval': False, 'state': 'checks_failed' if findings else 'semantic_review_pending'}

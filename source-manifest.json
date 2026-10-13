@@ -1406,6 +1406,11 @@
       "sha256": "a84ac29b1a5930c76eb15276f57b7fd30ab801ad2ea1bfcc08838d918610c378"
     },
     {
+      "path": "backend/app/report_metric_guards.py",
+      "bytes": 4683,
+      "sha256": "867c567859fee90338799f119b012f2dad672496c9970274a88d438bb9b1b481"
+    },
+    {
       "path": "backend/app/report_numeric_guards.py",
       "bytes": 8165,
       "sha256": "4db161b46e8ea668e21a7b48ee753eb3d29a428e298ac49fcb44a9462422e1d3"
@@ -1447,8 +1452,8 @@
     },
     {
       "path": "backend/app/report_quality.py",
-      "bytes": 16602,
-      "sha256": "6dcad0d102a51f98a331232feb7b15e4779cf94db1351e151cbbaea460479620"
+      "bytes": 16747,
+      "sha256": "5d6c3d4487bf85cfffd4a0168d4c6b33d5c1e8987d6e264a1d471e301079e961"
     },
     {
       "path": "backend/app/report_rejections.py",
@@ -2479,6 +2484,11 @@
       "path": "backend/tests/test_report_frozen_holdout_runner.py",
       "bytes": 4379,
       "sha256": "c1f3cce7cca52b1c791bbba9fe567d272297e272fd5b928c099ad189f1f4379f"
+    },
+    {
+      "path": "backend/tests/test_report_metric_guards.py",
+      "bytes": 5135,
+      "sha256": "7c00cde6b7fa886ad2d7c01429d1f56034e445cd4cf0a8219733962982e5e21d"
     },
     {
       "path": "backend/tests/test_report_numeric_guards.py",
