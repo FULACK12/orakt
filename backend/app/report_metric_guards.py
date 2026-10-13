@@ -60,7 +60,7 @@ def check(packet, documents):
                 continue  # Existing quote/source validator reports this.
             loc = f"{doc['chapter']}/section/grounded_claims/{index}/statement"
             source = ps[pid]
-            retired = re.search(r'\bretired\b[^.]{0,70}\btreasury shares\b', source, re.I)
+            retired = re.search(r'\bretired\s+(?:\d[\d,.]*\s+)?(?:(?:million|billion)\s+)?(?:of\s+)?(?:its\s+)?treasury shares\b', source, re.I)
             repurchased = re.search(r'\brepurchased treasury shares\b', en, re.I)
             if (retired and repurchased and not CAUTION.search(en[:repurchased.end()])
                     and not re.search(r'\brepurchased\b', source, re.I)):

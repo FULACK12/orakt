@@ -1407,8 +1407,8 @@
     },
     {
       "path": "backend/app/report_metric_guards.py",
-      "bytes": 6942,
-      "sha256": "bb5a95c6ae7a64242b061ff5278e525fae38e897374c0cb6580ef497c25e89dd"
+      "bytes": 6996,
+      "sha256": "8e6ad11d4bab54bc7559b42886f944d2e246bf3bda0a26906debabfc28ad60c4"
     },
     {
       "path": "backend/app/report_numeric_guards.py",
@@ -2487,8 +2487,8 @@
     },
     {
       "path": "backend/tests/test_report_metric_guards.py",
-      "bytes": 6977,
-      "sha256": "bd9de137522c684c0ad09409910c84d4ad1e34f2ebc81ee9d42d5a54611e0e40"
+      "bytes": 7074,
+      "sha256": "3352235088dfb1f36169163db473b5a7a231e3c39479ee7b85eb027e7aaaae6c"
     },
     {
       "path": "backend/tests/test_report_numeric_guards.py",

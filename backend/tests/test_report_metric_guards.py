@@ -48,8 +48,9 @@ def test_retained_amd_operating_income_translation_located():
     assert f['relatedLocation'].endswith('/en')
 
 
-def test_treasury_retirement_is_not_a_new_repurchase():
-    source='During the quarter the company retired treasury shares. Stock Repurchase Program: total authority remains available.'
+@pytest.mark.parametrize('quantity',['','66.9 million of ','1,200 of its '])
+def test_treasury_retirement_is_not_a_new_repurchase(quantity):
+    source='During the quarter the company retired '+quantity+'treasury shares. Stock Repurchase Program: total authority remains available.'
     result=run('公司回购库存股。','The company repurchased treasury shares but did not explain why.',source)
     assert [f['code'] for f in result]==['treasury_retirement_not_repurchase']
     assert not run('公司注销库存股。','The company retired treasury shares.',source)
