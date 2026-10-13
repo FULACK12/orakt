@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import re
+import time
 from collections.abc import Callable
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
@@ -448,6 +449,7 @@ def run_research(
     resume_checkpoint: dict[str, Any] | None = None,
 ) -> ResearchInquiryView:
     """Build a local evidence pack and ask the configured local model."""
+    usage_started = time.monotonic()
     runtime = settings or get_settings()
     resume = _usable_research_resume_checkpoint(
         resume_checkpoint,
@@ -969,6 +971,9 @@ def run_research(
     )
     row.question = result.question
     row.result = result.model_dump(mode="json")
+    evidence.setdefault('_reportUsage', {})['runWallSeconds'] = round(time.monotonic()-usage_started, 3)
+    evidence['_reportUsage']['scope'] = 'This run and retained main local research calls only; planning, external review and prior resumes may be unmetered.'
+    evidence['_reportUsage']['codexTokens'] = None
     row.evidence_snapshot = dict(evidence)
     if stored_review is not None:
         row.chatgpt_review = stored_review.model_dump(mode="json")
@@ -3753,6 +3758,9 @@ def _call_local_research_model(
         }
     last_error: Exception | None = None
     for _ in range(max_attempts or settings.llm_max_attempts):
+        attempt_started = time.monotonic()
+        usage_raw = None
+        usage_outcome = 'failed'
         try:
             with httpx.Client(
                 base_url=str(settings.llm_base_url).rstrip("/"),
@@ -3762,13 +3770,16 @@ def _call_local_research_model(
                 response = client.post(endpoint, json=payload)
                 response.raise_for_status()
             data = response.json()
+            usage_raw = data
             content = (
                 data["message"]["content"]
                 if settings.llm_provider == "ollama"
                 else data["choices"][0]["message"]["content"]
             )
             result = _validated_research_content(content)
-            return _sanitize_research_result(result, evidence=evidence)
+            sanitized = _sanitize_research_result(result, evidence=evidence)
+            usage_outcome = 'validated_local_draft'
+            return sanitized
         except httpx.TimeoutException as exc:
             # A timed-out generation can keep consuming the local runner briefly.
             # Reissuing the same large report immediately doubles compute without
@@ -3795,6 +3806,17 @@ def _call_local_research_model(
                     ),
                 },
             ]
+        finally:
+            raw_counts = usage_raw or {}
+            evidence.setdefault('_reportUsage', {}).setdefault('localCalls', []).append({
+                'model':settings.llm_model, 'outcome':usage_outcome,
+                'at':datetime.now(UTC).isoformat(),
+                'inputTokens':raw_counts.get('prompt_eval_count'),
+                'outputTokens':raw_counts.get('eval_count'),
+                'wallSeconds':round(time.monotonic()-attempt_started,3),
+                'modelSeconds':raw_counts['total_duration']/1e9 if isinstance(raw_counts.get('total_duration'),int) else None,
+                'unknownCountersAreNotZero':True,
+            })
     detail = (
         f"{type(last_error).__name__}: {str(last_error)[:1_200]}"
         if last_error is not None

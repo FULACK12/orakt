@@ -46,3 +46,4 @@ def test_context_overflow_rejected_before_network(monkeypatch):
     with pytest.raises(ValueError,match='context budget'):
         generate('http://local.test',{'messages':[{'role':'user','content':'证据'*20000}]},lambda p:None,saved.append)
     assert saved[0]['complete'] is False
+    assert saved[0]['oraktInput']['networkStarted'] is False

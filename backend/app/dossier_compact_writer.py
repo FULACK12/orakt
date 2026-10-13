@@ -54,12 +54,24 @@ def writer_view(packet,key,redact_numbers=True):
     for p in packet.get('chapter_passages',{}).get(key,[]):
         if p['id'] in packet.get('cash_context_ids',[])+packet.get('accounting_transition_ids',[])+packet.get('earnings_context_ids',[])+packet.get('review_context_ids',[]) and p not in selected:
             selected.append(p);selection.append({'id':p['id'],'reason':'required_same_filing_context'})
+    explicit=packet.get('review_chapter_selection',{}).get(key)
+    if explicit is not None:
+        originals={p['id']:p for p in packet['chapter_passages'][key]}
+        if len(set(explicit))<2 or len(set(explicit))!=len(explicit) or not set(explicit)<=originals.keys():
+            raise ValueError('Invalid explicit reviewed chapter evidence selection')
+        required=set(packet.get('cash_context_ids',[])+packet.get('accounting_transition_ids',[])+packet.get('earnings_context_ids',[])) & originals.keys()
+        if not required<=set(explicit):raise ValueError('Explicit selection omits mandatory accounting context')
+        selected=[originals[pid] for pid in explicit]
+        selection=[{'id':pid,'reason':'explicit_bounded_review_selection'} for pid in explicit]
     def redact(text):
         # Protect exact source-attested technical names; dates/amounts are not terms.
         chunks=re.split('('+'|'.join(re.escape(t) for t in terms)+')',text) if terms else [text]
-        return ''.join(s if s in terms else mask_financial_numbers(s) for s in chunks)
+        # Same masking semantics with a shorter, already rejected output marker.
+        # Large tables otherwise expand dramatically merely by hiding numbers.
+        return ''.join(s if s in terms else mask_financial_numbers(s).replace('[value in source table]','[quantity]') for s in chunks)
     result={'company':packet['ticker'],'chapter':key,
         'passages':[{'id':p['id'],'qualitative_view':redact(p['text']) if redact_numbers else p['text'],
+                     'originalCharacterCount':len(p['text']),
                      'periodContext':period_hints(p['text'],packet),
                      'originalContainsQuantities':bool(re.search(r'\d',p['text'])),
                      'quantityPolicy':'Amounts remain in original quote; masking is not missing disclosure.' if redact_numbers else 'Original amounts and dates are supplied; numerical output belongs in verified tables.'} for p in selected],
@@ -75,6 +87,18 @@ def writer_view(packet,key,redact_numbers=True):
     result['segmentFinancialObservations']=segment_observations(packet['financial_ledger'])
     from app.dossier_earnings_context import earnings_observations
     result['nonOperatingIncomeObservations']=earnings_observations(packet)
+    # Direct deterministic signs, with scope and periods, not model-generated
+    # interpretations. Negative cash adjustments are not negative revenue.
+    cash_concepts={'NetCashProvidedByUsedInOperatingActivities','NetCashProvidedByUsedInInvestingActivities','NetCashProvidedByUsedInFinancingActivities'}
+    result['cashFlowObservations']=[{
+        'concept':c['concept'],'periodType':c['periodType'],
+        'currentPeriod':{k:c['current'].get(k) for k in ('period_start','period_end')},
+        'comparisonPeriod':{k:c['previous'].get(k) for k in ('period_start','period_end')},
+        'currentSign':sign(c['current']['value']),'comparisonSign':sign(c['previous']['value']),
+        'direction':c['direction'],'evidenceIds':c['evidence_refs'],
+        'scope':'Consolidated cash-flow category, not revenue or a cash balance; signed change is not a causal attribution.'}
+        for c in packet['financial_ledger']['comparisons'] if c['concept'] in cash_concepts
+        and c.get('comparisonBasis')=='same_duration_year_over_year' and not c['current'].get('dimensions')]
     if packet.get('verified_cash_source'):
         from app.dossier_cash_bridge import cash_bridge
         from decimal import Decimal
@@ -123,6 +147,21 @@ def prompt_view(view):
     representation, never selects away a segment, period, sign or source ID.
     """
     result=copy.deepcopy(view)
+    ps=result.get('passages',[])
+    if len(ps)>1 and all(isinstance(p.get('periodContext'),dict) for p in ps):
+        shared={k:v for k,v in ps[0]['periodContext'].items()
+                if all(p['periodContext'].get(k)==v and k in p['periodContext'] for p in ps)}
+        if shared:
+            result['passagePeriodContext']={'encoding':'Shared period fields apply to every passage; each passage retains its distinct fields.',
+                                            'sharedFields':shared}
+            for p in ps:
+                p['periodContext']={k:v for k,v in p['periodContext'].items() if k not in shared}
+        shared={k:ps[0][k] for k in ('quantityPolicy','originalContainsQuantities')
+                if k in ps[0] and all(p.get(k)==ps[0][k] for p in ps)}
+        if shared:
+            result['passageSharedFields']=shared
+            for p in ps:
+                for k in shared:p.pop(k,None)
     rows=result.get('segmentFinancialObservations',[])
     if len(rows)>1 and all(isinstance(row,dict) for row in rows):
         columns=list(rows[0])
@@ -147,9 +186,12 @@ def schema_for(view, *, constrain_numbers=False):
     schema['properties']['analysis']['properties']['en']['minLength']=800
     pair={'type':'object','additionalProperties':False,'required':['zh','en'],
           'properties':{'zh':{'type':'string'},'en':{'type':'string'}}}
+    eligible=[p['id'] for p in view['passages'] if p.get('originalCharacterCount') is None or 30<=p['originalCharacterCount']<=2200]
+    if all('originalCharacterCount' in p for p in view['passages']) and len(eligible)<2:
+        raise ValueError('Preflight: need two bounded original claim spans (30..2200 characters); full table contexts stay available for narrative support')
     schema['properties']['claims']={'type':'array','minItems':2,'maxItems':4,'items':{
         'type':'object','additionalProperties':False,'required':['passage_id','statement'],
-        'properties':{'passage_id':{'type':'string','enum':[p['id'] for p in view['passages']]},'statement':pair}}}
+        'properties':{'passage_id':{'type':'string','enum':eligible},'statement':pair}}}
     schema['required'].append('claims')
     # Optional experiment only: the AMD v26 trial repeated/truncated under this
     # decoding constraint. Never silently enable it for production batches.
@@ -243,8 +285,11 @@ def bind(draft,packet,key,view):
     return s,contexts
 
 
-def run(source,output,key, *, constrain_numbers=False, redact_numbers=False, reasoning=False):
+def run(source,output,key, *, constrain_numbers=False, redact_numbers=False, reasoning=False, max_attempts=2, rejection_root=None, model_connection=None):
     if output.exists():raise ValueError('Preserve prior compact pilot')
+    if not 1<=max_attempts<=2:raise ValueError('At most two model calls per chapter revision')
+    from app.report_rejections import guard, reject
+    if rejection_root is not None:guard(rejection_root,key)
     from app.orakt_history_queue import resource_gate
     reason=resource_gate()
     if reason:raise RuntimeError('Resource gate: '+reason)
@@ -259,6 +304,8 @@ For every paragraph select support_ids; do not type citation IDs into prose. Evi
 mechanism: begin 如果 / If, give a conditional, testable transmission. counterEvidence: a genuinely competing explanation or falsification condition. evidenceGaps: say 本次所选摘录 / selected excerpts, not 'the company never disclosed'. validationPlan: concrete company data to retrieve and what would support or reject the mechanism.
 Reported risks are not realized events. Revenue decline does not prove industry demand decline. Gross profit differs from gross margin. Quarterly, cumulative, annual and balance comparisons are distinct. Source omissions are not economic causes. No future knowledge, target price, unsupported ranking, invented supplier or validated alpha. JSON only.'''
     instruction+='\nChapter-specific scope: '+FOCUS.get(key,'Business and revenue drivers, only as disclosed.')
+    if key in {'financial','capital','conclusion'}:
+        instruction+='\nCash-flow attribution: a disclosed increase in pretax income is not an explanation of cash-flow growth or of tax-expense growth. Keep each source sentence subject and period. Noncash depreciation is added back in the indirect cash statement, not automatically an offset to operating cash flow. Different segment directions are heterogeneity, not contradictory disclosures. OCI pension entries do not prove an offset to upstream profit. Original table values exist even in a masked writing view. A deferred-tax adjustment alone is not an accounting-policy change. If no matched cash-flow attribution is supplied, discuss the disclosed cash-flow categories and conditional working-capital timing instead of borrowing earnings drivers.'
     if redact_numbers:
         instruction+='\nThe prose-only input masks numeric spans. Do not reconstruct amounts or copy placeholders. Use separately supplied source period labels only to preserve time attribution. Original unmodified quotations and exact financial comparisons remain separately attached to the report. Preserve the subject of every source paragraph: a segment/subsidiary result is not the consolidated company result. Management attribution must remain attributed. A missing independent causal test is not an absence of the disclosed management explanation.'
     instruction+='\nKnown audit regressions: dilution increases the share denominator and lowers EPS with earnings held constant; it is not EPS accretion. If remaining repurchase authority appears anywhere in the supplied passages, do not list it as undisclosed. Other-than-temporary impairment is a specific accounting concept, not a generic one-time loss. Passing automated checks never means a report is approved.'
@@ -275,11 +322,15 @@ Reported risks are not realized events. Revenue decline does not prove industry 
         instruction+='\nMANDATORY FACTOR DESIGN: mechanism must contain a named linear signal (线性因子) and a conditional nonlinear interaction (非线性交互), both specific to supplied operating evidence. validationPlan must state a broad-market benchmark, industry benchmark, disclosure lag, trading costs, non-overlapping out-of-sample windows, and forward validation. These are proposed tests, not measured alpha. Do not turn the chapter into a list of missing disclosures. If the source gives explicitQuarterLabels for forward guidance, preserve that horizon rather than saying no horizon was disclosed.'
     if view.get('verifiedCashReconciliation'):
         instruction+='\nThe original cash statement is already supplied and reconciled. In financial, capital and conclusion analysis, explicitly explain cumulative operating/investing/financing flows and the reconciled cash balance. Do not call this evidence missing. Masked quantities elsewhere are present in original sources, not absent disclosures. Capitalized development is excluded from current R&D expense; do not reverse its accounting direction.'
-    with get_session_factory()() as session,local_model_workload_lock(session) as acquired:
+    # A bounded serial batch may lend its already locked DB connection. The
+    # same workload lock is still checked; this is not a boolean bypass.
+    session_options = {'bind':model_connection} if model_connection is not None else {}
+    with get_session_factory()(**session_options) as session,local_model_workload_lock(session) as acquired:
         if not acquired:raise RuntimeError('Local model busy')
         write_json(output/'writer-view.json',view);error=''
         try:
-            for attempt in range(2):
+            for attempt in range(max_attempts):
+                if rejection_root is not None:guard(rejection_root,key)
                 def progress(p):
                     if (output/'pause').exists() or (output.parent/'pause').exists():raise InterruptedError('Safe pause requested')
                     write_json(output/'progress.json',{'ticker':packet['ticker'],'chapter':key,'attempt':attempt+1,'checkedAt':datetime.now(UTC).isoformat(),**p})
@@ -304,10 +355,33 @@ Reported risks are not realized events. Revenue decline does not prove industry 
                         'authorship':{'narrative':'local_model','groundedClaims':'local_model_unreviewed'},
                         'protocol':'masked-source-qualitative-v30' if redact_numbers else 'original-source-qualitative-v24','comparisonValidation':'deterministic, not model attestation',
                         'reasoningEnabled':reasoning,
+                        'generationResponse':{'done':raw.get('done'),'done_reason':raw.get('done_reason')},
                         'sourcePacketSha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+                    from app.report_quality import write_worklist
+                    write_worklist(output/'semantic-worklist.json',packet,
+                        [json.loads((output/'chapter.json').read_text(encoding='utf-8'))])
                     stage='content_review_pending';break
                 except ValueError as exc:
                     error=str(exc);stage='repair_required'
+                    # A first schema/numeric guard must not hide all the other
+                    # actionable errors and cause another blind full retry.
+                    diagnostic_findings=[]
+                    try:
+                        from app.report_rejections import retain_rejected_draft
+                        from app.report_quality import write_worklist
+                        rejected=retain_rejected_draft(raw,view,original,key)
+                        write_json(output/f'rejected-attempt-{attempt+1}-chapter.json',rejected)
+                        diagnostic=write_worklist(output/f'rejected-attempt-{attempt+1}-worklist.json',packet,[rejected])
+                        diagnostic_findings=diagnostic['checks']['findings']
+                    except (ValueError,KeyError,TypeError) as diagnostic_error:
+                        write_json(output/f'rejected-attempt-{attempt+1}-diagnostic-unavailable.json',
+                            {'reason':str(diagnostic_error)[:500],'rawRetained':True,'published':False})
+                    if rejection_root is not None:
+                        reject(rejection_root,source=source,candidate=output/f'attempt-{attempt+1}.json',
+                            chapter=key,phase='generation_validation',findings=[{'error':error},*diagnostic_findings],
+                            context_paths=[output/f'request-{attempt+1}.json',output/'writer-view.json'])
+                    if diagnostic_findings:
+                        error+=' Additional localized checks: '+json.dumps(diagnostic_findings[:8],ensure_ascii=False)
                     print(json.dumps({'attempt':attempt+1,'error':error}),flush=True)
             write_json(output/'progress.json',{'stage':stage,'error':error if stage=='repair_required' else None,
                 'elapsedSeconds':round(time.monotonic()-started,2),'checkedAt':datetime.now(UTC).isoformat(),'published':False})
@@ -315,6 +389,10 @@ Reported risks are not realized events. Revenue decline does not prove industry 
             write_json(output/'progress.json',{'stage':'safely_paused' if isinstance(exc,InterruptedError) else 'failed',
                 'errorType':type(exc).__name__,'error':str(exc)[:500],'elapsedSeconds':round(time.monotonic()-started,2),'checkedAt':datetime.now(UTC).isoformat(),'published':False})
             raise
+        finally:
+            from app.report_usage import write_usage
+            write_usage(output,ticker=packet['ticker'],chapter=key,
+                accession=packet.get('accession'),stageWallSeconds=round(time.monotonic()-started,3))
 
 
 if __name__=='__main__':

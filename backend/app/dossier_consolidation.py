@@ -125,6 +125,11 @@ def assemble(source, chapter_paths, cold_root, output):
     html=render(chapters,result)
     write_json(output/'source.json',original)
     write_json(output/'dossier.json',result)
+    from app.report_quality import write_worklist
+    from app.report_usage import stage_event
+    write_worklist(output/'semantic-worklist.json',packet,chapters,complete=True)
+    stage_event(output,'assembly',started,outcome='whole_report_review_pending',
+                identity={'ticker':packet['ticker'],'accession':packet['accession']})
     (output/'readable.html').write_text(html,encoding='utf-8')
     write_json(output/'manifest.json',{'ticker':packet['ticker'],'accession':packet['accession'],
         'dossierSha256':hashlib.sha256((output/'dossier.json').read_bytes()).hexdigest(),

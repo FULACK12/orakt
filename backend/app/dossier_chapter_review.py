@@ -64,7 +64,16 @@ def revise(chapter_path,review_path,source_path,output):
     # Paragraph references are authoritative after the reviewer edits prose;
     # retain model context separately rather than silently mislabel it current.
     result['modelEvidenceContext']=result.pop('evidenceContext',{})
+    # New reviews can supply pinpoint semantic decisions. Old reviews remain
+    # intact and are never silently upgraded to per-statement acceptance.
+    from app.report_quality import worklist, accept_receipts
+    from app.report_usage import save
+    plan=worklist(packet,[result])
+    receipts=accept_receipts(plan,review['semanticDecisions']) if review.get('semanticDecisions') else None
     write_json(output,result)
+    save(output.with_name(output.stem+'-semantic-worklist.json'),plan)
+    if receipts is not None:
+        save(output.with_name(output.stem+'-semantic-receipts.json'),receipts)
 
 
 if __name__=='__main__':

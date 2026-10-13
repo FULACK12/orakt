@@ -8,7 +8,7 @@ def repeated_tail(text):
 
 
 def generate(url,payload,progress,retain_partial):
-    started=time.monotonic();last=0;content='';thinking='';terminal=None
+    started=time.monotonic();last=0;content='';thinking='';terminal=None;network_started=False
     try:
         # UTF-8 bytes are a deliberately conservative upper bound for the
         # byte-level tokenizer, not a claim about actual evaluated tokens.
@@ -18,6 +18,7 @@ def generate(url,payload,progress,retain_partial):
             raise ValueError(f'Chapter input exceeds conservative context budget: {request_bytes} UTF-8 bytes; limit {context-4096}. Retrieve less evidence before retrying.')
         progress({'stage':'input_validated','inputBytes':request_bytes,'contextTokens':context,'truncationAllowed':False,'progressPercent':None})
         with httpx.Client(timeout=httpx.Timeout(180,connect=20),trust_env=False) as client:
+            network_started=True
             with client.stream('POST',url,json={**payload,'stream':True,'truncate':False}) as response:
                 response.raise_for_status()
                 for line in response.iter_lines():
@@ -33,7 +34,8 @@ def generate(url,payload,progress,retain_partial):
                         if repeated_tail(content) or repeated_tail(thinking):raise ValueError('Repetitive output detected; write distinct concise paragraphs, no repeated filler')
                     if part.get('done'):terminal=part;break
         if terminal is None:raise ValueError('Model stream ended without completion')
-        return {**terminal,'oraktInput':{'utf8Bytes':request_bytes,'contextTokens':context,'truncationAllowed':False},'message':{'role':'assistant','content':content,'thinking':thinking}}
+        return {**terminal,'oraktTiming':{'wallSeconds':round(time.monotonic()-started,3)},'oraktInput':{'utf8Bytes':request_bytes,'contextTokens':context,'truncationAllowed':False},'message':{'role':'assistant','content':content,'thinking':thinking}}
     except BaseException:
-        retain_partial({'message':{'content':content,'thinking':thinking},'complete':False,'elapsedSeconds':round(time.monotonic()-started)})
+        retain_partial({'message':{'content':content,'thinking':thinking},'complete':False,'elapsedSeconds':round(time.monotonic()-started),
+                        'oraktInput':{'networkStarted':network_started}})
         raise

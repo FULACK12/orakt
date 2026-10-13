@@ -6,6 +6,11 @@
       "sha256": "47477e5855db2721b39df84d4a640fc649f3a14e5fd5da5199a4a3f54cb51e90"
     },
     {
+      "path": "backend/alembic.ini",
+      "bytes": 581,
+      "sha256": "87eac25825857a4a100efcd65a09d5e863cd19cea2e51b5143f3d5126b1d525a"
+    },
+    {
       "path": "backend/alembic/env.py",
       "bytes": 2101,
       "sha256": "260ebf062b2aaa474b459568f694e1ca9badbac14844c8bf9dae1e1fcc1b87cd"
@@ -256,19 +261,9 @@
       "sha256": "f22d44e42565b1bb8bf6e14f8d3a972f0a5eb8503394630c0c7a36c4dfeb44d2"
     },
     {
-      "path": "backend/alembic.ini",
-      "bytes": 581,
-      "sha256": "87eac25825857a4a100efcd65a09d5e863cd19cea2e51b5143f3d5126b1d525a"
-    },
-    {
       "path": "backend/app/__init__.py",
       "bytes": 56,
       "sha256": "ae7da9d5a9bc1ff2e49f73d8985268667eec27e10cb3a6eabee373180ccbb2d1"
-    },
-    {
-      "path": "backend/app/a_share_disclosures.py",
-      "bytes": 24390,
-      "sha256": "c8b057608162ad7ccbdd905d738b276e2cd34d153248ad40872f039dd35f052d"
     },
     {
       "path": "backend/app/a_share_disclosures_cli.py",
@@ -276,19 +271,24 @@
       "sha256": "a78a5a227e3e6d414760dc9208cd97be1a6c5967ea417be354686156653ff2a0"
     },
     {
+      "path": "backend/app/a_share_disclosures.py",
+      "bytes": 24390,
+      "sha256": "c8b057608162ad7ccbdd905d738b276e2cd34d153248ad40872f039dd35f052d"
+    },
+    {
       "path": "backend/app/ai_status.py",
       "bytes": 13103,
       "sha256": "142a8355c382fd49232c5664668dc12a9ff8096d0a438b312e6bfed01a5488d1"
     },
     {
-      "path": "backend/app/alpha_vantage_listings.py",
-      "bytes": 12647,
-      "sha256": "6459bef73916c7f51fc7c019f1bf6ee8980f387865ee4158955cd0a35155cce3"
-    },
-    {
       "path": "backend/app/alpha_vantage_listings_cli.py",
       "bytes": 6606,
       "sha256": "2de23b5259d9f2a8b630d8592780c3754e930323ce45aaaf612cef8ffac4b402"
+    },
+    {
+      "path": "backend/app/alpha_vantage_listings.py",
+      "bytes": 12647,
+      "sha256": "6459bef73916c7f51fc7c019f1bf6ee8980f387865ee4158955cd0a35155cce3"
     },
     {
       "path": "backend/app/alpha_vantage_prices.py",
@@ -436,14 +436,14 @@
       "sha256": "b029df6352da962e2322147d15fe7179e7a4791538822eed846049e17b8bf9b8"
     },
     {
-      "path": "backend/app/china_equities.py",
-      "bytes": 28369,
-      "sha256": "b4ca3a5b4647de819568e318b12572b8edbcb607082643d9a90cfdd0ee6f3746"
-    },
-    {
       "path": "backend/app/china_equities_cli.py",
       "bytes": 2033,
       "sha256": "cf313f4b26280125e45fe827e0d8970a76e13c65d02b8e57079601b4004f97e5"
+    },
+    {
+      "path": "backend/app/china_equities.py",
+      "bytes": 28369,
+      "sha256": "b4ca3a5b4647de819568e318b12572b8edbcb607082643d9a90cfdd0ee6f3746"
     },
     {
       "path": "backend/app/cluster_jobs.py",
@@ -456,14 +456,14 @@
       "sha256": "d48e82422279a2ddaec8b5a99c193ef5d6a63e274dad93166733f1f358a6fcd5"
     },
     {
-      "path": "backend/app/cluster_review.py",
-      "bytes": 2023,
-      "sha256": "341df4ff6bf12676db15d55d180fabef3698a8d7ba9372a40f16cdd8e04865c7"
-    },
-    {
       "path": "backend/app/cluster_review_service.py",
       "bytes": 13237,
       "sha256": "949ae5a33d0835615b6e8f5bccc6424198a5ad4e3a66eb9e04303d630f176b06"
+    },
+    {
+      "path": "backend/app/cluster_review.py",
+      "bytes": 2023,
+      "sha256": "341df4ff6bf12676db15d55d180fabef3698a8d7ba9372a40f16cdd8e04865c7"
     },
     {
       "path": "backend/app/cluster_service.py",
@@ -491,14 +491,14 @@
       "sha256": "5fce9dce7906a2113a7e27457b86e2e18b7b19d916fbfd94b6710e5cc605209f"
     },
     {
-      "path": "backend/app/collectors/firms.py",
-      "bytes": 15673,
-      "sha256": "0a66b7d056236362dd7fd9257fd03f2d3270c002452d157a84c6880744e4fa3d"
-    },
-    {
       "path": "backend/app/collectors/firms_cli.py",
       "bytes": 2536,
       "sha256": "2ad10042ab953cb8059f6f302557b0e7f609163c9a47ce2b9f9f2d4ff1ee9b4e"
+    },
+    {
+      "path": "backend/app/collectors/firms.py",
+      "bytes": 15673,
+      "sha256": "0a66b7d056236362dd7fd9257fd03f2d3270c002452d157a84c6880744e4fa3d"
     },
     {
       "path": "backend/app/collectors/fulltext.py",
@@ -506,14 +506,14 @@
       "sha256": "266f6314b7e13d4287e9d3e2dd2a74b6a1c8e88f93676133fcc0c038bb8546e5"
     },
     {
-      "path": "backend/app/collectors/gdelt.py",
-      "bytes": 16675,
-      "sha256": "de464e6f0bac22b235650ea37fb6d1a8e9adc3a2781dc0188560af79c3ca7489"
-    },
-    {
       "path": "backend/app/collectors/gdelt_cli.py",
       "bytes": 9518,
       "sha256": "fbbe6fac203374e0322cc51b846ae09255860ed224487b4f173f0674e112cdaa"
+    },
+    {
+      "path": "backend/app/collectors/gdelt.py",
+      "bytes": 16675,
+      "sha256": "de464e6f0bac22b235650ea37fb6d1a8e9adc3a2781dc0188560af79c3ca7489"
     },
     {
       "path": "backend/app/collectors/rss.py",
@@ -531,24 +531,24 @@
       "sha256": "9c51c3e25952ec740f637c4d998e112c930a6502bc5465dcd01ff3f3e5388f92"
     },
     {
-      "path": "backend/app/collectors/ucdp.py",
-      "bytes": 14916,
-      "sha256": "40dc91b0c8c46e2546910b9c77ad774c0a43367eb11cb4248b25fc32b4ef7d1c"
-    },
-    {
       "path": "backend/app/collectors/ucdp_cli.py",
       "bytes": 3635,
       "sha256": "a46466ecf279c60c2a490306e88946e24fa89a09d674cec2acf8498754763b44"
     },
     {
-      "path": "backend/app/companies.py",
-      "bytes": 37300,
-      "sha256": "e868bcdddf43693bd644a002ff3482a1c22c40069abee2ae3e766d6261e2fd7e"
+      "path": "backend/app/collectors/ucdp.py",
+      "bytes": 14916,
+      "sha256": "40dc91b0c8c46e2546910b9c77ad774c0a43367eb11cb4248b25fc32b4ef7d1c"
     },
     {
       "path": "backend/app/companies_cli.py",
       "bytes": 4310,
       "sha256": "2f3675cad30edd0d336ccd690ece646b9efe0af6b6d8e4fc76200fb49b58b375"
+    },
+    {
+      "path": "backend/app/companies.py",
+      "bytes": 37300,
+      "sha256": "e868bcdddf43693bd644a002ff3482a1c22c40069abee2ae3e766d6261e2fd7e"
     },
     {
       "path": "backend/app/company_chart_export.py",
@@ -691,14 +691,14 @@
       "sha256": "f725466f61fc76eeb5345bd50066da9f6d5b2eade6f8d62bcd33899e250fd870"
     },
     {
-      "path": "backend/app/db/models/document.py",
-      "bytes": 2319,
-      "sha256": "9734d77de2b298a59ab2336c9bd32fdba92be6aa1d689c1e5006a18a91eb86c5"
-    },
-    {
       "path": "backend/app/db/models/document_analysis.py",
       "bytes": 1453,
       "sha256": "22425a974e3f131be657b1a959f3f15c891c7d58347df8051460d612c44b4f0a"
+    },
+    {
+      "path": "backend/app/db/models/document.py",
+      "bytes": 2319,
+      "sha256": "9734d77de2b298a59ab2336c9bd32fdba92be6aa1d689c1e5006a18a91eb86c5"
     },
     {
       "path": "backend/app/db/models/earnings_task.py",
@@ -837,8 +837,8 @@
     },
     {
       "path": "backend/app/dossier_chapter_review.py",
-      "bytes": 5044,
-      "sha256": "d8bd008b90af6f48f48d884bc19668b54ddf0b3595fb19749fdff6a5126dbf80"
+      "bytes": 5616,
+      "sha256": "bb977dee8f40852680fddd9c07debe8cad17a302f09fa8000f1d54789e1aac69"
     },
     {
       "path": "backend/app/dossier_claim_pilot.py",
@@ -852,13 +852,13 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 32697,
-      "sha256": "4488f707c27422b768082ec8323f5f210f75b0b2d799750ac0667bd321196074"
+      "bytes": 39666,
+      "sha256": "0d6819d86b69ec55497a1d544f387dd2542c39e8a4955075aaa7f7e2f25abfe7"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
-      "bytes": 12118,
-      "sha256": "c4994709bdf793f9bd85f5d529e3782004d73f95f2ef4589593c25fac105ddbe"
+      "bytes": 12462,
+      "sha256": "29e14eb2d1487e2eff024319020ba684253bffe4f1e2e3517fe3810af095ffc8"
     },
     {
       "path": "backend/app/dossier_corporate_actions.py",
@@ -907,8 +907,8 @@
     },
     {
       "path": "backend/app/dossier_model_stream.py",
-      "bytes": 2808,
-      "sha256": "3787bc4b440f781bb9b693f039a0a3945ad44e5e50bf61a38094a8228a18bc11"
+      "bytes": 3000,
+      "sha256": "ac1d2b959b661f4091b9971b90e2e39f107a9895f86ac8ddbea8d7b051eeea72"
     },
     {
       "path": "backend/app/dossier_passages.py",
@@ -937,8 +937,8 @@
     },
     {
       "path": "backend/app/dossier_review_context.py",
-      "bytes": 866,
-      "sha256": "6c74ab3e878e5a31296670236b252332ab6d75cd0051652db7a77114e0f9b74d"
+      "bytes": 4275,
+      "sha256": "e151b02040716e6da50699b6c0e0d171172b8daf9baf826ac033266de17bdc20"
     },
     {
       "path": "backend/app/dossier_reviewed_synthesis.py",
@@ -947,8 +947,8 @@
     },
     {
       "path": "backend/app/dossier_semantic_guards.py",
-      "bytes": 3915,
-      "sha256": "8bc730117f1a5732012f4bba8adf494760208d80b2217357260a927e4074eabc"
+      "bytes": 4581,
+      "sha256": "b28c552582889ed7f5042d4ce98d974417ae37f37a9fc1aa93e383ed5152f99e"
     },
     {
       "path": "backend/app/dossier_source_contract.py",
@@ -986,14 +986,14 @@
       "sha256": "625056bdfa4864c97669da1dd7f4f27fa2ab43212ce87e1bbb128d42fbf24306"
     },
     {
-      "path": "backend/app/earnings_tasks.py",
-      "bytes": 6565,
-      "sha256": "fa02681fa0c9c874e3c899730c60867437c573cbe68e814f2d60fcdd8da5a5e7"
-    },
-    {
       "path": "backend/app/earnings_tasks_cli.py",
       "bytes": 3760,
       "sha256": "3b3a4bd75bb2e7e2506c99d2f2f73be9cb009c8e45e279dc6d249f34d4ea54ac"
+    },
+    {
+      "path": "backend/app/earnings_tasks.py",
+      "bytes": 6565,
+      "sha256": "fa02681fa0c9c874e3c899730c60867437c573cbe68e814f2d60fcdd8da5a5e7"
     },
     {
       "path": "backend/app/economics/__init__.py",
@@ -1041,24 +1041,24 @@
       "sha256": "dfed42b0577f1b394581178f65e8087ff8a636800bd93d55989b861efa1cad1c"
     },
     {
-      "path": "backend/app/entry_calibration.py",
-      "bytes": 63650,
-      "sha256": "e231eea65eee9aaf56a0a05e0ba420889c19c5417fca2d939d54ceb57189828d"
-    },
-    {
       "path": "backend/app/entry_calibration_cli.py",
       "bytes": 1378,
       "sha256": "7c9d01fb794c78b800dc089ae6934eecf83f370492ac5125cf7edce289af8d28"
     },
     {
-      "path": "backend/app/entry_review_import.py",
-      "bytes": 4464,
-      "sha256": "6ce5101881be4ff364d753a7c57c69d1d53fdd5f5f8475813d974e52b955e570"
+      "path": "backend/app/entry_calibration.py",
+      "bytes": 63650,
+      "sha256": "e231eea65eee9aaf56a0a05e0ba420889c19c5417fca2d939d54ceb57189828d"
     },
     {
       "path": "backend/app/entry_review_import_cli.py",
       "bytes": 814,
       "sha256": "2450060d2d1ce27ccc041086671ebb742e33b6f1b241ce234ba8ebfc762565e7"
+    },
+    {
+      "path": "backend/app/entry_review_import.py",
+      "bytes": 4464,
+      "sha256": "6ce5101881be4ff364d753a7c57c69d1d53fdd5f5f8475813d974e52b955e570"
     },
     {
       "path": "backend/app/equity_research.py",
@@ -1126,14 +1126,14 @@
       "sha256": "dbb9dc7f8f2cddd787054211de9009ba779da22602785e267582147fa887c1f2"
     },
     {
-      "path": "backend/app/factor_experiments.py",
-      "bytes": 11140,
-      "sha256": "8aa3a13417b253864c5090ef90dc905a619e0d248163338f8badc94f87b2f0e4"
-    },
-    {
       "path": "backend/app/factor_experiments_cli.py",
       "bytes": 978,
       "sha256": "9bb8791a49c1e2c4803c0bbca2f4814205ca078a46dfa1d54ae181393e90d29c"
+    },
+    {
+      "path": "backend/app/factor_experiments.py",
+      "bytes": 11140,
+      "sha256": "8aa3a13417b253864c5090ef90dc905a619e0d248163338f8badc94f87b2f0e4"
     },
     {
       "path": "backend/app/factor_mining.py",
@@ -1156,14 +1156,14 @@
       "sha256": "f3a83079a64cd3bf75fe878f1633d8fe9f4818ea50b51a9ad7687681fb68b90a"
     },
     {
-      "path": "backend/app/gdelt_history.py",
-      "bytes": 18440,
-      "sha256": "0212d36c67d670d260502aeb406c42e37758c449a72392f1db3e0d35986f5778"
-    },
-    {
       "path": "backend/app/gdelt_history_cli.py",
       "bytes": 2199,
       "sha256": "0d09d4ce3282db112c04e7c3db01e79f084e6fd8bd16ee2e98d63491362c1de9"
+    },
+    {
+      "path": "backend/app/gdelt_history.py",
+      "bytes": 18440,
+      "sha256": "0212d36c67d670d260502aeb406c42e37758c449a72392f1db3e0d35986f5778"
     },
     {
       "path": "backend/app/geography/__init__.py",
@@ -1206,24 +1206,24 @@
       "sha256": "cc812e23bb4f3809ee5bea723962b545a0c9239e8688348e622714c5c98e1b7a"
     },
     {
-      "path": "backend/app/insider_history.py",
-      "bytes": 28618,
-      "sha256": "0143e34a8498e437572638234d8fe0e0a7b2a46c54b54a13ecb690be1f41ce7b"
-    },
-    {
       "path": "backend/app/insider_history_cli.py",
       "bytes": 3623,
       "sha256": "1ef3162d33d75d25d23158aa82a741f2e06ef261632c4fb3550cd08998968619"
     },
     {
-      "path": "backend/app/institutional_history.py",
-      "bytes": 21386,
-      "sha256": "44185cd754d78b6db4480439cc0c6cd64168fa9562e78d338b04c99b6e6d71fb"
+      "path": "backend/app/insider_history.py",
+      "bytes": 28618,
+      "sha256": "0143e34a8498e437572638234d8fe0e0a7b2a46c54b54a13ecb690be1f41ce7b"
     },
     {
       "path": "backend/app/institutional_history_cli.py",
       "bytes": 2715,
       "sha256": "63dbab04c07cafe1c112f9f78661b22c42826dfd9a432dde0e29a610667d1167"
+    },
+    {
+      "path": "backend/app/institutional_history.py",
+      "bytes": 21386,
+      "sha256": "44185cd754d78b6db4480439cc0c6cd64168fa9562e78d338b04c99b6e6d71fb"
     },
     {
       "path": "backend/app/lab_expansion_export.py",
@@ -1242,8 +1242,8 @@
     },
     {
       "path": "backend/app/leader_history_batch.py",
-      "bytes": 33315,
-      "sha256": "e25a01c77433d6cdb6eea7b5bd5fc371067b6acb2d4f4458072d3820ff1361d2"
+      "bytes": 33644,
+      "sha256": "96396683acf9a5365c435477cb98c6294dc42faaadec1276a7f43e93910cbc22"
     },
     {
       "path": "backend/app/leader_latest_queue.py",
@@ -1286,14 +1286,14 @@
       "sha256": "c10a82885cfa8266473709b39809da807852ddd7ffcc0e85d98ddf4937484c73"
     },
     {
-      "path": "backend/app/market_history.py",
-      "bytes": 24583,
-      "sha256": "120e4aaf2046dea3ab4fc0bd106a9ba7d9cb13a809e29b10e7cbcbc6a1e8b8a8"
-    },
-    {
       "path": "backend/app/market_history_cli.py",
       "bytes": 5039,
       "sha256": "706b9bc456694beb5cc06cd9a9d057dce88f5a9d02c2cf4c5cd9fcd86013b36b"
+    },
+    {
+      "path": "backend/app/market_history.py",
+      "bytes": 24583,
+      "sha256": "120e4aaf2046dea3ab4fc0bd106a9ba7d9cb13a809e29b10e7cbcbc6a1e8b8a8"
     },
     {
       "path": "backend/app/market_identity.py",
@@ -1341,14 +1341,14 @@
       "sha256": "9172989111cb2ffadf4adc6925a46a25bb54ba716598e17110016fc28f9e1113"
     },
     {
-      "path": "backend/app/product_evidence.py",
-      "bytes": 32941,
-      "sha256": "9a3bfc0d96ad377e5f643578bff561dfb640fa4aac5cb419396585d0871afb66"
-    },
-    {
       "path": "backend/app/product_evidence_cli.py",
       "bytes": 2411,
       "sha256": "4a3dd96975596647cbea3a1dc3eb7a9270ceb8fa3b4c7af244677df12f4ed236"
+    },
+    {
+      "path": "backend/app/product_evidence.py",
+      "bytes": 32941,
+      "sha256": "9a3bfc0d96ad377e5f643578bff561dfb640fa4aac5cb419396585d0871afb66"
     },
     {
       "path": "backend/app/provenance.py",
@@ -1376,14 +1376,69 @@
       "sha256": "a9b9138847d59b22a7b1d082e476b707efc4150a87d86a4525ba48515cae1efc"
     },
     {
+      "path": "backend/app/report_chapter_trial.py",
+      "bytes": 2145,
+      "sha256": "a84ac29b1a5930c76eb15276f57b7fd30ab801ad2ea1bfcc08838d918610c378"
+    },
+    {
+      "path": "backend/app/report_numeric_guards.py",
+      "bytes": 8165,
+      "sha256": "4db161b46e8ea668e21a7b48ee753eb3d29a428e298ac49fcb44a9462422e1d3"
+    },
+    {
+      "path": "backend/app/report_quality_cli.py",
+      "bytes": 3523,
+      "sha256": "190181d4f84b49236eec1e77d34a559188e729690162b7ccfbb34659fdfb4c73"
+    },
+    {
+      "path": "backend/app/report_quality_evaluation.py",
+      "bytes": 4323,
+      "sha256": "5876762a92d5978c10f80d2fee1d67915d680a7780ce8bc86b14d31fe26ee7f4"
+    },
+    {
+      "path": "backend/app/report_quality_holdout.py",
+      "bytes": 2860,
+      "sha256": "5a70c5ca2fda8dd4a4031011a9c5a56ce994f31c0726052c340f98f19dbe1487"
+    },
+    {
+      "path": "backend/app/report_quality_inventory.py",
+      "bytes": 11023,
+      "sha256": "8f2e77c0cb6fae9452abe389d456c1dac78ea34aab507812ee9dde57c4cb4abe"
+    },
+    {
+      "path": "backend/app/report_quality_replay.py",
+      "bytes": 1908,
+      "sha256": "21503ca42d706fe801139ad67bb92041b871db4b5ea70fd8da49ca94628fa312"
+    },
+    {
+      "path": "backend/app/report_quality_trial.py",
+      "bytes": 8071,
+      "sha256": "4d29594feaa6e28570ce4de41977ca6df65ed09c475d298aa02939dcbaf1ea94"
+    },
+    {
+      "path": "backend/app/report_quality.py",
+      "bytes": 16527,
+      "sha256": "6a0db929bc6e693adfbfa000339a02c958fdb9844a7566fb70584e45d7c8e5c2"
+    },
+    {
+      "path": "backend/app/report_rejections.py",
+      "bytes": 4841,
+      "sha256": "2cecbec85515a202edd3817ef1f7768bbb0c94826c344767645d6f6f9fa75b02"
+    },
+    {
       "path": "backend/app/report_translation_batch.py",
       "bytes": 7271,
       "sha256": "51ada6e2e133f1b7c700033b81ee68666ab958716ae045d8107a116be8369b88"
     },
     {
-      "path": "backend/app/research.py",
-      "bytes": 353165,
-      "sha256": "bc9007d03495f19b8745d1004126cf92eaa91aa69020c8ecc1328e9760831e6b"
+      "path": "backend/app/report_trial_review.py",
+      "bytes": 7796,
+      "sha256": "957777b90670a0f1570d56ac01d169d3305aca9d95b9e5f9f8daed36259c7430"
+    },
+    {
+      "path": "backend/app/report_usage.py",
+      "bytes": 4144,
+      "sha256": "c86f3f848b4b8044d0d5cb89d5b311301e9b0a782d7476d0be4ea926a525d5c5"
     },
     {
       "path": "backend/app/research_audit_jobs.py",
@@ -1414,6 +1469,11 @@
       "path": "backend/app/research_lab_export.py",
       "bytes": 8691,
       "sha256": "4e4c6a1a9821039f46f4c22d220616b4ec5851692dc48b355515fc4170dca6cb"
+    },
+    {
+      "path": "backend/app/research.py",
+      "bytes": 354406,
+      "sha256": "b3d5cb4d3a9d3e6b6568bd0047d8303fbf06222dd8f6aa47eb282416729c8c35"
     },
     {
       "path": "backend/app/review_frozen_dossier.py",
@@ -1591,19 +1651,14 @@
       "sha256": "9e0175834eef4ceee1ce75da2e982ba198fbd0261abf2cf83a4899f2cc5487a1"
     },
     {
-      "path": "backend/app/supplier_market_history.py",
-      "bytes": 12055,
-      "sha256": "a6716e601b7b622f5dde74cb1ebaeacdf4e979aeca409b1d15db49bb16df07ed"
-    },
-    {
       "path": "backend/app/supplier_market_history_cli.py",
       "bytes": 3871,
       "sha256": "d5ebd4ad16e8d483d84fc328a97ed5b71ab6d88c980a8fd7e3e33c3cb9418e61"
     },
     {
-      "path": "backend/app/supply_chain.py",
-      "bytes": 18032,
-      "sha256": "66e97248cac526a601fdda62668c5fe91d0fc39f5ab4f08d664d86f0896d19b4"
+      "path": "backend/app/supplier_market_history.py",
+      "bytes": 12055,
+      "sha256": "a6716e601b7b622f5dde74cb1ebaeacdf4e979aeca409b1d15db49bb16df07ed"
     },
     {
       "path": "backend/app/supply_chain_cli.py",
@@ -1626,24 +1681,29 @@
       "sha256": "8297b7a68c3936da1d717bf63aed2aa033977cd8c21140937a44b6d325ff4900"
     },
     {
-      "path": "backend/app/supply_chain_sites.py",
-      "bytes": 22520,
-      "sha256": "d1e3f67ec36ac4f9baf6cf37d30b9973bb255fddbdc00efb63a38396876eaeda"
-    },
-    {
       "path": "backend/app/supply_chain_sites_cli.py",
       "bytes": 744,
       "sha256": "b32acefe6dad673d4a144df49f744b578cd1feb433b7e4662f10417b6141fccd"
     },
     {
-      "path": "backend/app/survivorship_import.py",
-      "bytes": 7274,
-      "sha256": "1c7d76db584e6e5e7fb9d28c9e4d1915aca620d9a20e27b9fb4f7d6b5bb55200"
+      "path": "backend/app/supply_chain_sites.py",
+      "bytes": 22520,
+      "sha256": "d1e3f67ec36ac4f9baf6cf37d30b9973bb255fddbdc00efb63a38396876eaeda"
+    },
+    {
+      "path": "backend/app/supply_chain.py",
+      "bytes": 18032,
+      "sha256": "66e97248cac526a601fdda62668c5fe91d0fc39f5ab4f08d664d86f0896d19b4"
     },
     {
       "path": "backend/app/survivorship_import_cli.py",
       "bytes": 859,
       "sha256": "381801ad32ab933a29e7a81a028b05e6f91498e93dc139004304267e40b1ff95"
+    },
+    {
+      "path": "backend/app/survivorship_import.py",
+      "bytes": 7274,
+      "sha256": "1c7d76db584e6e5e7fb9d28c9e4d1915aca620d9a20e27b9fb4f7d6b5bb55200"
     },
     {
       "path": "backend/app/sync_study_benchmark.py",
@@ -1987,8 +2047,8 @@
     },
     {
       "path": "backend/tests/test_dossier_model_stream.py",
-      "bytes": 2126,
-      "sha256": "7dfa4d21f5de0ddc282036cab372e8d27415308e46f33735f09504c852688f6e"
+      "bytes": 2187,
+      "sha256": "a21c4243901d6149c1f1f2b02270aad4e866f55ee7459a3e32cc597068979547"
     },
     {
       "path": "backend/tests/test_dossier_passages.py",
@@ -1997,8 +2057,8 @@
     },
     {
       "path": "backend/tests/test_dossier_prompt_compaction.py",
-      "bytes": 2110,
-      "sha256": "6d9748984d99471a376bbf564a9a5cd78e9fa9247316d0d14f701314e489d472"
+      "bytes": 2761,
+      "sha256": "440b57c4568fe97cb61033c64a1f53595dd15d0a26ee8bd698cc1b5be9b756c0"
     },
     {
       "path": "backend/tests/test_dossier_quality_v13.py",
@@ -2071,11 +2131,6 @@
       "sha256": "51eaaa68a74f266a188cd74fb512c640e3e7cace2ad10d0967cbbb7fd73e9f78"
     },
     {
-      "path": "backend/tests/test_earnings_tasks.py",
-      "bytes": 5565,
-      "sha256": "a5acebcd56a8e8a2840180c868b8d6446ceeb30f4b7d898f5ab46585b1af011e"
-    },
-    {
       "path": "backend/tests/test_earnings_tasks_cli.py",
       "bytes": 3696,
       "sha256": "2d2ed36f2928d7c5d9e6386ded5640cd66afee7452d020f654555ad3c6961349"
@@ -2084,6 +2139,11 @@
       "path": "backend/tests/test_earnings_tasks_migration.py",
       "bytes": 1625,
       "sha256": "c9531bfb8eacedd3d09403f5fd3930e4fad862bbd0abe506cd393d634e15d8ab"
+    },
+    {
+      "path": "backend/tests/test_earnings_tasks.py",
+      "bytes": 5565,
+      "sha256": "a5acebcd56a8e8a2840180c868b8d6446ceeb30f4b7d898f5ab46585b1af011e"
     },
     {
       "path": "backend/tests/test_economics.py",
@@ -2351,14 +2411,34 @@
       "sha256": "bf1732729fb6ca5cf5551579b459440b9b7b0d910599269d37b7e82e7710d826"
     },
     {
+      "path": "backend/tests/test_report_context_revision.py",
+      "bytes": 5126,
+      "sha256": "400a9a20b6ebada57d59b86e4719729a0df31fc68dfb3ecd9b3a48c83fe916e9"
+    },
+    {
+      "path": "backend/tests/test_report_numeric_guards.py",
+      "bytes": 3670,
+      "sha256": "61e26d6d913c24f486648a5c7c8b0edbd67b98086f6d1ea28fab33aad72afca2"
+    },
+    {
+      "path": "backend/tests/test_report_quality_pipeline.py",
+      "bytes": 10181,
+      "sha256": "85f97e1d8415519ead37eb654999c3b3be121f5e1f383f75ed99a1a9d95d087b"
+    },
+    {
+      "path": "backend/tests/test_report_quality_trial.py",
+      "bytes": 2127,
+      "sha256": "5cb0e5af8b1550a5efbb2686ae5a930864011a13af32e93bff8e8ac85028fe61"
+    },
+    {
+      "path": "backend/tests/test_report_rejections.py",
+      "bytes": 4967,
+      "sha256": "21a1c48dafe0e1baf42a59a8e00c20b147bf11d2c07b7f6ad2b9919e74e49ba9"
+    },
+    {
       "path": "backend/tests/test_report_translation_batch.py",
       "bytes": 1493,
       "sha256": "42e68c39c17e74b82d25685088d2f6e5918f876bd3ad57a606b6f0257e847a5a"
-    },
-    {
-      "path": "backend/tests/test_research.py",
-      "bytes": 52529,
-      "sha256": "64c19af21fa96ec89c5df58a2fd727b8f3290ed5f65b1d9ddac331702359a843"
     },
     {
       "path": "backend/tests/test_research_batches.py",
@@ -2369,6 +2449,11 @@
       "path": "backend/tests/test_research_lab_export.py",
       "bytes": 878,
       "sha256": "b675eeb23bef81b6e89a32cf152368ab25693e3d4c114ca160ce6b48bde5a4a7"
+    },
+    {
+      "path": "backend/tests/test_research.py",
+      "bytes": 52529,
+      "sha256": "64c19af21fa96ec89c5df58a2fd727b8f3290ed5f65b1d9ddac331702359a843"
     },
     {
       "path": "backend/tests/test_review_frozen_dossier.py",
@@ -2426,11 +2511,6 @@
       "sha256": "57f0967e36d0c7c28e8a9cabcdb5bd5cf6c5b523271a4b4e6306cf5ed7500f4b"
     },
     {
-      "path": "backend/tests/test_supply_chain.py",
-      "bytes": 12123,
-      "sha256": "f802c093887d326a7bcc30fc4628c45346bfa6b4f3de4efb17e427bc7b64fa7d"
-    },
-    {
       "path": "backend/tests/test_supply_chain_discovery.py",
       "bytes": 5068,
       "sha256": "81f8c56bfe90da9493d8a67b556f108937bdef165d1e03f8ec18c1dc294f2afe"
@@ -2444,6 +2524,11 @@
       "path": "backend/tests/test_supply_chain_sites.py",
       "bytes": 11876,
       "sha256": "aaa91d63f6453dcff0690973317b3f8aec79bdccab856a7e3d49b3fa25a67b3f"
+    },
+    {
+      "path": "backend/tests/test_supply_chain.py",
+      "bytes": 12123,
+      "sha256": "f802c093887d326a7bcc30fc4628c45346bfa6b4f3de4efb17e427bc7b64fa7d"
     },
     {
       "path": "backend/tests/test_survivorship_import.py",
@@ -2986,6 +3071,11 @@
       "sha256": "d060017e968b85ad62061ce77d3919d5abbcdba008ca12739a75ca1b6feabd06"
     },
     {
+      "path": "pilot-site/app/knowledge.css",
+      "bytes": 1727,
+      "sha256": "5062142006a98a23c021322387a61ab0d670214d95e35bd26ac202b2ea104ac8"
+    },
+    {
       "path": "pilot-site/app/knowledge/[slug]/page.tsx",
       "bytes": 1658,
       "sha256": "7c852aef7574b00b5671d96fab4fdf1f973c405cf459b8458b35b45367cd0365"
@@ -2999,11 +3089,6 @@
       "path": "pilot-site/app/knowledge/page.tsx",
       "bytes": 1146,
       "sha256": "9230769d478fd48f5e0bb45798c705b29df4320af582b87ca56c43b7aa2de8f3"
-    },
-    {
-      "path": "pilot-site/app/knowledge.css",
-      "bytes": 1727,
-      "sha256": "5062142006a98a23c021322387a61ab0d670214d95e35bd26ac202b2ea104ac8"
     },
     {
       "path": "pilot-site/app/lab/page.tsx",
@@ -3086,14 +3171,14 @@
       "sha256": "8d419036b94b753f6c2f47022a2bb82e60d92cdea00783a11bb85103c51c6f48"
     },
     {
-      "path": "pilot-site/app/membership/page.tsx",
-      "bytes": 290,
-      "sha256": "05925a3146b438bd8a4068846d38b514f7983f1b73a937609280d8d1c12ef5b5"
-    },
-    {
       "path": "pilot-site/app/membership.module.css",
       "bytes": 3556,
       "sha256": "aab1452e70d163942b0d9f678be2729b900e695ce8e7277ba12459c61a60193e"
+    },
+    {
+      "path": "pilot-site/app/membership/page.tsx",
+      "bytes": 290,
+      "sha256": "05925a3146b438bd8a4068846d38b514f7983f1b73a937609280d8d1c12ef5b5"
     },
     {
       "path": "pilot-site/app/MeteoraResearch.module.css",
@@ -3416,11 +3501,6 @@
       "sha256": "4e6b20c5a770f486fbe4298913cffb34ef95109292004f31cca986b143244e80"
     },
     {
-      "path": "pilot-site/app/research/page.tsx",
-      "bytes": 286,
-      "sha256": "0a2d3bd8ac6a4b406900517cc75dfcb4ed19fd8bb22ed53507f397fe50ff0f5e"
-    },
-    {
       "path": "pilot-site/app/research-publication.css",
       "bytes": 2091,
       "sha256": "dde4e4b78e273c7b4a36f7e65b326b634abcb413f1db29b358702b4c6f751871"
@@ -3429,6 +3509,11 @@
       "path": "pilot-site/app/research-workspace.css",
       "bytes": 29641,
       "sha256": "f809f5d5bcca56aa49d90ee5beb77b907adf84fc3b5d5fc85cd93f641f82fa72"
+    },
+    {
+      "path": "pilot-site/app/research/page.tsx",
+      "bytes": 286,
+      "sha256": "0a2d3bd8ac6a4b406900517cc75dfcb4ed19fd8bb22ed53507f397fe50ff0f5e"
     },
     {
       "path": "pilot-site/app/ResearchCompletion.tsx",
@@ -3561,6 +3646,11 @@
       "sha256": "7286bcaf361ef93a7019d5f6ed257bace0f9fd013e2e37fb784db77a52e1427f"
     },
     {
+      "path": "pilot-site/drizzle.config.ts",
+      "bytes": 148,
+      "sha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b"
+    },
+    {
       "path": "pilot-site/drizzle/0000_solid_silver_fox.sql",
       "bytes": 462,
       "sha256": "e901679987074d019ae2f7a8b645e2ade7d7bd86ec74eaf7862816763e3846ae"
@@ -3649,6 +3739,11 @@
       "path": "pilot-site/drizzle/0017_amazing_whiplash.sql",
       "bytes": 953,
       "sha256": "c385c5885cf7c63dd6a3cc456f191321ec9a5db3419fd414d1b8ac13517b3928"
+    },
+    {
+      "path": "pilot-site/drizzle/meta/_journal.json",
+      "bytes": 2635,
+      "sha256": "e6bffd575499cb313c09445e568a64a709376ddab04073782442220fc2b6c538"
     },
     {
       "path": "pilot-site/drizzle/meta/0000_snapshot.json",
@@ -3741,16 +3836,6 @@
       "sha256": "fdc9c22d5014f9a6b25b8e99c1da6810fa5f6ba165ea6d019657833344c74c3e"
     },
     {
-      "path": "pilot-site/drizzle/meta/_journal.json",
-      "bytes": 2635,
-      "sha256": "e6bffd575499cb313c09445e568a64a709376ddab04073782442220fc2b6c538"
-    },
-    {
-      "path": "pilot-site/drizzle.config.ts",
-      "bytes": 148,
-      "sha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b"
-    },
-    {
       "path": "pilot-site/package-lock.json",
       "bytes": 394820,
       "sha256": "29e1ecf6b770831f63d18714a2ed04de53e7df7657ee160a50f97fe350955c69"
@@ -3831,6 +3916,16 @@
       "sha256": "ba5a15c50f83b49248edadcf16b437221ce4964c2df72f06050ae99ada2e6d1a"
     },
     {
+      "path": "pilot-site/scripts/export_local_snapshot.py",
+      "bytes": 110155,
+      "sha256": "29b8c68f793f6981a01ce150ebfb2d1a5a98d3dc5fa117ed94d8e2fcebbf0b47"
+    },
+    {
+      "path": "pilot-site/scripts/export_orakt_research.py",
+      "bytes": 7362,
+      "sha256": "979ce2ab0203b37f04237c912c4c52ca676abf61949010c963f72d3e527e9662"
+    },
+    {
       "path": "pilot-site/scripts/export-company-report-inventory.mjs",
       "bytes": 912,
       "sha256": "428edf0839b74bad330efebf698193825d00fc5457711d72ba0ad048bd2dfb62"
@@ -3849,16 +3944,6 @@
       "path": "pilot-site/scripts/export-reviewed-dossier.mjs",
       "bytes": 914,
       "sha256": "83eee98a2ef3fd13014fd1add048d169d7f8aac98079b22c48409db18f47c9ab"
-    },
-    {
-      "path": "pilot-site/scripts/export_local_snapshot.py",
-      "bytes": 110155,
-      "sha256": "29b8c68f793f6981a01ce150ebfb2d1a5a98d3dc5fa117ed94d8e2fcebbf0b47"
-    },
-    {
-      "path": "pilot-site/scripts/export_orakt_research.py",
-      "bytes": 7362,
-      "sha256": "979ce2ab0203b37f04237c912c4c52ca676abf61949010c963f72d3e527e9662"
     },
     {
       "path": "pilot-site/scripts/generate-meteora-layout.mjs",

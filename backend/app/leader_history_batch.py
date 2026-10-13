@@ -432,7 +432,12 @@ def run(root, limit=3, retry_failed=False, period_inventory=None, original_text=
                     if target.exists():
                         job['state']='interrupted';save('repair_required',reason='Retained unregistered output requires reconciliation');return state
                     save('generating',activeChapter=key,activeChapterProgress=str(target/'progress.json'))
-                    write_chapter(source,target,key,redact_numbers=not original_text,reasoning=True)
+                    try:
+                        write_chapter(source,target,key,redact_numbers=not original_text,reasoning=True,rejection_root=base.parent)
+                    finally:
+                        from app.report_usage import write_usage
+                        usage=write_usage(base.parent,ticker=item['ticker'],accession=accession)
+                        job['usage']={k:v for k,v in usage.items() if k!='calls'}
                     outcome=json.loads((target/'progress.json').read_text(encoding='utf-8'))
                     if outcome['stage']!='content_review_pending':
                         job['failures']+=1;job['state']='repair_required';job['error']=outcome.get('error')

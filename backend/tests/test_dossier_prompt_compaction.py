@@ -18,6 +18,15 @@ def test_irregular_or_single_segment_records_stay_intact():
         v={'segmentFinancialObservations':rows}
         assert prompt_view(v)==v
 
+def test_passage_period_compaction_preserves_distinct_years_and_originals():
+    v={'passages':[{'id':str(i),'qualitative_view':'Exact source wording',
+        'periodContext':{'sourceYears':[2008+i],'reportPeriodEnd':'2010-12-31','rule':'Preserve source periods.'},
+        'quantityPolicy':'Values stay in original table.','originalContainsQuantities':True} for i in range(4)]}
+    before=copy.deepcopy(v);out=prompt_view(v)
+    restored=[{**out['passageSharedFields'],**p,'periodContext':{**out['passagePeriodContext']['sharedFields'],**p['periodContext']}}
+              for p in out['passages']]
+    assert restored==v['passages'] and v==before
+
 def test_explicit_physical_volumes_do_not_trigger_revenue_only_guard():
     from types import SimpleNamespace
     from app.dossier_compact_writer import check_source_scope

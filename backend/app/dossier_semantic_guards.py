@@ -19,6 +19,11 @@ def known_semantic_errors(section, packet):
                 # Corrections discussing the old error are not endorsements.
                 if re.search(r'不能|不应|并非|而非|错误|误称|误把|does not|cannot|must not|incorrect|wrongly|draft incorrectly', sentence, re.I):
                     continue
+                asset_proceeds_in_investing=bool(re.search(r'Investing Activities(?:(?!Financing Activities).){0,1400}Proceeds and deposits related to asset sales',source,re.I|re.S))
+                if asset_proceeds_in_investing and (
+                    re.search(r'经营(?:活动)?现金流.{0,45}(?:源于|来自|由).{0,35}资产(?:出售|销售)(?:收益|款|收入)',sentence)
+                    or re.search(r'operating cash flow.{0,65}(?:driven by|from|due to).{0,60}asset sale proceeds',sentence,re.I)):
+                    errors.append(f'{field}.{lang}: asset-sale proceeds are investing cash flows in this source, not a direct operating cash inflow')
                 dilution_denial = bool(re.search(r'(?:稀释|摊薄|分母增加)(?:本身)?不等于(?:提高|提升|增加)每股收益', sentence))
                 if (not dilution_denial and re.search(r'(?:稀释|摊薄|分母增加).{0,35}(?:提高|提升|增加)每股收益', sentence)
                         or re.search(r'(?:dilution|dilutive shares|increased denominator).{0,65}(?:raises?|increases?|improves?|higher).{0,20}(?:EPS|earnings per share)', sentence, re.I)):
