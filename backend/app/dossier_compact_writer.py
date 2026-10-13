@@ -216,6 +216,29 @@ def prompt_view(view):
     return result
 
 
+def scoped_prompt_view(view):
+    """Limit unrelated financial hints in operating/risk chapter prompts.
+
+    The full writer-view and immutable ledger remain archived. No selected
+    passage, original quote or source ID is removed. Financial chapters retain
+    their complete summary inputs. This is input routing, not fact validation.
+    """
+    scoped=copy.deepcopy(view)
+    if view.get('chapter') in {'business','competition','supply','macro'}:
+        fields=('comparisons','grossMarginDirections','coreFinancialObservations',
+                'segmentFinancialObservations','nonOperatingIncomeObservations',
+                'cashFlowObservations','verifiedCashReconciliation')
+        excluded=[name for name in fields if name in scoped]
+        for name in excluded:scoped.pop(name)
+        # Global technical-name lists are lexical allow-lists, not business
+        # evidence. Only names actually present in this chapter should be hints.
+        source=' '.join(p['qualitative_view'] for p in scoped.get('passages',[]))
+        scoped['technicalNames']=[t for t in scoped.get('technicalNames',[]) if t in source]
+        scoped['writingBoundary']={'mode':'selected_passages_only','summaryFieldsExcluded':excluded,
+            'instruction':'Other financial summaries remain in the report archive but are not evidence for this paragraph. Do not infer they are undisclosed. Assert historical results only from the selected original passages; do not import unrelated ledger trends.'}
+    return prompt_view(scoped)
+
+
 def schema_for(view, *, constrain_numbers=False):
     claims=[{'passageId':p['id']} for p in view['passages']]
     schema=chapter_schema(claims)
@@ -328,6 +351,16 @@ def bind(draft,packet,key,view):
     guard_known_semantics(s,packet)
     check_claims(s.grounded_claims,list(originals.values()),required=True)
     if key in {'financial','capital'}:guard_cash_narrative(s,packet)
+    # Run the same report-level source/metric checks on successful parses too.
+    # Previously these were only attached as diagnostics after another guard
+    # failed, allowing an otherwise well-formed unsupported draft through.
+    from app.report_quality import check
+    checked=check(packet,[{'ticker':packet['ticker'],'chapter':key,'section':s.model_dump()}])
+    if checked['findings']:
+        # Full source-bound diagnostics are retained by run(); keep retry input
+        # concise instead of duplicating original quotations in a long error.
+        summary=[{k:f.get(k) for k in ('code','location','severity')} for f in checked['findings']]
+        raise ValueError('Report-level checks require review: '+json.dumps(summary,ensure_ascii=False))
     return s,contexts
 
 
@@ -385,7 +418,7 @@ Reported risks are not realized events. Revenue decline does not prove industry 
                 request={
                     'model':settings.llm_model,'think':reasoning,'format':schema,
                     'options':{'num_ctx':32768,'num_predict':16000 if reasoning else 6500,'temperature':0.1},
-                    'messages':[{'role':'system','content':instruction},{'role':'user','content':json.dumps({'evidence':prompt_view(view),'validationError':error},ensure_ascii=False,separators=(',',':'))}]}
+                    'messages':[{'role':'system','content':instruction},{'role':'user','content':json.dumps({'evidence':scoped_prompt_view(view),'validationError':error},ensure_ascii=False,separators=(',',':'))}]}
                 # Model inputs contain selected public filing evidence, no service
                 # headers or credentials. Preserve exact prompts/config for audit.
                 write_json(output/f'request-{attempt+1}.json',{'request':request,

@@ -867,8 +867,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 44864,
-      "sha256": "5cfd8720c59b4323b92405950ef6888eda7261fa13f1b463362657831d2876ba"
+      "bytes": 47153,
+      "sha256": "0e668b62d56e7721368a4d78cf455d656486888fe9e84f264dc31df8945c6b0e"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -2122,8 +2122,8 @@
     },
     {
       "path": "backend/tests/test_dossier_prompt_compaction.py",
-      "bytes": 2761,
-      "sha256": "440b57c4568fe97cb61033c64a1f53595dd15d0a26ee8bd698cc1b5be9b756c0"
+      "bytes": 4113,
+      "sha256": "b71fae92047215a810b955529a351aa436e86e1fd87206d02d99b4e665766ef1"
     },
     {
       "path": "backend/tests/test_dossier_quality_v13.py",
@@ -4754,6 +4754,21 @@
       "path": "scripts/run_frozen_holdout.py",
       "bytes": 8917,
       "sha256": "b6199ad5d3febf8bf91554347eb49c405bb903def1bb44ccf2eb699db280ce18"
+    },
+    {
+      "path": "backend/tests/test_report_writer_gate.py",
+      "bytes": 3141,
+      "sha256": "3ea32b3ff3109e3fe04da3f4b779a53bfa80383ed7388dc6ef1c383370493d63"
+    },
+    {
+      "path": "backend/tests/test_report_writer_replay.py",
+      "bytes": 1469,
+      "sha256": "82eec62cdc548ccc5df1e4a377d9bbbc81cbe85babb9c493cc139daa3d4e6a71"
+    },
+    {
+      "path": "scripts/replay_report_writer_gate.py",
+      "bytes": 5310,
+      "sha256": "979e244d38960e3069fd2ca52be2292ecd84a8fb4daaad67bb87a8ba4034d585"
     }
   ],
   "notUploaded": true,

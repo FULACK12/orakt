@@ -1,5 +1,27 @@
 import copy,json
 from app.dossier_compact_writer import prompt_view
+from app.dossier_compact_writer import scoped_prompt_view
+import pytest
+
+
+@pytest.mark.parametrize('chapter',['business','competition','supply','macro'])
+def test_operating_prompt_excludes_unrelated_summaries_not_sources(chapter):
+    view={'chapter':chapter,'passages':[{'id':'p1','qualitative_view':'EPYC manufacturing risk.'}],
+          'technicalNames':['EPYC','FPGA'],'coreFinancialObservations':[{'direction':'increase'}],
+          'cashFlowObservations':[{'direction':'decrease'}],'comparisons':[{'id':'c'}]}
+    before=copy.deepcopy(view);result=scoped_prompt_view(view)
+    assert view==before and result['passages']==view['passages']
+    assert result['technicalNames']==['EPYC']
+    assert 'coreFinancialObservations' not in result and 'cashFlowObservations' not in result
+    assert result['writingBoundary']['mode']=='selected_passages_only'
+    assert set(result['writingBoundary']['summaryFieldsExcluded'])=={'coreFinancialObservations','cashFlowObservations','comparisons'}
+
+
+@pytest.mark.parametrize('chapter',['financial','capital','valuation','factors','conclusion'])
+def test_financial_prompt_keeps_all_disclosed_summaries(chapter):
+    view={'chapter':chapter,'passages':[],'coreFinancialObservations':[{'direction':'increase'}],
+          'technicalNames':['EPYC','FPGA']}
+    assert scoped_prompt_view(view)==prompt_view(view)
 
 def test_segment_prompt_compaction_is_lossless_and_nonmutating():
     rows=[{'concept':'Revenue','segment':f'segment-{i}','periodType':p,'direction':'increase',
