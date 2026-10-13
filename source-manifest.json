@@ -1417,8 +1417,13 @@
     },
     {
       "path": "backend/app/report_quality_evaluation.py",
-      "bytes": 4323,
-      "sha256": "5876762a92d5978c10f80d2fee1d67915d680a7780ce8bc86b14d31fe26ee7f4"
+      "bytes": 5815,
+      "sha256": "ff488dec52e41e7dca556cccd20c482062f213a2afa0a56e5e8181306c1d60da"
+    },
+    {
+      "path": "backend/app/report_quality_holdout_audit.py",
+      "bytes": 6595,
+      "sha256": "841d52f0cccbe72935ce9b572bec967af4dcd82459b2e0b36ed3c8448f614d61"
     },
     {
       "path": "backend/app/report_quality_holdout.py",
@@ -2474,6 +2479,11 @@
       "path": "backend/tests/test_report_numeric_guards.py",
       "bytes": 3670,
       "sha256": "61e26d6d913c24f486648a5c7c8b0edbd67b98086f6d1ea28fab33aad72afca2"
+    },
+    {
+      "path": "backend/tests/test_report_quality_holdout_audit.py",
+      "bytes": 6521,
+      "sha256": "3773964407bd97ca37bbc8347a78be46c68fe3a013e21c5284cc40756caeb0f0"
     },
     {
       "path": "backend/tests/test_report_quality_pipeline.py",

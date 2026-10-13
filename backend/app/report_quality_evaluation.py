@@ -18,6 +18,20 @@ def split(issuer):
     return 'holdout' if int(digest(issuer.upper())[:8], 16) % 5 == 0 else 'development'
 
 
+def group_key(case):
+    value = case.get('groupId')
+    return value.strip().upper() if isinstance(value, str) else ''
+
+
+def consistent_result(row):
+    """Reject contradictory labels; a boolean-shaped row is not sufficient."""
+    return not (
+        (row['severeErrorPresent'] and row['correctContent'])
+        or (row['severeErrorDetected'] and not row['severeErrorPresent'])
+        or (row['repairIntroducedError'] and not row['repairAttempted'])
+    )
+
+
 def evaluate(manifest, results):
     failures = []
     expected = {c['id']: c for c in manifest['cases'] if c['split'] == 'holdout'}
@@ -27,24 +41,33 @@ def evaluate(manifest, results):
         failures.append('holdout_not_locked_before_tuning')
     if not manifest.get('rulesetSha256'):
         failures.append('missing_ruleset_hash')
-    training_groups = {c.get('groupId') for c in manifest['cases'] if c['split'] != 'holdout' or c.get('usedForTuning')}
-    if training_groups & {c.get('groupId') for c in expected.values()}:
+    training_groups = {group_key(c) for c in manifest['cases'] if c['split'] != 'holdout' or c.get('usedForTuning')}
+    if training_groups & {group_key(c) for c in expected.values()}:
         failures.append('issuer_leakage_from_development')
     rows = {r['id']: r for r in results}
     if len(rows) != len(results) or set(rows) != set(expected):
         failures.append('missing_duplicate_or_unexpected_results')
+    group_counts = Counter(group_key(c) for c in expected.values())
+    if any(count > 1 for count in group_counts.values()):
+        failures.append('non_independent_report_groups')
+    case_counts = Counter(c['id'] for c in manifest['cases'] if c['split'] == 'holdout')
+    result_counts = Counter(r['id'] for r in results)
     valid = []
     for key, case in expected.items():
         r = rows.get(key, {})
+        if (group_key(case) in training_groups or group_counts[group_key(case)] > 1
+                or case_counts[key] > 1 or result_counts[key] > 1):
+            failures.extend(['unqualified_case:' + key, 'non_independent_case:' + key]); continue
         if (case.get('labelStatus') != 'independently_adjudicated' or case.get('usedForTuning') is not False
                 or case.get('synthetic') is not False or r.get('caseSha256') != digest(case)
                 or r.get('rulesetSha256') != manifest.get('rulesetSha256')
                 or not all(isinstance(r.get(k), bool) for k in ('severeErrorPresent', 'severeErrorDetected', 'correctContent', 'blocked', 'repairAttempted', 'repairIntroducedError'))):
             failures.append('unqualified_case:' + key); continue
+        if not consistent_result(r):
+            failures.append('contradictory_labels:' + key); continue
+        if not group_key(case):
+            failures.append('missing_report_group:' + key); continue
         valid.append((case, r))
-    unique = {c.get('groupId') for c, r in valid}
-    if None in unique or len(unique) != len(valid):
-        failures.append('non_independent_report_groups')
     strata = Counter(c['stratum'] for c, r in valid)
     if set(POLICY['requiredStrata']) - strata.keys():
         failures.append('coverage_missing')
@@ -63,10 +86,16 @@ def evaluate(manifest, results):
         failures.append('false_block_evidence_insufficient')
     if not repairs or regressions:
         failures.append('repair_safety_not_established')
-    return {'policy': POLICY, 'independentCases': len(valid), 'strata': dict(strata),
+    return {'policy': POLICY, 'reservedCases': len(expected),
+            'unqualifiedCases': len(expected) - len(valid),
+            'independentCases': len(valid), 'strata': dict(strata),
             'severeCases': n, 'severeMisses': misses, 'severeMissUpper95': upper,
+            'severeMissRate': misses / n if n else None,
             'correctCases': correct, 'falseBlocks': false_blocks,
+            'falseBlockRate': false_blocks / correct if correct else None,
             'repairCases': repairs, 'repairRegressions': regressions,
+            'repairRegressionRate': regressions / repairs if repairs else None,
+            'measurementState': 'qualified_observations_available' if valid else 'not_measured',
             'eligibleForEnablementReview': not failures, 'failures': failures,
             'automaticApprovalEnabled': False,
             'note': 'Requires independent labels and separate explicit enablement review; does not approve reports.'}
