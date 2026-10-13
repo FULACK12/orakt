@@ -138,6 +138,12 @@ def writer_view(packet,key,redact_numbers=True):
         from app.dossier_acquisition_basis import acquisition_basis
         basis=acquisition_basis(packet)
         result['acquisitionBasis']={k:basis[k] for k in ('sourceIds','accountingStandard','boundaries','adapterCodeSha256')}
+    if key in {'factors','conclusion'} and any(p.get('contextRole')=='comprehensive_income_periods' for p in selected) and packet['ticker']=='CVX':
+        from app.dossier_factor_candidate import candidate_observation
+        candidate=candidate_observation(packet,key)
+        result['factorMeasurementScope']={k:candidate[k] for k in ('sourceIds','availabilityRule','comparableScopeWarning','meaning','adapterCodeSha256')}
+        result['factorMeasurementScope']['metricBoundaries']=[r['metric'] for r in candidate['classificationChecks'].values()]
+        result['factorMeasurementScope']['candidateFormulas']=[candidate['linearSignal']['formula'],candidate['nonlinearCandidate']['formula']]
     return result
 
 
@@ -257,7 +263,12 @@ def check_platform_names(section, view):
     prose=json.dumps(section.model_dump(),ensure_ascii=False)
     for name in names:
         pattern=r'(?<![A-Za-z])'+name+r'(?![A-Za-z])'
-        if re.search(pattern,prose,re.I) and not re.search(pattern,source,re.I):
+        candidate=prose
+        if name=='Windows':
+            # Research time windows are not Microsoft's operating system.
+            # Strip only explicit time/sample phrases, not arbitrary Windows mentions.
+            candidate=re.sub(r'\b(?:out-of-sample|in-sample|training|validation|rolling|observation|time) windows?\b','research intervals',candidate,flags=re.I)
+        if re.search(pattern,candidate,re.I) and not re.search(pattern,source,re.I):
             raise ValueError('Platform absent from supplied source view: '+name)
 
 

@@ -867,8 +867,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 42239,
-      "sha256": "193c36c089d90fe6681f6c815b426548c19affa6f7736f6b9b564742ef36537e"
+      "bytes": 43314,
+      "sha256": "5fbf4d9617994b98549000086c6821699a36e7d1fd8224a699692346f0cb3952"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -904,6 +904,11 @@
       "path": "backend/app/dossier_extended_study.py",
       "bytes": 16946,
       "sha256": "83dd63fa91818631807fd039c5ee7cd6fb54ce62e96f3f1898f76c47a9bbeb5b"
+    },
+    {
+      "path": "backend/app/dossier_factor_candidate.py",
+      "bytes": 6697,
+      "sha256": "c3d52ad55cc51e5712736c75f9aa7a595044cfe99617194819fdaae694d5f46a"
     },
     {
       "path": "backend/app/dossier_factor_pilot.py",
@@ -2061,6 +2066,11 @@
       "sha256": "4831369ea4b6b590d7e7a11de0d22ae854edc8529f1493ae859f0f7ac94755e8"
     },
     {
+      "path": "backend/tests/test_dossier_factor_candidate.py",
+      "bytes": 4215,
+      "sha256": "b8fd4abade04d4243c70a260e5f84e1cf9ed232287414080f99ecbef007f4d66"
+    },
+    {
       "path": "backend/tests/test_dossier_factor_pilot.py",
       "bytes": 3861,
       "sha256": "54b72931d580948310266f2cae008bbea629b9ccee2fed6975997f33342aa08b"
@@ -2084,6 +2094,11 @@
       "path": "backend/tests/test_dossier_passages.py",
       "bytes": 3825,
       "sha256": "3a62171ad7e028eb64dbe60ebdb21ba039ed77a8c601e010928689353c794ed1"
+    },
+    {
+      "path": "backend/tests/test_dossier_platform_context.py",
+      "bytes": 1090,
+      "sha256": "53e3823956539e37b319e68e8c6bcea77866251674d9b414bb53498891c6c04a"
     },
     {
       "path": "backend/tests/test_dossier_prompt_compaction.py",
