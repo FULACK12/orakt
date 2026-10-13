@@ -7,6 +7,29 @@ SOURCE = ('Operating income for the three months ended June 27, 2026 was $2.0 bi
           'The increase in operating income was due to higher gross profit, partially offset by higher operating expenses.')
 
 
+@pytest.mark.parametrize('sentence,source,count', [
+    ('Improved cash flow links to operational efficiency.', 'We rely on external manufacturers.', 1),
+    ('Operating cash flow increased.', 'We rely on external manufacturers.', 1),
+    ('If operating cash flow increased, test the cause.', 'We rely on external manufacturers.', 0),
+    ('Verify whether operating cash flow increased.', 'We rely on external manufacturers.', 0),
+    ('Operating cash flow increased.', 'Cash provided by operations increased.', 0),
+])
+def test_narrative_result_needs_own_source(sentence, source, count):
+    packet={'chapter_passages':{'business':[{'id':PID,'text':source},
+             {'id':'PASSAGE:0000000000000001','text':'Operating cash flow increased.'}]}}
+    body=sentence+' ['+PID+']'
+    doc={'chapter':'business','section':{'analysis':{'en':body}}}
+    result=check(packet,[doc])
+    assert len(result)==count
+    if count:
+        f=result[0]
+        assert f['code']=='narrative_result_source_mismatch'
+        assert body[f['span']['start']:f['span']['end']]==f['actual']
+        assert f['sourceIds']==[PID]
+    doc['factBindings']=[{'location':'section/analysis/en'}]
+    assert not check(packet,[doc])  # Binding validity is checked by the ledger layer.
+
+
 def run(zh, en, source=SOURCE, extras=()):
     packet = {'chapter_passages': {'financial': [{'id': PID, 'text': source}, *extras]}}
     doc = {'chapter': 'financial', 'section': {'grounded_claims': [
@@ -23,6 +46,14 @@ def test_retained_amd_operating_income_translation_located():
     assert zh[f['span']['start']:f['span']['end']] == f['actual'] == '运营收入'
     assert f['sourceIds'] == [PID] and f['originalEvidence'][0]['text'] == SOURCE
     assert f['relatedLocation'].endswith('/en')
+
+
+def test_treasury_retirement_is_not_a_new_repurchase():
+    source='During the quarter the company retired treasury shares. Stock Repurchase Program: total authority remains available.'
+    result=run('公司回购库存股。','The company repurchased treasury shares but did not explain why.',source)
+    assert [f['code'] for f in result]==['treasury_retirement_not_repurchase']
+    assert not run('公司注销库存股。','The company retired treasury shares.',source)
+    assert not run('注销不是回购。','The company retired, not repurchased treasury shares.',source)
 
 
 def test_retained_amd_corrected_translation_not_flagged():

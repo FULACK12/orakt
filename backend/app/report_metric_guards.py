@@ -29,6 +29,25 @@ def check(packet, documents):
 
     for doc in documents:
         section = doc.get('section', {})
+        # Development AMD business draft: a cash-flow improvement asserted in
+        # a paragraph citing manufacturing risks only. This is citation triage,
+        # not an entailment verdict. An explicit fact binding stays with the
+        # ledger validator. Restrict to English result assertions, not questions,
+        # forecasts or hypotheses; other languages still need semantic review.
+        body = section.get('analysis', {}).get('en', '')
+        refs = set(re.findall(r'PASSAGE:[a-f0-9]{16}', body))
+        source = ' '.join(ps.get(pid, '') for pid in refs)
+        bound = any(b.get('location') == 'section/analysis/en' for b in doc.get('factBindings', []))
+        if refs and refs <= ps.keys() and not bound:
+            for sentence in re.finditer(r'[^.!?]+[.!?]?', body):
+                value = sentence.group()
+                if CAUTION.search(value) or '?' in value:
+                    continue
+                asserted = re.search(r'\b(?:improved|increased|decreased|higher|lower) (?:operating )?cash flow\b|\b(?:operating )?cash flow (?:improved|increased|decreased|rose|fell)\b', value, re.I)
+                if asserted and not re.search(r'\bcash (?:flows?|provided|used|generated)\b', source, re.I):
+                    add('narrative_result_source_mismatch', doc['chapter']+'/section/analysis/en', body,
+                        sentence.start()+asserted.start(), sentence.start()+asserted.end(), refs,
+                        'Cash-flow result asserted but not named in the cited evidence; bind its original statement or remove the unsupported result. This is not proof the result is false.')
         # Grounded claims are short, explicitly paired and have a single exact
         # source. Whole-paragraph keyword comparison would mix unrelated metrics.
         for index, claim in enumerate(section.get('grounded_claims', [])):
@@ -41,6 +60,13 @@ def check(packet, documents):
                 continue  # Existing quote/source validator reports this.
             loc = f"{doc['chapter']}/section/grounded_claims/{index}/statement"
             source = ps[pid]
+            retired = re.search(r'\bretired\b[^.]{0,70}\btreasury shares\b', source, re.I)
+            repurchased = re.search(r'\brepurchased treasury shares\b', en, re.I)
+            if (retired and repurchased and not CAUTION.search(en[:repurchased.end()])
+                    and not re.search(r'\brepurchased\b', source, re.I)):
+                add('treasury_retirement_not_repurchase', loc+'/en', en,
+                    repurchased.start(), repurchased.end(), {pid},
+                    'The cited event retires existing treasury shares, not a new repurchase. Preserve both languages and do not deduct cash twice.', loc+'/zh')
             # Rejecting a proposition is not asserting it. Abstaining here is
             # deliberate; these units remain in the semantic review worklist.
             if CAUTION.search(zh + ' ' + en):

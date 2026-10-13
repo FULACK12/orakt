@@ -181,7 +181,7 @@ def check(packet, documents, *, complete=False):
     for u in all_units:
         if not u['sourceIds'] or set(u['sourceIds']) - ps.keys():
             add('source_binding', u['id'], u['sourceIds'])
-        if '[NUMBER]' in u['text'] or 'PLACEHOLDER' in u['text']:
+        if re.search(r'\[(?:number|quantity|value in source table)\]|\bPLACEHOLDER\b', u['text'], re.I):
             add('placeholder', u['id'])
     from app.report_numeric_guards import check as numeric_checks
     findings.extend(numeric_checks(packet, documents))

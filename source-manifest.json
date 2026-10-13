@@ -867,8 +867,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 43748,
-      "sha256": "d94e517d53d422294af8b568ce6371a920507745fee551c8f7c10926a9f7dc33"
+      "bytes": 44864,
+      "sha256": "5cfd8720c59b4323b92405950ef6888eda7261fa13f1b463362657831d2876ba"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -1407,8 +1407,8 @@
     },
     {
       "path": "backend/app/report_metric_guards.py",
-      "bytes": 4683,
-      "sha256": "867c567859fee90338799f119b012f2dad672496c9970274a88d438bb9b1b481"
+      "bytes": 6942,
+      "sha256": "bb5a95c6ae7a64242b061ff5278e525fae38e897374c0cb6580ef497c25e89dd"
     },
     {
       "path": "backend/app/report_numeric_guards.py",
@@ -1447,13 +1447,13 @@
     },
     {
       "path": "backend/app/report_quality_trial.py",
-      "bytes": 8071,
-      "sha256": "4d29594feaa6e28570ce4de41977ca6df65ed09c475d298aa02939dcbaf1ea94"
+      "bytes": 8394,
+      "sha256": "6182df60691a04d10769dd09df906563b64ea427c2fbd2564110294dafa45cef"
     },
     {
       "path": "backend/app/report_quality.py",
-      "bytes": 16747,
-      "sha256": "5d6c3d4487bf85cfffd4a0168d4c6b33d5c1e8987d6e264a1d471e301079e961"
+      "bytes": 16786,
+      "sha256": "bde6ff27327a18763f2c6cd641993ae3ceaa79cca2295f69ede1db275805b06b"
     },
     {
       "path": "backend/app/report_rejections.py",
@@ -2487,8 +2487,8 @@
     },
     {
       "path": "backend/tests/test_report_metric_guards.py",
-      "bytes": 5135,
-      "sha256": "7c00cde6b7fa886ad2d7c01429d1f56034e445cd4cf0a8219733962982e5e21d"
+      "bytes": 6977,
+      "sha256": "bd9de137522c684c0ad09409910c84d4ad1e34f2ebc81ee9d42d5a54611e0e40"
     },
     {
       "path": "backend/tests/test_report_numeric_guards.py",
@@ -2502,13 +2502,13 @@
     },
     {
       "path": "backend/tests/test_report_quality_pipeline.py",
-      "bytes": 10852,
-      "sha256": "e9a7c44409610f271ee61a224d4516aceb02dc721a29aee4f607339aaf260c23"
+      "bytes": 11300,
+      "sha256": "5395da85ed5eb37ac38fea83635074fe5f67f17be1641c39bc9d9926efcb7e15"
     },
     {
       "path": "backend/tests/test_report_quality_trial.py",
-      "bytes": 2127,
-      "sha256": "5cb0e5af8b1550a5efbb2686ae5a930864011a13af32e93bff8e8ac85028fe61"
+      "bytes": 2521,
+      "sha256": "b16ab4d7d65c066ca4c9aba61c2b2ea5fad94b6000ef60fd5d6b71c3af862c28"
     },
     {
       "path": "backend/tests/test_report_rejections.py",

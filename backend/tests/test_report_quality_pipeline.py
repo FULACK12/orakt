@@ -38,6 +38,14 @@ def test_good_structure_still_needs_semantic_review():
     assert not worklist(packet,docs)['automaticApprovalEnabled']
 
 
+@pytest.mark.parametrize('placeholder',['[quantity]','[NUMBER]','[value in source table]','PLACEHOLDER'])
+def test_writing_mask_never_leaks_into_reader_prose(placeholder):
+    packet,docs=fixture()
+    docs[0]['section']['counterEvidence']['en']='Revenue was '+placeholder+' ['+PID+']'
+    findings=check(packet,docs)['findings']
+    assert any(f['code']=='placeholder' and f['location']=='business/section/counterEvidence/en' for f in findings)
+
+
 def test_identical_source_rows_are_not_false_errors_but_conflicts_block():
     packet,docs=fixture()
     packet['facts'].append(copy.deepcopy(packet['facts'][0]))

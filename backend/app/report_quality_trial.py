@@ -25,7 +25,7 @@ from app.model_workload import MODEL_WORKLOAD_LOCK_ID
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
-def run(source,root,holdout,resume=False):
+def run(source,root,holdout,resume=False,redact_numbers=False):
     if root.exists() and not resume:raise ValueError('Preserve previous trial output; do not rerun this report')
     if resume and not root.exists():raise ValueError('No existing trial to resume')
     settings=get_settings();original,_=load_frozen_packet(source,settings.cold_data_root)
@@ -36,11 +36,14 @@ def run(source,root,holdout,resume=False):
     policy={**DEFAULT_POLICY,'maxModelRequests':9,'maxKnownLocalTokens':120000,'maxWallSeconds':1800}
     state={'ticker':packet['ticker'],'accession':packet['accession'],'startedAt':datetime.now(UTC).isoformat(),
            'sourcePath':str(source),'sourceSha256':sha(source),'developmentOnly':True,
-           'policy':policy,'published':False,'trainingEnabled':False,'chapters':{}}
+           'policy':policy,'published':False,'trainingEnabled':False,'chapters':{},
+           'writerOptions':{'redactNumbers':redact_numbers}}
     prior_wall=0
     if resume:
         guard(root)
         state=json.loads((root/'progress.json').read_text(encoding='utf-8'))
+        if state.get('writerOptions',{}).get('redactNumbers',False)!=redact_numbers:
+            raise ValueError('Cannot change writer options on resume')
         if state.get('stage')!='stopped' or state.get('error')!='Local model busy':
             raise ValueError('Only lock contention may resume; quality/budget failures require separate review')
         if sha(source)!=state['sourceSha256'] or json.loads((root/'source.json').read_text(encoding='utf-8'))!=original:
@@ -88,7 +91,7 @@ def run(source,root,holdout,resume=False):
                 cool_down(root,progress,seconds=15 if n else 0)
                 progress('generating',activeChapter=key)
                 target=root/'drafts'/key/'revision-1'
-                write_chapter(source,target,key,redact_numbers=False,reasoning=True,max_attempts=1,rejection_root=root,model_connection=lock)
+                write_chapter(source,target,key,redact_numbers=redact_numbers,reasoning=True,max_attempts=1,rejection_root=root,model_connection=lock)
                 local=json.loads((target/'progress.json').read_text(encoding='utf-8'))
                 if (target/'chapter.json').exists():
                     doc=json.loads((target/'chapter.json').read_text(encoding='utf-8'))
@@ -123,5 +126,6 @@ def run(source,root,holdout,resume=False):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--root',type=Path,required=True)
-    p.add_argument('--holdout',type=Path,required=True);p.add_argument('--resume',action='store_true');a=p.parse_args()
-    print(json.dumps(run(a.source,a.root,a.holdout,a.resume),ensure_ascii=False))
+    p.add_argument('--holdout',type=Path,required=True);p.add_argument('--resume',action='store_true')
+    p.add_argument('--redact-numbers',action='store_true');a=p.parse_args()
+    print(json.dumps(run(a.source,a.root,a.holdout,a.resume,a.redact_numbers),ensure_ascii=False))
