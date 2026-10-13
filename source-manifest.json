@@ -811,6 +811,11 @@
       "sha256": "816fabdd9cbdbba41c344c368751a5e4770ea1c5dce3c85c646c0d154150e783"
     },
     {
+      "path": "backend/app/dossier_acquisition_basis.py",
+      "bytes": 4640,
+      "sha256": "bec6d6ef5bb36deb541574fa12a6e60c7f69017878e2b1adfd930a62fea41b98"
+    },
+    {
       "path": "backend/app/dossier_attempt_review.py",
       "bytes": 7809,
       "sha256": "faddf8a62cd5ca54379962bd81773e8ba28f9693e05b77a6ebeb074a58e73f34"
@@ -862,8 +867,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 41897,
-      "sha256": "dd2f3e2abed3aa5a2c7ce4299089a80ecf2bfbba47374be69bdf5f6a2b3a3ba3"
+      "bytes": 42239,
+      "sha256": "193c36c089d90fe6681f6c815b426548c19affa6f7736f6b9b564742ef36537e"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -1974,6 +1979,11 @@
       "path": "backend/tests/test_document_tiering.py",
       "bytes": 3968,
       "sha256": "525bdfaa0b0c56453b0c0d18d90b3a82ba48dd00d9fd4e2a5bfb5685feceb62a"
+    },
+    {
+      "path": "backend/tests/test_dossier_acquisition_basis.py",
+      "bytes": 3412,
+      "sha256": "5be7a7fa864ee0b0887153678a3ad1f30b3f63e659fa355fc965a9216b93ffaa"
     },
     {
       "path": "backend/tests/test_dossier_attempt_review.py",

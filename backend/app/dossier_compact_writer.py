@@ -134,6 +134,10 @@ def writer_view(packet,key,redact_numbers=True):
             ratio=capital_ratio(packet,ratios[0]['id'])
             result['capitalRatioDefinition']={k:ratio[k] for k in ('sourceId','formula','cashScope','limitation')}
             result['capitalRatioDefinition']['comparisonScope']='Reporting-period-end balance versus prior year end, not cumulative cash flows.'
+    if key=='valuation' and any(p.get('contextRole')=='acquisition_terms_and_accounting' for p in selected):
+        from app.dossier_acquisition_basis import acquisition_basis
+        basis=acquisition_basis(packet)
+        result['acquisitionBasis']={k:basis[k] for k in ('sourceIds','accountingStandard','boundaries','adapterCodeSha256')}
     return result
 
 
