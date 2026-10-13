@@ -144,6 +144,11 @@ def writer_view(packet,key,redact_numbers=True):
         result['factorMeasurementScope']={k:candidate[k] for k in ('sourceIds','availabilityRule','comparableScopeWarning','meaning','adapterCodeSha256')}
         result['factorMeasurementScope']['metricBoundaries']=[r['metric'] for r in candidate['classificationChecks'].values()]
         result['factorMeasurementScope']['candidateFormulas']=[candidate['linearSignal']['formula'],candidate['nonlinearCandidate']['formula']]
+    if packet['ticker']=='CVX' and key in {'business','competition','supply','macro'} and packet.get('review_chapter_selection',{}).get(key):
+        from app.dossier_operating_scope import ROLES,operating_scope
+        if any(p.get('contextRole') in ROLES[key] for p in selected):
+            scope=operating_scope(packet,key)
+            result['operatingScope']={k:scope[k] for k in ('sourceIds','boundaries','adapterCodeSha256')}
     return result
 
 

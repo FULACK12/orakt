@@ -867,8 +867,8 @@
     },
     {
       "path": "backend/app/dossier_compact_writer.py",
-      "bytes": 43314,
-      "sha256": "5fbf4d9617994b98549000086c6821699a36e7d1fd8224a699692346f0cb3952"
+      "bytes": 43748,
+      "sha256": "d94e517d53d422294af8b568ce6371a920507745fee551c8f7c10926a9f7dc33"
     },
     {
       "path": "backend/app/dossier_consolidation.py",
@@ -929,6 +929,11 @@
       "path": "backend/app/dossier_model_stream.py",
       "bytes": 3000,
       "sha256": "ac1d2b959b661f4091b9971b90e2e39f107a9895f86ac8ddbea8d7b051eeea72"
+    },
+    {
+      "path": "backend/app/dossier_operating_scope.py",
+      "bytes": 5735,
+      "sha256": "6d7d9f42591d3baebab265509b43cfd100952c1a1f9e0b75ab03dff09fa8b5a3"
     },
     {
       "path": "backend/app/dossier_passages.py",
@@ -2089,6 +2094,11 @@
       "path": "backend/tests/test_dossier_model_stream.py",
       "bytes": 2187,
       "sha256": "a21c4243901d6149c1f1f2b02270aad4e866f55ee7459a3e32cc597068979547"
+    },
+    {
+      "path": "backend/tests/test_dossier_operating_scope.py",
+      "bytes": 3711,
+      "sha256": "989eb36fe4408396e90b57faec33e9a089a123ff2f0a0ae5f724d1c1f2db532f"
     },
     {
       "path": "backend/tests/test_dossier_passages.py",
